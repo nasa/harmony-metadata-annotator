@@ -16,7 +16,6 @@ from pystac import Asset, Item
 
 from metadata_annotator.annotate import annotate_granule
 
-
 VARINFO_CONFIG_FILE = 'earthdata_varinfo_config.json'
 
 

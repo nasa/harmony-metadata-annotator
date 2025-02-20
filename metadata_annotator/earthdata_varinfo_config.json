@@ -1,6 +1,6 @@
 {
-  "Identification": "hoss_config",
-  "Version": 22,
+  "Identification": "Metadata Annotator configuration rules.",
+  "Version": 1,
   "CollectionShortNamePath": [
     "/HDF5_GLOBAL/short_name",
     "/NC_GLOBAL/short_name",
@@ -225,10 +225,6 @@
         {
           "Name": "false_northing",
           "Value": 0.0
-        },
-        {
-          "Name": "master_geotransform",
-          "Value": [-9000000, 3000, 0, 9000000, 0, -3000]
         }
       ],
       "_Description": "Provide missing polar grid mapping attributes for SMAP L3 collections."
@@ -259,10 +255,6 @@
         {
           "Name": "false_northing",
           "Value": 0.0
-        },
-        {
-          "Name": "master_geotransform",
-          "Value": [-9000000, 9000, 0, 9000000, 0, -9000]
         }
       ],
       "_Description": "Provide missing polar grid mapping attributes for SMAP L3 collections."
@@ -293,10 +285,6 @@
         {
           "Name": "false_northing",
           "Value": 0.0
-        },
-        {
-          "Name": "master_geotransform",
-          "Value": [-9000000, 36000, 0, 9000000, 0, -36000]
         }
       ],
       "_Description": "Provide missing polar grid mapping attributes for SMAP L3 collections."

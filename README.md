@@ -91,7 +91,7 @@ checks that enforce coding standard best practices. These include:
 * [ruff](https://github.com/astral-sh/ruff) Python linting checks.
 * [black](https://black.readthedocs.io/en/stable/index.html) Python code
   formatting checks.
-* Ensuring no committed files are above 500 kB. 
+* Ensuring no committed files are above 500 kB.
 
 To enable these checks:
 
@@ -105,7 +105,7 @@ pre-commit install
 
 ## Versioning
 
-Docker service images for the `harmony-smap-l2-gridder` adhere to [semantic
+Docker service images for the `harmony-metadata-annotator` adhere to [semantic
 version](https://semver.org/) numbers: major.minor.patch.
 
 * Major increments: These are non-backwards compatible API changes.

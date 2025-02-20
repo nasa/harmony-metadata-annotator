@@ -1,10 +1,8 @@
-from varinfo import VarInfoFromNetCDF4
+"""Main module for business logic of the Harmony Metadata Annotator."""
 
 
 def annotate_granule(
-    input_file_name: str,
-    output_file_name: str,
-    varinfo_config_file: str
+    input_file_name: str, output_file_name: str, varinfo_config_file: str
 ) -> None:
     """Top level of abstraction to do the annotation."""
     # TODO
