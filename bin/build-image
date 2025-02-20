@@ -1,0 +1,26 @@
+#!/bin/bash
+###############################################################################
+#
+# Build a Docker image of the Harmony Metadata Annotator service.
+#
+###############################################################################
+
+image="ghcr.io/nasa/harmony-metadata-annotator"
+
+# Retrieve the tag from the script arguments, or default to "latest". Bamboo
+# will pass the contents of `docker/service_version.txt` as this argument,
+# which contains a semantic version number.
+#
+tag=${1:-latest}
+
+
+# Remove old versions of service and test images:
+bin/clean-images
+
+# Build the image
+# This command tags the image with two tags:
+# - The one supplied as a script argument. Bamboo will provide the semantic
+#   version number from `docker/service_version.txt`.
+# - "latest", so the test Dockerfile can use the service image as a base image.
+#
+docker build --platform linux/amd64 -t ${image}:${tag} -t ${image}:latest -f docker/service.Dockerfile .

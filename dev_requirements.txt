@@ -1,0 +1,2 @@
+# Python dependencies for local development only.
+pre-commit ~= 4.1.0
