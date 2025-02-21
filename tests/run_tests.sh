@@ -10,14 +10,18 @@
 # Exit status used to report back to caller
 STATUS=0
 
+# Set up directories for test results
+mkdir -p reports/coverage reports/test-reports
+
 # Run the standard set of unit tests, producing JUnit compatible output
-pytest --cov=metadata_annotator --cov=harmony_service
-       --cov-report=html:reports/coverage \
-       --cov-report term \
-       --junitxml=reports/test-reports/test-results-"$(date +'%Y%m%d%H%M%S')".xml || STATUS=1
+pytest --cov=metadata_annotator \
+    --cov=harmony_service
+    --cov-report=html:tests/coverage \
+    --cov-report term \
+    --junitxml=reports/test-reports/test-results-"$(date +'%Y%m%d%H%M%S')".xml || STATUS=1
 
 # Run pylint
-pylint metadata_annotator harmony_service --disable=W1203
+pylint metadata_annotator harmony_service --disable=W1203 --extension-pkg-whitelist=netCDF4
 RESULT=$((3 & $?))
 
 if [ "$RESULT" -ne "0" ]; then

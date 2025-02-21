@@ -1,0 +1,130 @@
+{
+  "Identification": "Configuration file for Harmony Metadata Annotator unit tests",
+  "Version": 1,
+  "CollectionShortNamePath": [
+    "/HDF5_GLOBAL/short_name",
+    "/NC_GLOBAL/short_name",
+    "/Metadata/DatasetIdentification/shortName",
+    "/METADATA/DatasetIdentification/shortName",
+    "/Metadata/SeriesIdentification/shortName",
+    "/METADATA/SeriesIdentification/shortName",
+    "/HDF5_GLOBAL/id",
+    "/NC_GLOBAL/id",
+    "short_name"
+  ],
+  "Mission": {
+    "TEST\\d{2}": "TEST_MISSION"
+  },
+  "MetadataOverrides": [
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST01",
+        "VariablePattern": "/$"
+      },
+      "Attributes": [
+        {
+          "Name": "addition",
+          "Value": "new root group value"
+        },
+        {
+          "Name": "update",
+          "Value": "corrected root group value"
+        },
+        {
+          "Name": "delete",
+          "Value": null
+        }
+      ],
+      "_Description": "Adding, updating and deleting attributes of the root group of the file."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST01",
+        "VariablePattern": "/sub_group$"
+      },
+      "Attributes": [
+        {
+          "Name": "nested_addition",
+          "Value": "new subgroup value"
+        },
+        {
+          "Name": "update",
+          "Value": "corrected subgroup value"
+        },
+        {
+          "Name": "delete",
+          "Value": null
+        }
+      ],
+      "_Description": "Adding, updating and deleting attributes of a subgroup in the file."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST01",
+        "VariablePattern": "/variable_one"
+      },
+      "Attributes": [
+        {
+          "Name": "coordinates",
+          "Value": "time latitude longitude"
+        },
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_polar_projection"
+        }
+      ],
+      "_Description": "Adding a new attribute and updating an existing attribute on an existing variable."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST01",
+        "VariablePattern": "/sub_group/variable_two"
+      },
+      "Attributes": [
+        {
+          "Name": "delete",
+          "Value": null
+        },
+        {
+          "Name": "delete_two",
+          "Value": null
+        }
+      ],
+      "_Description": "Deleting an existing attribute and attempting to delete a non-existent attribute on an existing variable."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST01",
+        "VariablePattern": "/EASE2_global_projection"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping_name",
+          "Value": "lambert_azimuthal_equal_area"
+        },
+        {
+          "Name": "longitude_of_projection_origin",
+          "Value": 0.0
+        },
+        {
+          "Name": "latitude_of_projection_origin",
+          "Value": 90.0
+        },
+        {
+          "Name": "false_easting",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_northing",
+          "Value": 0.0
+        }
+      ],
+      "_Description": "Adding a new attribute-only variable with specified attributes."
+    }
+  ]
+}

@@ -15,7 +15,7 @@ remove_image_by_name() {
     fi
 }
 
-image_base_name="ghcr.io/nasa/harmony-cf-annotator"
+image_base_name="ghcr.io/nasa/harmony-metadata-annotator"
 
 # First remove test images:
 remove_image_by_name "${image_base_name}-test"

@@ -1,3 +1,4 @@
 # Requirements for the Harmony Metadata Annotator service
 earthdata-varinfo ~= 3.0.2
 harmony-service-lib ~= 2.5.0
+netCDF4 ~= 1.6.5
