@@ -5,12 +5,15 @@ from os.path import join as path_join
 from shutil import copy, move, rmtree
 from tempfile import mkdtemp
 
+import numpy as np
+import xarray as xr
 from harmony_service_lib.message import Message as HarmonyMessage
 from harmony_service_lib.util import bbox_to_geometry
-from netCDF4 import Dataset
 from pystac import Asset, Catalog, Item
 from pytest import fixture
 from varinfo import VarInfoFromNetCDF4
+
+from metadata_annotator.annotate import PROGRAM, VERSION
 
 
 @fixture(scope='function')
@@ -48,47 +51,115 @@ def sample_netcdf4_file(temp_dir) -> str:
     """Create a sample NetCDF-4 file."""
     file_name = path_join(temp_dir, 'test_input.nc')
 
-    with Dataset(file_name, 'w') as ds:
-        ds.setncatts(
-            {
+    sample_datatree = xr.DataTree(
+        dataset=xr.Dataset(
+            attrs={
                 'short_name': 'TEST01',
                 'update': 'original value',
                 'delete': 'attribute should not exist',
-            }
-        )
+            },
+            data_vars={
+                'variable_one': xr.DataArray(
+                    np.array([]),
+                    attrs={
+                        '_FillValue': -9999.0,
+                        'coordinates': 'original_value',
+                        'units': 'seconds since 2000-00-00T12:34:56',
+                    },
+                ),
+                'variable_three': xr.DataArray(
+                    np.array([]),
+                    attrs={
+                        '_FillValue': -9999.0,
+                        'coordinates': 'time latitude longitude',
+                        'notes': 'this variable does not match any override rules',
+                    },
+                ),
+            },
+        ),
+    )
 
-        variable_one = ds.createVariable('variable_one', 'S1')
-        variable_one.setncatts(
-            {
-                'coordinates': 'original value',
-                'units': 'seconds since 2000-00-00T12:34:56',
-            }
-        )
+    sample_datatree['/sub_group'] = xr.Dataset(
+        attrs={
+            'delete': 'attribute should not exist',
+            'update': 'original value',
+        },
+        data_vars={
+            'variable_two': xr.DataArray(
+                np.array([]),
+                attrs={
+                    '_FillValue': -9999.0,
+                    'coordinates': 'time latitude longitude',
+                    'delete': 'attribute needs to be deleted',
+                },
+            )
+        },
+    )
+    sample_datatree.to_netcdf(file_name, encoding=None)
+    return file_name
 
-        subgroup = ds.createGroup('/sub_group')
-        subgroup.setncatts(
-            {
-                'delete': 'attribute should not exist',
-                'update': 'original value',
-            }
-        )
 
-        variable_two = ds.createVariable('/sub_group/variable_two', 'S1')
-        variable_two.setncatts(
-            {
-                'coordinates': 'time latitude longitude',
-                'delete': 'attribute needs to be deleted',
-            }
-        )
+@fixture(scope='function')
+def expected_output_netcdf4_file(temp_dir) -> str:
+    """NetCDF-4 file with metadata updated per earthdata-varinfo config file."""
+    file_name = path_join(temp_dir, 'expected_output.nc')
 
-        variable_three = ds.createVariable('/variable_three', 'S1')
-        variable_three.setncatts(
-            {
-                'coordinates': 'time latitude longitude',
-                'notes': 'this variable does not match any override rules',
-            }
-        )
+    sample_datatree = xr.DataTree(
+        dataset=xr.Dataset(
+            attrs={
+                'short_name': 'TEST01',
+                'update': 'corrected root group value',
+                'addition': 'new root group value',
+                'history': f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}',
+            },
+            data_vars={
+                'EASE2_polar_projection': xr.DataArray(
+                    b'',
+                    attrs={
+                        'false_easting': 0.0,
+                        'false_northing': 0.0,
+                        'grid_mapping_name': 'lambert_azimuthal_equal_area',
+                        'latitude_of_projection_origin': 90.0,
+                        'longitude_of_projection_origin': 0.0,
+                    },
+                ),
+                'variable_one': xr.DataArray(
+                    np.array([]),
+                    attrs={
+                        '_FillValue': -9999.0,
+                        'coordinates': 'time latitude longitude',
+                        'grid_mapping': '/EASE2_polar_projection',
+                        'units': 'seconds since 2000-00-00T12:34:56',
+                    },
+                ),
+                'variable_three': xr.DataArray(
+                    np.array([]),
+                    attrs={
+                        '_FillValue': -9999.0,
+                        'coordinates': 'time latitude longitude',
+                        'notes': 'this variable does not match any override rules',
+                    },
+                ),
+            },
+        ),
+    )
 
+    sample_datatree['/sub_group'] = xr.Dataset(
+        attrs={
+            'update': 'corrected subgroup value',
+            'nested_addition': 'new subgroup value',
+        },
+        data_vars={
+            'variable_two': xr.DataArray(
+                np.array([]),
+                attrs={
+                    '_FillValue': -9999.0,
+                    'coordinates': 'time latitude longitude',
+                },
+            )
+        },
+    )
+    sample_datatree.to_netcdf(file_name, encoding=None)
     return file_name
 
 

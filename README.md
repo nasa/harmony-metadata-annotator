@@ -57,6 +57,86 @@ For local development and testing of library modifications or small functions in
 1. Install the dependencies in `pip_requirements.txt`, and `tests/pip_test_requirements.txt`
 1. Install the pre-commit hooks ([described below](#pre-commit-hooks)).
 
+## Enabling the prototype in Harmony in a Box:
+
+To test this service you will need to update your local version of Harmony:
+
+First define the service chain in `services.yml` (at the top of the UAT section):
+
+```
+  - name: harmony/harmony-metadata-annotator
+    description: |
+      Prototype service that creates, updates or deletes metadata attributes of
+      NetCDF-4 or HDF-5 files.
+      In practice would be used as part of a larger service chain.
+    data_operation_version: '0.20.0'
+    type:
+      <<: *default-turbo-config
+      params:
+        <<: *default-turbo-params
+        env:
+          <<: *default-turbo-env
+          STAGING_PATH: public/harmony/harmony-metadata-annotator
+    umm_s: S1273103184-EEDTEST
+    maximum_sync_granules: 0
+    capabilities:
+      subsetting:
+        bbox: false
+        variable: false
+        multiple_variable: false
+      reprojection: false
+      concatenation: false
+      all_collections: true
+      output_formats:
+        - application/netcdf # Incorrect mime-type, remove when no longer needed
+        - application/x-netcdf4
+        - application/x-hdf5
+        - application/x-hdf
+    steps:
+      - image: !Env ${QUERY_CMR_IMAGE}
+        is_sequential: true
+      - image: !Env ${HARMONY_METADATA_ANNOTATOR_IMAGE}
+```
+
+Note the `all_collections` part of the configuration. This allows local testing
+without disrupting UMM-C to UMM-S associations for other developers (and SIT or
+UAT Harmony environments).
+
+Also note that the Harmony Metadata Annotator is more realistically a step in
+a chain, not a chain in and of itself.
+
+Next, define the service queue URLs for SQS (in localstack) in
+`packages/util/env-defaults`:
+
+```
+HARMONY_METADATA_ANNOTATOR_SERVICE_QUEUE_URLS='["ghcr.io/nasa/harmony-metadata-annotator:latest,http://
+sqs.us-west-2.localhost.localstack.cloud:4566/000000000000/harmony-metadata-annotator.fifo"]'
+```
+Now define the environment variables Harmony will use to set the configuration
+of the service Docker containers. Note, for now, that the memory limit is large
+due to the way `xarray.DataTree.to_netcdf` uses a lot of memory.
+
+```
+HARMONY_METADATA_ANNOTATOR_IMAGE=ghcr.io/nasa/harmony-metadata-annotator:latest
+HARMONY_METADATA_ANNOTATOR_REQUESTS_MEMORY=128Mi
+HARMONY_METADATA_ANNOTATOR_LIMITS_MEMORY=8Gi
+HARMONY_METADATA_ANNOTATOR_INVOCATION_ARGS='python -m harmony_service'
+```
+
+Now, try a sample request:
+
+```
+http://localhost:3000/C1246896616-EEDTEST/ogc-api-coverages/1.0.0/collections/all/coverage/rangeset?maxResults=1&format=application%2Fx-netcdf4
+```
+
+To see that this request worked download the output (using `localhost:3000/jobs`
+to find the results URL). Then open that file in Panoply. First note the new CRS
+variables in the root group of the output: `/EASE2_global_projection` and
+`/EASE2_polar_projection_9km`. These were defined in the
+`earthdata_varinfo_config.json` file. Next look at one of the variables, e.g.:
+`/Soil_Moisture_Retrieval_Data_AM/albedo`. This will now have a `grid_mapping`
+metadata attribute, which was absent in the native data.
+
 ## Tests
 
 This service utilises the Python `pytest` package to perform unit tests on
@@ -64,9 +144,7 @@ classes and functions in the service. After local development is complete, and
 test have been updated, they can be run in Docker via:
 
 ```bash
-$ ./bin/build-image
-$ ./bin/build-test
-$ ./bin/run-test
+$ ./bin/build-image && ./bin/build-test && ./bin/run-test
 ```
 
 It is also possible to run the test scripts directly (without Docker) by just
@@ -111,3 +189,12 @@ version](https://semver.org/) numbers: major.minor.patch.
 * Major increments: These are non-backwards compatible API changes.
 * Minor increments: These are backwards compatible API changes.
 * Patch increments: These updates do not affect the API to the service.
+
+## Gotchas:
+
+The service currently uses `xarray.DataTree.to_netcdf` to write the whole
+`DataTree` object out to a file. This is _very_ memory intensive, meaning that
+the Harmony in a Box configuration listed above uses 8 GiB for the memory limit
+of the service. A future improvement would be to find a way to write things out
+incrementally. The Harmony SMAP L2 Gridder does perform such an operation, and
+may be a good model to update this code.

@@ -1,7 +1,7 @@
 """Tests for metadata_annotator.annotate.py."""
 
+import xarray as xr
 from freezegun import freeze_time
-from netCDF4 import Dataset
 
 from metadata_annotator.annotate import (
     PROGRAM,
@@ -32,13 +32,15 @@ def test_is_exact_path_alternates():
 @freeze_time('2000-01-02T03:04:05')
 def test_update_history_metadata_no_input_history(sample_netcdf4_file):
     """A new history attribute should be created."""
-    with Dataset(sample_netcdf4_file, 'a') as test_input:
-        update_history_metadata(test_input)
+    with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
+        # Invoke the function under test:
+        update_history_metadata(test_datatree)
 
-    with Dataset(sample_netcdf4_file, 'r') as test_output:
-        assert 'history' in test_output.ncattrs()
+        # Check output from the function:
+        assert 'history' in test_datatree.attrs
+        assert 'History' not in test_datatree.attrs
         assert (
-            test_output.getncattr('history')
+            test_datatree.attrs['history']
             == f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
         )
 
@@ -46,16 +48,17 @@ def test_update_history_metadata_no_input_history(sample_netcdf4_file):
 @freeze_time('2000-01-02T03:04:05+00:00')
 def test_update_history_metadata_append_to_existing(sample_netcdf4_file):
     """An existing history attribute should have a new line added."""
-    with Dataset(sample_netcdf4_file, 'a') as test_input:
-        # First add a history metadata attribute:
-        test_input.setncattr('history', '1999-01-01T00 File creation v1')
+    with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
+        # First add a pre-existing history metadata attribute:
+        test_datatree.attrs['history'] = '1999-01-01T00 File creation v1'
 
         # Now invoke the function under test:
-        update_history_metadata(test_input)
+        update_history_metadata(test_datatree)
 
-    with Dataset(sample_netcdf4_file, 'r') as test_output:
-        assert 'history' in test_output.ncattrs()
-        assert test_output.getncattr('history') == (
+        # Check output from the function:
+        assert 'history' in test_datatree.attrs
+        assert 'History' not in test_datatree.attrs
+        assert test_datatree.attrs['history'] == (
             '1999-01-01T00 File creation v1\n'
             f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
         )
@@ -64,17 +67,17 @@ def test_update_history_metadata_append_to_existing(sample_netcdf4_file):
 @freeze_time('2000-01-02T03:04:05+00:00')
 def test_update_history_metadata_existing_uppercase(sample_netcdf4_file):
     """If History exists instead of history, that should be used."""
-    with Dataset(sample_netcdf4_file, 'a') as test_input:
+    with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
         # First add a history metadata attribute:
-        test_input.setncattr('History', '1999-01-01T00 File creation v1')
+        test_datatree.attrs['History'] = '1999-01-01T00 File creation v1'
 
         # Now invoke the function under test:
-        update_history_metadata(test_input)
+        update_history_metadata(test_datatree)
 
-    with Dataset(sample_netcdf4_file, 'r') as test_output:
-        assert 'History' in test_output.ncattrs()
-        assert 'history' not in test_output.ncattrs()
-        assert test_output.getncattr('History') == (
+        # Check output from the function:
+        assert 'History' in test_datatree.attrs
+        assert 'history' not in test_datatree.attrs
+        assert test_datatree.attrs['History'] == (
             '1999-01-01T00 File creation v1\n'
             f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
         )
@@ -82,29 +85,30 @@ def test_update_history_metadata_existing_uppercase(sample_netcdf4_file):
 
 def test_update_metadata_attributes_variable(sample_netcdf4_file, sample_varinfo):
     """Check that attributes are added and updated."""
-    with Dataset(sample_netcdf4_file, 'a') as test_dataset:
-        update_metadata_attributes(test_dataset, '/variable_one', sample_varinfo)
+    with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
+        # First call the function under test:
+        update_metadata_attributes(test_datatree, '/variable_one', sample_varinfo)
 
-    with Dataset(sample_netcdf4_file, 'r') as test_results:
-        assert set(test_results['/variable_one'].ncattrs()) == set(
+        # Check outputs from the function:
+        assert set(test_datatree['/variable_one'].attrs.keys()) == set(
             ['coordinates', 'grid_mapping', 'units']
         )
 
         # units had no overrides, so should be unchanged
         assert (
-            test_results['/variable_one'].getncattr('units')
+            test_datatree['/variable_one'].attrs['units']
             == 'seconds since 2000-00-00T12:34:56'
         )
 
         # coordinates was updated, so should be the value in the configuration file
         assert (
-            test_results['/variable_one'].getncattr('coordinates')
+            test_datatree['/variable_one'].attrs['coordinates']
             == 'time latitude longitude'
         )
 
         # grid_mapping is a new attribute added due to the configuration file
         assert (
-            test_results['/variable_one'].getncattr('grid_mapping')
+            test_datatree['/variable_one'].attrs['grid_mapping']
             == '/EASE2_polar_projection'
         )
 
@@ -116,21 +120,28 @@ def test_update_metadata_attributes_deletion(sample_netcdf4_file, sample_varinfo
     not exist. This tests also ensures that the function can handle nested
     variables.
 
+    The `decode_coords` kwarg has been used to ensure `xarray` doesn't remove
+    the `coordinates` metadata attribute and use it to define internal `xarray`
+    objects instead.
+
     """
-    with Dataset(sample_netcdf4_file, 'a') as test_dataset:
+    with xr.open_datatree(
+        sample_netcdf4_file, decode_times=False, decode_coords=False
+    ) as test_datatree:
+        # First call the function under test:
         update_metadata_attributes(
-            test_dataset, '/sub_group/variable_two', sample_varinfo
+            test_datatree, '/sub_group/variable_two', sample_varinfo
         )
 
-    with Dataset(sample_netcdf4_file, 'r') as test_results:
+        # Check outputs from the function:
         # Only coordinates should remain as "delete" should have been removed
-        assert set(test_results['/sub_group/variable_two'].ncattrs()) == set(
+        assert set(test_datatree['/sub_group/variable_two'].attrs.keys()) == set(
             ['coordinates']
         )
 
         # coordinates had no overrides, so should be unchanged
         assert (
-            test_results['/sub_group/variable_two'].getncattr('coordinates')
+            test_datatree['/sub_group/variable_two'].attrs['coordinates']
             == 'time latitude longitude'
         )
 
@@ -148,11 +159,11 @@ def test_get_matching_groups_and_variables(sample_varinfo):
         ['/', '/sub_group', '/variable_one', '/sub_group/variable_two']
     )
 
-    # The /EASE2_global_projection variable is specifically included in the
+    # The /EASE2_polar_projection variable is specifically included in the
     # configuration file to test missing variable behaviour.
     assert missing_variables == set(
         [
-            '/EASE2_global_projection',
+            '/EASE2_polar_projection',
         ]
     )
 
@@ -160,6 +171,7 @@ def test_get_matching_groups_and_variables(sample_varinfo):
 @freeze_time('2000-01-02T03:04:05+00:00')
 def test_annotate_granule(
     sample_netcdf4_file,
+    expected_output_netcdf4_file,
     temp_output_file_path,
     varinfo_config_file,
 ):
@@ -174,59 +186,13 @@ def test_annotate_granule(
         sample_netcdf4_file, temp_output_file_path, varinfo_config_file, 'TEST01'
     )
 
-    with Dataset(temp_output_file_path, 'r') as test_results:
-        # Check all the expected groups and variables are present:
-        assert set(test_results.groups.keys()) == set(['sub_group'])
-        assert set(test_results.variables.keys()) == set(
-            ['variable_one', 'variable_three', 'EASE2_global_projection']
-        )
-        assert set(test_results['sub_group'].variables.keys()) == set(
-            [
-                'variable_two',
-            ]
-        )
-
-        # Check all expected metadata attributes exist with expected values.
-        # "update" updated, "addition" added, "history" added, "delete" removed.
-        assert test_results.__dict__ == {
-            'addition': 'new root group value',
-            'history': f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}',
-            'short_name': 'TEST01',
-            'update': 'corrected root group value',
-        }
-
-        # "coordinates" updated, "grid_mapping" added.
-        assert test_results['/variable_one'].__dict__ == {
-            'coordinates': 'time latitude longitude',
-            'grid_mapping': '/EASE2_polar_projection',
-            'units': 'seconds since 2000-00-00T12:34:56',
-        }
-
-        # No changes to input file.
-        assert test_results['/variable_three'].__dict__ == {
-            'coordinates': 'time latitude longitude',
-            'notes': 'this variable does not match any override rules',
-        }
-
-        # Entirely new variable.
-        assert test_results['/EASE2_global_projection'].__dict__ == {
-            'false_easting': 0.0,
-            'false_northing': 0.0,
-            'grid_mapping_name': 'lambert_azimuthal_equal_area',
-            'latitude_of_projection_origin': 90.0,
-            'longitude_of_projection_origin': 0.0,
-        }
-
-        # "nested_addition" added, "update" updated, "delete" removed.
-        assert test_results['/sub_group'].__dict__ == {
-            'nested_addition': 'new subgroup value',
-            'update': 'corrected subgroup value',
-        }
-
-        # "delete" removed.
-        assert test_results['/sub_group/variable_two'].__dict__ == {
-            'coordinates': 'time latitude longitude',
-        }
+    with (
+        xr.open_datatree(temp_output_file_path, decode_times=False) as results_datatree,
+        xr.open_datatree(
+            expected_output_netcdf4_file, decode_times=False
+        ) as expected_datatree,
+    ):
+        assert results_datatree.identical(expected_datatree)
 
 
 def test_annotate_granule_no_changes(
@@ -239,11 +205,6 @@ def test_annotate_granule_no_changes(
     The collection short name is set to something that will not match any of
     the configuration file overrides.
 
-    Comparisons to expected output are made explicitly in the test, instead of
-    comparing to the input file, to prevent matching against a potentially
-    mutated input. That shouldn't happen, but this test ensures immunity to
-    any such issues.
-
     """
     annotate_granule(
         sample_netcdf4_file,
@@ -252,43 +213,8 @@ def test_annotate_granule_no_changes(
         'OTHER_SHORT_NAME',
     )
 
-    with Dataset(temp_output_file_path, 'r') as test_results:
-        # Check all the expected groups and variables are present:
-        assert set(test_results.groups.keys()) == set(['sub_group'])
-        assert set(test_results.variables.keys()) == set(
-            ['variable_one', 'variable_three']
-        )
-        assert set(test_results['sub_group'].variables.keys()) == set(
-            [
-                'variable_two',
-            ]
-        )
-
-        # Check all expected metadata attributes exist with expected values.
-        # Some will look odd, as they are the original values from the fixture,
-        # most of which are designed to be updated in other tests.
-        assert test_results.__dict__ == {
-            'short_name': 'TEST01',
-            'update': 'original value',
-            'delete': 'attribute should not exist',
-        }
-
-        assert test_results['/variable_one'].__dict__ == {
-            'coordinates': 'original value',
-            'units': 'seconds since 2000-00-00T12:34:56',
-        }
-
-        assert test_results['/variable_three'].__dict__ == {
-            'coordinates': 'time latitude longitude',
-            'notes': 'this variable does not match any override rules',
-        }
-
-        assert test_results['/sub_group'].__dict__ == {
-            'delete': 'attribute should not exist',
-            'update': 'original value',
-        }
-
-        assert test_results['/sub_group/variable_two'].__dict__ == {
-            'coordinates': 'time latitude longitude',
-            'delete': 'attribute needs to be deleted',
-        }
+    with (
+        xr.open_datatree(sample_netcdf4_file, decode_times=False) as expected_datatree,
+        xr.open_datatree(temp_output_file_path, decode_times=False) as results_datatree,
+    ):
+        assert results_datatree.identical(expected_datatree)

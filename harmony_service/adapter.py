@@ -19,7 +19,7 @@ from pystac import Asset, Item
 from harmony_service.utilities import get_mimetype
 from metadata_annotator.annotate import annotate_granule
 
-VARINFO_CONFIG_FILE = 'earthdata_varinfo_config.json'
+VARINFO_CONFIG_FILE = 'metadata_annotator/earthdata_varinfo_config.json'
 
 
 class MetadataAnnotatorAdapter(BaseHarmonyAdapter):

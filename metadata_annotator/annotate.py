@@ -4,7 +4,7 @@ import re
 from datetime import UTC, datetime
 from shutil import copy
 
-from netCDF4 import Dataset
+import xarray as xr
 from varinfo import VarInfoFromNetCDF4
 
 PROGRAM = 'Harmony Metadata Annotator'
@@ -26,8 +26,6 @@ def annotate_granule(
     amend the metadata according to those rules.
 
     """
-    copy(input_file_name, output_file_name)
-
     granule_varinfo = VarInfoFromNetCDF4(
         input_file_name,
         short_name=collection_short_name,
@@ -36,10 +34,15 @@ def annotate_granule(
 
     if len(granule_varinfo.cf_config.metadata_overrides):
         # There are metadata overrides applicable to the granule's collection:
-        amend_in_file_metadata(output_file_name, granule_varinfo)
+        amend_in_file_metadata(input_file_name, output_file_name, granule_varinfo)
+    else:
+        # There are no updates required, so copy the input file as-is:
+        copy(input_file_name, output_file_name)
 
 
-def amend_in_file_metadata(file_name: str, granule_varinfo: VarInfoFromNetCDF4) -> None:
+def amend_in_file_metadata(
+    input_file_name: str, output_file_name: str, granule_varinfo: VarInfoFromNetCDF4
+) -> None:
     """Update metadata attributes according to known rules.
 
     First, identify the variables or groups needing to be updated, or variables
@@ -48,17 +51,28 @@ def amend_in_file_metadata(file_name: str, granule_varinfo: VarInfoFromNetCDF4) 
     removing any attributes with an overriding value of None. Lastly, update
     the `history` global attribute.
 
+    When opening the file as a DataTree, attempts to decode times, coordinates
+    and other CF-Convention metadata are disabled, to allow updates to be made
+    to the metadata attributes without impacting `xarray` internal concepts such
+    as `xr.Coordinates`.
+
     """
     items_to_update, variables_to_create = get_matching_groups_and_variables(
         granule_varinfo,
     )
 
-    with Dataset(file_name, 'a') as output_dataset:
+    with xr.open_datatree(
+        input_file_name,
+        decode_times=False,
+        decode_coords=False,
+        decode_cf=False,
+        mask_and_scale=False,
+    ) as datatree:
         # First create missing variables (such as CRS definitions)
         for variable_path in variables_to_create:
-            output_dataset.createVariable(variable_path, 'S1')
+            datatree[variable_path] = xr.DataArray(data=b'')
             update_metadata_attributes(
-                output_dataset,
+                datatree,
                 variable_path,
                 granule_varinfo,
             )
@@ -66,12 +80,18 @@ def amend_in_file_metadata(file_name: str, granule_varinfo: VarInfoFromNetCDF4) 
         # Update all pre-existing variables or groups with metadata overrides
         for item_to_update in items_to_update:
             update_metadata_attributes(
-                output_dataset,
+                datatree,
                 item_to_update,
                 granule_varinfo,
             )
 
-        update_history_metadata(output_dataset)
+        update_history_metadata(datatree)
+
+        # Future improvement: It is memory intensive to try and write out the
+        # whole `xarray.DataTree` in one operation. Making this write variables
+        # and group separately reduces the memory usage, but makes the
+        # operation slower. (See Harmony SMAP L2 Gridder implementation)
+        datatree.to_netcdf(output_file_name)
 
 
 def get_matching_groups_and_variables(
@@ -130,7 +150,7 @@ def is_exact_path(pattern_string: str) -> bool:
 
 
 def update_metadata_attributes(
-    output_granule: Dataset,
+    datatree: xr.DataTree,
     group_or_variable_path: str,
     granule_varinfo: VarInfoFromNetCDF4,
 ) -> None:
@@ -155,25 +175,24 @@ def update_metadata_attributes(
         attributes_to_update.keys()
     )
 
-    if group_or_variable_path == '/':
-        # Using a path of '/' from the root group doesn't work.
-        output_object = output_granule
-    else:
-        output_object = output_granule[group_or_variable_path]
-
-    output_object.setncatts(attributes_to_update)
+    datatree[group_or_variable_path].attrs.update(attributes_to_update)
 
     for attribute in attributes_to_delete:
         try:
-            output_object.delncattr(attribute)
-        except RuntimeError as exception:
+            del datatree[group_or_variable_path].attrs[attribute]
+        except KeyError:
             # Trying to delete a non-existent attribute should not fail
-            if not str(exception).endswith('Attribute not found'):
-                raise
+            pass
 
 
-def update_history_metadata(output_dataset: Dataset) -> None:
-    """Update the history global attribute of the Dataset."""
+def update_history_metadata(datatree: xr.DataTree) -> None:
+    """Update the history global attribute of the DataTree.
+
+    If either an existing History or history global attribute exists, append
+    information as a new line to the existing value. Otherwise create a new
+    attribute called "history".
+
+    """
     new_history_line = ' '.join(
         [
             datetime.now(UTC).isoformat(),
@@ -182,21 +201,16 @@ def update_history_metadata(output_dataset: Dataset) -> None:
         ]
     )
 
-    existing_attributes = output_dataset.ncattrs()
-
-    if 'History' in existing_attributes:
+    if 'History' in datatree.attrs:
         history_attribute_name = 'History'
-        existing_history = output_dataset.getncattr('History')
-    elif 'history' in existing_attributes:
+        existing_history = datatree.attrs['History']
+    elif 'history' in datatree.attrs:
         history_attribute_name = 'history'
-        existing_history = output_dataset.getncattr('history')
+        existing_history = datatree.attrs['history']
     else:
         history_attribute_name = 'history'
         existing_history = None
 
-    output_history_value = '\n'.join(filter(None, [existing_history, new_history_line]))
-
-    output_dataset = output_dataset.setncattr(
-        history_attribute_name,
-        output_history_value,
+    datatree.attrs[history_attribute_name] = '\n'.join(
+        filter(None, [existing_history, new_history_line])
     )

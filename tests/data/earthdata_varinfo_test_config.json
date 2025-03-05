@@ -100,7 +100,7 @@
       "Applicability": {
         "Mission": "TEST_MISSION",
         "ShortNamePath": "TEST01",
-        "VariablePattern": "/EASE2_global_projection"
+        "VariablePattern": "/EASE2_polar_projection"
       },
       "Attributes": [
         {
