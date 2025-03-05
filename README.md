@@ -123,6 +123,18 @@ HARMONY_METADATA_ANNOTATOR_LIMITS_MEMORY=8Gi
 HARMONY_METADATA_ANNOTATOR_INVOCATION_ARGS='python -m harmony_service'
 ```
 
+To make your local Harmony instance deploy this service, update your `.env` file:
+
+```
+LOCALLY_DEPLOYED_SERVICES=harmony-metadata-annotator
+```
+
+Then start your local Harmony in a Box:
+
+```
+bin/bootstrap-harmony
+```
+
 Now, try a sample request:
 
 ```
