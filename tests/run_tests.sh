@@ -15,8 +15,8 @@ mkdir -p reports/coverage reports/test-reports
 
 # Run the standard set of unit tests, producing JUnit compatible output
 pytest --cov=metadata_annotator \
-    --cov=harmony_service
-    --cov-report=html:tests/coverage \
+    --cov=harmony_service \
+    --cov-report=html:reports/coverage \
     --cov-report term \
     --junitxml=reports/test-reports/test-results-"$(date +'%Y%m%d%H%M%S')".xml || STATUS=1
 
