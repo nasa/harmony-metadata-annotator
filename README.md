@@ -1,14 +1,16 @@
 # Harmony Metadata Annotator
 
-This prototype service updates the metadata attributes of an input file to
-values that are known to be correct, either amending, adding or deleting
-attributes as appropriate. The underlying methodology is to use a configuration
-file with `earthdata-varinfo` to supply known corrections to the metadata.
+This service updates the metadata attributes of an input file to values that
+are known to be correct, either amending, adding or deleting attributes as
+appropriate. The underlying methodology is to use a configuration file with
+[earthdata-varinfo](https://github.com/nasa/earthdata-varinfo) to supply known
+corrections to the metadata.
 
 ## Directory structure
 
 ```
 📁
+├── .📁 github
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── LICENSE
@@ -22,7 +24,8 @@ file with `earthdata-varinfo` to supply known corrections to the metadata.
 └── 📁 tests
 ```
 
-* `CHANGELOG.md` -   Contains a record of changes applied to each new release
+* `.github` - Contains CI/CD workflows and pull request template.
+* `CHANGELOG.md` - Contains a record of changes applied to each new release
   of the Harmony Metadata Annotator Service.
 * `CONTRIBUTING.md` -  Instructions on how to contribute to the repository.
 * `LICENSE` - Required for distribution under NASA open-source approval.
@@ -57,7 +60,11 @@ For local development and testing of library modifications or small functions in
 1. Install the dependencies in `pip_requirements.txt`, and `tests/pip_test_requirements.txt`
 1. Install the pre-commit hooks ([described below](#pre-commit-hooks)).
 
-## Enabling the prototype in Harmony in a Box:
+## Enabling the service in Harmony in a Box:
+
+**Note - this service is intended to be used as part of a chain, with the
+instructions below being a temporary mechanism to test the service in
+isolation.**
 
 To test this service you will need to update your local version of Harmony:
 

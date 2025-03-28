@@ -11,4 +11,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial repository setup with utility scripts and Dockerfiles.
 
-[v0.0.1]: https://github.com/nasa/harmony-SMAP-L2-gridding-service/releases/tag/0.0.1
+[v0.0.1]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/0.0.1
