@@ -161,7 +161,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/(Freeze_Thaw_Retrieval_Data|Radar_Data|Ancillary_Data)/(?!am_pm$).+$"
+        "VariablePattern": "/(Freeze_Thaw_Retrieval_Data|Radar_Data|Ancillary_Data)/.*|/(x|y)"
       },
       "Attributes": [
         {
@@ -203,7 +203,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SMA$",
-        "VariablePattern": "/(Soil_Moisture_Retrieval_Data|Radar_Data|Ancillary_Data)/.*"
+        "VariablePattern": "/(Soil_Moisture_Retrieval_Data|Radar_Data|Ancillary_Data)/.*|/(x|y)"
       },
       "Attributes": [
         {
@@ -634,7 +634,7 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3SM(A|AP)",
+        "ShortNamePath": "SPL3SMAP",
         "VariablePattern": "/Soil_Moisture_Retrieval_Data/x"
       },
       "Attributes": [
@@ -660,7 +660,7 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3SM(A|AP)",
+        "ShortNamePath": "SPL3SMAP",
         "VariablePattern": "/Soil_Moisture_Retrieval_Data/y"
       },
       "Attributes": [
@@ -930,8 +930,8 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/Freeze_Thaw_Retrieval_Data/x"
+        "ShortNamePath": "SPL3FTA|SPL3SMA$",
+        "VariablePattern": "/x"
       },
       "Attributes": [
         {
@@ -956,8 +956,8 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/Freeze_Thaw_Retrieval_Data/y"
+        "ShortNamePath": "SPL3FTA|SPL3SMA$",
+        "VariablePattern": "/y"
       },
       "Attributes": [
         {
@@ -983,7 +983,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/Freeze_Thaw_Retrieval_Data/am_pm"
+        "VariablePattern": "/am_pm"
       },
       "Attributes": [
         {
@@ -1155,7 +1155,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SMA$",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data/(?!x$|y$).+$|/(Radar_Data|Ancillary_Data)/.*"
+        "VariablePattern": "/(Soil_Moisture_Retrieval_Data|Radar_Data|Ancillary_Data)/.*"
       },
       "Attributes": [
         {
@@ -1211,7 +1211,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/Freeze_Thaw_Retrieval_Data/(?!transition_state_flag$|transition_direction$|am_pm$|x$|y$).+$|/(Radar_Data|Ancillary_Data)/.*"
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data/(?!transition_state_flag$|transition_direction$).+$|/(Radar_Data|Ancillary_Data)/.*"
       },
       "Attributes": [
         {
