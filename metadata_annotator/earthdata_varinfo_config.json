@@ -553,6 +553,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -575,6 +579,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -601,6 +609,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -627,6 +639,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -653,6 +669,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -679,6 +699,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -705,6 +729,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -731,6 +759,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -749,6 +781,10 @@
         {
           "Name": "long_name",
           "Value": "land cover type"
+        },
+        {
+          "Name": "type",
+          "Value": "uint8"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variable) to clarify the dimension name"
@@ -775,6 +811,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -801,6 +841,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -819,6 +863,10 @@
         {
           "Name": "long_name",
           "Value": "land cover type"
+        },
+        {
+          "Name": "type",
+          "Value": "uint8"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variable) to clarify the dimension name"
@@ -845,6 +893,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -871,6 +923,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -897,6 +953,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -923,6 +983,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -949,6 +1013,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -975,6 +1043,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -993,6 +1065,10 @@
         {
           "Name": "long_name",
           "Value": "AM-PM dimension of size 2, 0 => AM, 1=> PM"
+        },
+        {
+          "Name": "type",
+          "Value": "uint8"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to clarify the dimension name"
@@ -1019,6 +1095,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -1045,6 +1125,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -1063,9 +1147,13 @@
         {
           "Name": "long_name",
           "Value": "AM-PM dimension of size 2, 0 => AM, 1=> PM"
+        },
+        {
+          "Name": "type",
+          "Value": "uint8"
         }
       ],
-      "_Description": ""
+      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to clarify the dimension name"
     },
     {
       "Applicability": {
@@ -1089,6 +1177,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -1115,6 +1207,10 @@
         {
           "Name": "units",
           "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -1133,6 +1229,10 @@
         {
           "Name": "long_name",
           "Value": "AM-PM dimension of size 2, 0 => AM, 1=> PM"
+        },
+        {
+          "Name": "type",
+          "Value": "uint8"
         }
       ],
       "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
