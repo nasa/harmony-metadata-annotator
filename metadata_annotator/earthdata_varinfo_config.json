@@ -270,7 +270,7 @@
         },
         {
           "Name": "master_geotransform",
-          "Value": [-17367530.4451615, 1001.0104, 0, 7314540.8306386, 0, -1001.0104]
+          "Value": [-17367530.4451615, 1000.89502335, 0, 7314540.8306386, 0, -1000.89502335]
         }
       ],
       "_Description": "Provide missing global grid mapping attributes for SMAP L3 collections."
@@ -304,7 +304,7 @@
         },
         {
           "Name": "master_geotransform",
-          "Value": [-17367530.4451615, 3003.0312, 0, 7314540.8306386, 0, -3003.0312]
+          "Value": [-17367530.4451615, 3002.6850700487, 0, 7314540.8306386, 0, -3002.6850700487]
         }
       ],
       "_Description": "Provide missing global grid mapping attributes for SMAP L3 collections."
@@ -338,7 +338,7 @@
         },
         {
           "Name": "master_geotransform",
-          "Value": [-17367530.4451615, 9009.0936, 0, 7314540.8306386, 0, -9009.0936]
+          "Value": [-17367530.4451615, 9008.055210146, 0, 7314540.8306386, 0, -9008.055210146]
         }
       ],
       "_Description": "Provide missing global grid mapping attributes for SMAP L3 collections."
@@ -372,7 +372,7 @@
         },
         {
           "Name": "master_geotransform",
-          "Value": [-17367530.44, 36036.3744, 0, 7314540.83, 0, -36036.3744]
+          "Value": [-17367530.44, 36032.22084058, 0, 7314540.83, 0, -36032.22084058]
         }
       ],
       "_Description": "Provide missing global grid mapping attributes for SMAP L3 collections."
