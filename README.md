@@ -57,7 +57,7 @@ regarding creation of a local Harmony instance.
 For local development and testing of library modifications or small functions independent of the main Harmony application:
 
 1. Create a Python virtual environment
-1. Install the dependencies in `pip_requirements.txt`, and `tests/pip_test_requirements.txt`
+1. Install the dependencies in `requirements.txt`, and `tests/test_requirements.txt`
 1. Install the pre-commit hooks ([described below](#pre-commit-hooks)).
 
 ## Enabling the service in Harmony in a Box:
