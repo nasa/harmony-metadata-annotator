@@ -109,7 +109,7 @@ def test_update_metadata_attributes_variable(sample_netcdf4_file, sample_varinfo
         # grid_mapping is a new attribute added due to the configuration file
         assert (
             test_datatree['/variable_one'].attrs['grid_mapping']
-            == '/EASE2_polar_projection'
+            == '/EASE2_north_polar_projection_36km'
         )
 
 
@@ -159,11 +159,11 @@ def test_get_matching_groups_and_variables(sample_varinfo):
         ['/', '/sub_group', '/variable_one', '/sub_group/variable_two']
     )
 
-    # The /EASE2_polar_projection variable is specifically included in the
+    # The /EASE2_north_polar_projection_36km variable is specifically included in the
     # configuration file to test missing variable behaviour.
     assert missing_variables == set(
         [
-            '/EASE2_polar_projection',
+            '/EASE2_north_polar_projection_36km',
         ]
     )
 
