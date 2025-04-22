@@ -547,8 +547,16 @@
           "Value": "projection_x_coordinate"
         },
         {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
           "Name": "dimensions",
           "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
         },
         {
           "Name": "units",
@@ -573,8 +581,16 @@
           "Value": "projection_y_coordinate"
         },
         {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
           "Name": "dimensions",
           "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
         },
         {
           "Name": "units",
@@ -607,6 +623,10 @@
           "Value": "x"
         },
         {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
           "Name": "units",
           "Value": "m"
         },
@@ -635,6 +655,10 @@
         {
           "Name": "dimensions",
           "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
         },
         {
           "Name": "units",
@@ -667,6 +691,10 @@
           "Value": "x"
         },
         {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
           "Name": "units",
           "Value": "m"
         },
@@ -695,6 +723,10 @@
         {
           "Name": "dimensions",
           "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
         },
         {
           "Name": "units",
@@ -727,6 +759,10 @@
           "Value": "x"
         },
         {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
           "Name": "units",
           "Value": "m"
         },
@@ -755,6 +791,10 @@
         {
           "Name": "dimensions",
           "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
         },
         {
           "Name": "units",
@@ -809,6 +849,10 @@
           "Value": "x"
         },
         {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
           "Name": "units",
           "Value": "m"
         },
@@ -837,6 +881,10 @@
         {
           "Name": "dimensions",
           "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
         },
         {
           "Name": "units",
@@ -891,6 +939,10 @@
           "Value": "x"
         },
         {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
           "Name": "units",
           "Value": "m"
         },
@@ -919,6 +971,10 @@
         {
           "Name": "dimensions",
           "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
         },
         {
           "Name": "units",
@@ -951,6 +1007,10 @@
           "Value": "x"
         },
         {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
           "Name": "units",
           "Value": "m"
         },
@@ -979,6 +1039,10 @@
         {
           "Name": "dimensions",
           "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
         },
         {
           "Name": "units",
@@ -1011,6 +1075,10 @@
           "Value": "x"
         },
         {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
           "Name": "units",
           "Value": "m"
         },
@@ -1039,6 +1107,10 @@
         {
           "Name": "dimensions",
           "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
         },
         {
           "Name": "units",
@@ -1093,6 +1165,10 @@
           "Value": "x"
         },
         {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
           "Name": "units",
           "Value": "m"
         },
@@ -1121,6 +1197,10 @@
         {
           "Name": "dimensions",
           "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
         },
         {
           "Name": "units",
@@ -1175,6 +1255,10 @@
           "Value": "x"
         },
         {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
           "Name": "units",
           "Value": "m"
         },
@@ -1203,6 +1287,10 @@
         {
           "Name": "dimensions",
           "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
         },
         {
           "Name": "units",
