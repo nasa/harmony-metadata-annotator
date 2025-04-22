@@ -1,5 +1,6 @@
 """Main module for business logic of the Harmony Metadata Annotator."""
 
+import os
 import re
 from datetime import UTC, datetime
 from shutil import copy
@@ -68,23 +69,18 @@ def amend_in_file_metadata(
         decode_cf=False,
         mask_and_scale=False,
     ) as datatree:
-        # First create missing variables (such as CRS definitions)
-        for variable_path in variables_to_create:
-            datatree[variable_path] = xr.DataArray(data=b'')
-            update_metadata_attributes(
-                datatree,
-                variable_path,
-                granule_varinfo,
-            )
-
         # Update all pre-existing variables or groups with metadata overrides
-        for item_to_update in items_to_update:
-            update_metadata_attributes(
-                datatree,
-                item_to_update,
-                granule_varinfo,
-            )
+        update_existing_variables(datatree, items_to_update, granule_varinfo)
 
+        # get all the dimension variables
+        dimension_variables = get_dimension_variables(datatree, set())
+
+        # create variables except dimension variables
+        for variable_path in variables_to_create:
+            if variable_path not in dimension_variables:
+                create_new_variables(datatree, variable_path, granule_varinfo)
+            else:
+                update_dimension_variables(datatree, variable_path, granule_varinfo)
         update_history_metadata(datatree)
 
         # Future improvement: It is memory intensive to try and write out the
@@ -214,3 +210,99 @@ def update_history_metadata(datatree: xr.DataTree) -> None:
     datatree.attrs[history_attribute_name] = '\n'.join(
         filter(None, [existing_history, new_history_line])
     )
+
+
+def update_existing_variables(datatree, items_to_update, granule_varinfo) -> None:
+    """Update attributes for existing variables based on configuration."""
+    for item_to_update in items_to_update:
+        update_metadata_attributes(
+            datatree,
+            item_to_update,
+            granule_varinfo,
+        )
+        # get the dimensions that are missing or renamed
+        # update_dimensions_misnamed(datatree, items_to_update)
+        update_dimension_names(datatree, item_to_update)
+
+
+def update_dimension_names(dt: xr.DataTree, variable_to_update: str) -> None:
+    """Update the dimension names."""
+    da = dt[variable_to_update]
+    attrs = da.attrs
+    # if dimension attribute exists for variable_to_update,
+    # get target dimension names
+    rename_dim_list = attrs.get('dimensions', '').split()
+
+    # list exists so renaming required
+    if rename_dim_list:
+        if len(da.dims) != len(rename_dim_list):
+            raise Exception(f'Incorrect configured dimensions for {variable_to_update}')
+
+        # rename from source data dimension names to VarInfo dimension names
+        # and limit to the number of dimensions given in rename list
+        source_dims = da.dims[: len(rename_dim_list)]
+        rename_dict = dict(zip(source_dims, rename_dim_list))
+        dt[variable_to_update] = da.rename(rename_dict)
+
+
+def create_new_variables(datatree, variable_path, granule_varinfo) -> None:
+    """Create new variables in the data tree as configred in the json file."""
+    datatree[variable_path] = xr.DataArray(data=b'')
+    update_metadata_attributes(
+        datatree,
+        variable_path,
+        granule_varinfo,
+    )
+
+
+def get_dimension_variables(
+    data_tree: xr.DataTree, dimension_variables: set[str]
+) -> set[str]:
+    """Return dimension variables."""
+    for name, node in data_tree.children.items():
+        dt = data_tree[name]
+        if dt.variables:
+            data_set = xr.Dataset(dt)
+            for variable in data_set.variables.values():
+                for dim in variable.dims:
+                    dimension_variables.add(f'/{name}/{dim}')
+        if node.children.items():
+            dimension_variables = get_dimension_variables(node, dimension_variables)
+    return dimension_variables
+
+
+def update_dimension_variables(datatree, variable_path, granule_varinfo) -> None:
+    """Update attributes of dimension variables based on json configuration."""
+    group_path, dimension_name = os.path.split(variable_path)
+    dt_group = datatree[group_path]
+    dataset = xr.Dataset(dt_group)
+    data_array = dataset[dimension_name]
+    update_metadata_attributes_for_data_array(
+        data_array, variable_path, granule_varinfo
+    )
+    dataset[dimension_name] = data_array
+    datatree[group_path] = dt_group.assign(dataset)
+
+
+def update_metadata_attributes_for_data_array(
+    data_array: xr.DataArray,
+    group_or_variable_path: str,
+    granule_varinfo: VarInfoFromNetCDF4,
+) -> None:
+    """Update the metadata attributes on the supplied group or variable.
+
+    The attributes are updated on the data array based on the metadata
+    overrides matched by earthdata-var-info for the requested path.
+
+    """
+    matching_overrides = granule_varinfo.cf_config.get_metadata_overrides(
+        group_or_variable_path,
+    )
+
+    attributes_to_update = {
+        attribute_name: attribute_value
+        for attribute_name, attribute_value in matching_overrides.items()
+        if attribute_value is not None
+    }
+
+    data_array.attrs.update(attributes_to_update)
