@@ -96,7 +96,7 @@
       "Attributes": [
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_polar_projection_36km"
+          "Value": "/EASE2_north_polar_projection_36km"
         }
       ],
       "_Description": "SMAP L3 collections omit polar grid mapping information"
@@ -124,7 +124,7 @@
       "Attributes": [
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_polar_projection_9km"
+          "Value": "/EASE2_north_polar_projection_9km"
         }
       ],
       "_Description": "SMAP L3 collections omit polar grid mapping information"
@@ -152,7 +152,7 @@
       "Attributes": [
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_polar_projection_9km"
+          "Value": "/EASE2_north_polar_projection_9km"
         }
       ],
       "_Description": "SMAP L3 collections omit polar grid mapping information"
@@ -166,7 +166,7 @@
       "Attributes": [
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_polar_projection_3km"
+          "Value": "/EASE2_north_polar_projection_3km"
         }
       ],
       "_Description": "SMAP L3 collections omit polar grid mapping information"
@@ -381,7 +381,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/EASE2_polar_projection_3km"
+        "VariablePattern": "/EASE2_north_polar_projection_3km"
       },
       "Attributes": [
         {
@@ -415,7 +415,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTP_E|SPL3SMP_E",
-        "VariablePattern": "/EASE2_polar_projection_9km"
+        "VariablePattern": "/EASE2_north_polar_projection_9km"
       },
       "Attributes": [
         {
@@ -449,7 +449,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTP$",
-        "VariablePattern": "/EASE2_polar_projection_36km"
+        "VariablePattern": "/EASE2_north_polar_projection_36km"
       },
       "Attributes": [
         {
