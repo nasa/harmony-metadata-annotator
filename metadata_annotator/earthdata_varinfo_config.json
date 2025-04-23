@@ -76,13 +76,13 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3FT(P|P_E)",
-        "VariablePattern": "(?i).*global.*"
+        "ShortNamePath": "SPL3FTP$",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Global/(?!am_pm$).+$"
       },
       "Attributes": [
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_global_projection"
+          "Value": "/EASE2_global_projection_36km"
         }
       ],
       "_Description": "SMAP L3 collections omit global grid mapping information"
@@ -90,13 +90,13 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTP",
-        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Polar/.*"
+        "ShortNamePath": "SPL3FTP$",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Polar/(?!am_pm$).+$"
       },
       "Attributes": [
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_polar_projection_36km"
+          "Value": "/EASE2_north_polar_projection_36km"
         }
       ],
       "_Description": "SMAP L3 collections omit polar grid mapping information"
@@ -105,12 +105,26 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTP_E",
-        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Polar/.*"
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Global/(?!am_pm$).+$"
       },
       "Attributes": [
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_polar_projection_9km"
+          "Value": "/EASE2_global_projection_9km"
+        }
+      ],
+      "_Description": "SMAP L3 collections omit global grid mapping information"
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FTP_E",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Polar/(?!am_pm$).+$"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_9km"
         }
       ],
       "_Description": "SMAP L3 collections omit polar grid mapping information"
@@ -124,7 +138,7 @@
       "Attributes": [
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_global_projection"
+          "Value": "/EASE2_global_projection_9km"
         }
       ],
       "_Description": "SMAP L3 collections omit global grid mapping information"
@@ -138,7 +152,7 @@
       "Attributes": [
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_polar_projection_9km"
+          "Value": "/EASE2_north_polar_projection_9km"
         }
       ],
       "_Description": "SMAP L3 collections omit polar grid mapping information"
@@ -146,12 +160,13 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTA"
+        "ShortNamePath": "SPL3FTA",
+        "VariablePattern": "/(Freeze_Thaw_Retrieval_Data|Radar_Data|Ancillary_Data)/.*|/(x|y)"
       },
       "Attributes": [
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_polar_projection_3km"
+          "Value": "/EASE2_north_polar_projection_3km"
         }
       ],
       "_Description": "SMAP L3 collections omit polar grid mapping information"
@@ -159,12 +174,13 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3SM(P|A|AP)$|SPL2SMAP_S"
+        "ShortNamePath": "SPL2SMAP_S",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_1km/.*"
       },
       "Attributes": [
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_global_projection"
+          "Value": "/EASE2_global_projection_1km"
         }
       ],
       "_Description": "SMAP L3 collections omit global grid mapping information"
@@ -172,8 +188,64 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3FT(P|P_E)|SPL3SM(P|P_E|A|AP)|SPL2SMAP_S",
-        "VariablePattern": "/EASE2_global_projection"
+        "ShortNamePath": "SPL2SMAP_S",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_3km/.*"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_global_projection_3km"
+        }
+      ],
+      "_Description": "SMAP L3 collections omit global grid mapping information"
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMA$",
+        "VariablePattern": "/(Soil_Moisture_Retrieval_Data|Radar_Data|Ancillary_Data)/.*|/(x|y)"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_global_projection_3km"
+        }
+      ],
+      "_Description": "SMAP L3 collections omit global grid mapping information"
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMAP",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data/.*"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_global_projection_9km"
+        }
+      ],
+      "_Description": "SMAP L3 collections omit global grid mapping information"
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMP$",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_(AM|PM)/(?!lc_type$).+$"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_global_projection_36km"
+        }
+      ],
+      "_Description": "SMAP L3 collections omit global grid mapping information"
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL2SMAP_S",
+        "VariablePattern": "/EASE2_global_projection_1km"
       },
       "Attributes": [
         {
@@ -195,6 +267,112 @@
         {
           "Name": "false_northing",
           "Value": 0.0
+        },
+        {
+          "Name": "master_geotransform",
+          "Value": [-17367530.4451615, 1000.89502335, 0, 7314540.8306386, 0, -1000.89502335]
+        }
+      ],
+      "_Description": "Provide missing global grid mapping attributes for SMAP L3 collections."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMA$|SPL2SMAP_S",
+        "VariablePattern": "/EASE2_global_projection_3km"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping_name",
+          "Value": "lambert_cylindrical_equal_area"
+        },
+        {
+          "Name": "standard_parallel",
+          "Value": 30.0
+        },
+        {
+          "Name": "longitude_of_central_meridian",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_easting",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_northing",
+          "Value": 0.0
+        },
+        {
+          "Name": "master_geotransform",
+          "Value": [-17367530.4451615, 3002.6850700487, 0, 7314540.8306386, 0, -3002.6850700487]
+        }
+      ],
+      "_Description": "Provide missing global grid mapping attributes for SMAP L3 collections."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FTP_E|SPL3SMAP|SPL3SMP_E",
+        "VariablePattern": "/EASE2_global_projection_9km"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping_name",
+          "Value": "lambert_cylindrical_equal_area"
+        },
+        {
+          "Name": "standard_parallel",
+          "Value": 30.0
+        },
+        {
+          "Name": "longitude_of_central_meridian",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_easting",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_northing",
+          "Value": 0.0
+        },
+        {
+          "Name": "master_geotransform",
+          "Value": [-17367530.4451615, 9008.055210146, 0, 7314540.8306386, 0, -9008.055210146]
+        }
+      ],
+      "_Description": "Provide missing global grid mapping attributes for SMAP L3 collections."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FTP$|SPL3SMP$",
+        "VariablePattern": "/EASE2_global_projection_36km"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping_name",
+          "Value": "lambert_cylindrical_equal_area"
+        },
+        {
+          "Name": "standard_parallel",
+          "Value": 30.0
+        },
+        {
+          "Name": "longitude_of_central_meridian",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_easting",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_northing",
+          "Value": 0.0
+        },
+        {
+          "Name": "master_geotransform",
+          "Value": [-17367530.44, 36032.22084058, 0, 7314540.83, 0, -36032.22084058]
         }
       ],
       "_Description": "Provide missing global grid mapping attributes for SMAP L3 collections."
@@ -203,7 +381,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/EASE2_polar_projection_3km"
+        "VariablePattern": "/EASE2_north_polar_projection_3km"
       },
       "Attributes": [
         {
@@ -225,6 +403,10 @@
         {
           "Name": "false_northing",
           "Value": 0.0
+        },
+        {
+          "Name": "master_geotransform",
+          "Value": [-9000000, 3000, 0, 9000000, 0, -3000]
         }
       ],
       "_Description": "Provide missing polar grid mapping attributes for SMAP L3 collections."
@@ -233,7 +415,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTP_E|SPL3SMP_E",
-        "VariablePattern": "/EASE2_polar_projection_9km"
+        "VariablePattern": "/EASE2_north_polar_projection_9km"
       },
       "Attributes": [
         {
@@ -255,6 +437,10 @@
         {
           "Name": "false_northing",
           "Value": 0.0
+        },
+        {
+          "Name": "master_geotransform",
+          "Value": [-9000000, 9000, 0, 9000000, 0, -9000]
         }
       ],
       "_Description": "Provide missing polar grid mapping attributes for SMAP L3 collections."
@@ -262,8 +448,8 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTP",
-        "VariablePattern": "/EASE2_polar_projection_36km"
+        "ShortNamePath": "SPL3FTP$",
+        "VariablePattern": "/EASE2_north_polar_projection_36km"
       },
       "Attributes": [
         {
@@ -285,6 +471,10 @@
         {
           "Name": "false_northing",
           "Value": 0.0
+        },
+        {
+          "Name": "master_geotransform",
+          "Value": [-9000000, 36000, 0, 9000000, 0, -36000]
         }
       ],
       "_Description": "Provide missing polar grid mapping attributes for SMAP L3 collections."
@@ -344,6 +534,894 @@
         }
       ],
       "_Description": "Ensure variables in /Soil_Moisture_Retrieval_Data_Polar_PM group point to correct coordinate variables."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL2SMAP_S",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_1km/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_x_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL2SMAP_S",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_1km/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL2SMAP_S",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_3km/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_x_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL2SMAP_S",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_3km/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMAP",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_x_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMAP",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SM(P|P_E)",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_AM/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_x_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SM(P|P_E)",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_AM/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMP$",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_AM/lc_type"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "lc_type"
+        },
+        {
+          "Name": "long_name",
+          "Value": "land cover type"
+        },
+        {
+          "Name": "type",
+          "Value": "uint8"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variable) to clarify the dimension name"
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SM(P|P_E)",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_PM/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_x_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SM(P|P_E)",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_PM/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMP$",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_PM/lc_type"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "lc_type"
+        },
+        {
+          "Name": "long_name",
+          "Value": "land cover type"
+        },
+        {
+          "Name": "type",
+          "Value": "uint8"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variable) to clarify the dimension name"
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMP_E",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_Polar_AM/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_x_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMP_E",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_Polar_AM/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMP_E",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_Polar_PM/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_x_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMP_E",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_Polar_PM/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FTA|SPL3SMA$",
+        "VariablePattern": "/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_x_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FTA|SPL3SMA$",
+        "VariablePattern": "/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FTA",
+        "VariablePattern": "/am_pm"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "am_pm"
+        },
+        {
+          "Name": "long_name",
+          "Value": "AM-PM dimension of size 2, 0 => AM, 1=> PM"
+        },
+        {
+          "Name": "type",
+          "Value": "uint8"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to clarify the dimension name"
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FT(P|P_E)",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Global/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_x_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FT(P|P_E)",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Global/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FT(P|P_E)",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Global/am_pm"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "am_pm"
+        },
+        {
+          "Name": "long_name",
+          "Value": "AM-PM dimension of size 2, 0 => AM, 1=> PM"
+        },
+        {
+          "Name": "type",
+          "Value": "uint8"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to clarify the dimension name"
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FT(P|P_E)",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Polar/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_x_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FT(P|P_E)",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Polar/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FT(P|P_E)",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data_Polar/am_pm"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "am_pm"
+        },
+        {
+          "Name": "long_name",
+          "Value": "AM-PM dimension of size 2, 0 => AM, 1=> PM"
+        },
+        {
+          "Name": "type",
+          "Value": "uint8"
+        }
+      ],
+      "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SM(AP|P_E)|SPL2SMAP_S",
+        "VariablePattern": "/Soil_Moisture_Retrieval_(?:Data(?:_AM|_Polar_AM|_1km|_3km)?)/(?!x$|y$).+$"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "y x"
+        }
+      ],
+      "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMA$",
+        "VariablePattern": "/(Soil_Moisture_Retrieval_Data|Radar_Data|Ancillary_Data)/.*"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "y x"
+        }
+      ],
+      "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMP",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_(AM|PM)?/(?!x$|y$|landcover.*$|lc_type$).+$"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "y x"
+        }
+      ],
+      "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMP",
+        "VariablePattern": ".*landcover.*"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "y x lc_type"
+        }
+      ],
+      "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FT(P|P_E)",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data(?:_(Global|Polar))?/(?!transition_state_flag$|transition_direction$|am_pm$|x$|y$).+$|/Radar_Data/.*"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "am_pm y x"
+        }
+      ],
+      "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FTA",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data/(?!transition_state_flag$|transition_direction$).+$|/(Radar_Data|Ancillary_Data)/.*"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "am_pm y x"
+        }
+      ],
+      "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FT(A|P|P_E)",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_Data(?:_(Global|Polar))?/(transition_direction|transition_state_flag)$"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "y x"
+        }
+      ],
+      "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
     }
   ]
 }

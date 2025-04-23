@@ -113,7 +113,7 @@ def expected_output_netcdf4_file(temp_dir) -> str:
                 'history': f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}',
             },
             data_vars={
-                'EASE2_polar_projection': xr.DataArray(
+                'EASE2_north_polar_projection_36km': xr.DataArray(
                     b'',
                     attrs={
                         'false_easting': 0.0,
@@ -121,6 +121,7 @@ def expected_output_netcdf4_file(temp_dir) -> str:
                         'grid_mapping_name': 'lambert_azimuthal_equal_area',
                         'latitude_of_projection_origin': 90.0,
                         'longitude_of_projection_origin': 0.0,
+                        'master_geotransform': [-9000000, 36000, 0, 9000000, 0, -36000],
                     },
                 ),
                 'variable_one': xr.DataArray(
@@ -128,7 +129,7 @@ def expected_output_netcdf4_file(temp_dir) -> str:
                     attrs={
                         '_FillValue': -9999.0,
                         'coordinates': 'time latitude longitude',
-                        'grid_mapping': '/EASE2_polar_projection',
+                        'grid_mapping': '/EASE2_north_polar_projection_36km',
                         'units': 'seconds since 2000-00-00T12:34:56',
                     },
                 ),

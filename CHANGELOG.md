@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased] - 2025-04-22
+
+### Changed
+
+- The earthdata varinfo configuration file was updated for SMAP L3 collections to make the global grid mapping variables resolution specific, add a `master_geotransform` attribute to all grid mapping variables, add missing dimension variables, and create a dimensions attribute on their associated variables.
+
 ## [v1.0.0] - 2025-03-28
 
 - This is the first formal release of the Harmony Metadata Annotator as
