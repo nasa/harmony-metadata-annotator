@@ -9,15 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- The Harmony Metadata Annotator was updated to rename pseudo dimension variables
-that created in collections that do not have dimension variables. The dimension variables
-are renamed with the names provided in the earthdata-varinfo configuration file.
+- Update Harmony Metadata Annotator to rename pseudo dimension variables
+  that get created in collections that do not have dimension variables.
+  Rename the dimension variables with the names provided in the earthdata-varinfo configuration file.
 
 ## [unreleased] - 2025-04-22
 
 ### Changed
 
-- The earthdata varinfo configuration file was updated for SMAP L3 collections to make the global grid mapping variables resolution specific, add a `master_geotransform` attribute to all grid mapping variables, add missing dimension variables, and create a dimensions attribute on their associated variables.
+- Update the earthdata varinfo configuration file for SMAP L3 collections to make
+  the global grid mapping variables resolution specific, add a `master_geotransform`
+  attribute to all grid mapping variables, add missing dimension variables, and create a dimensions
+  attribute on their associated variables.
 
 ## [v1.0.0] - 2025-03-28
 

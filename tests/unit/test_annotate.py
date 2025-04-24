@@ -349,7 +349,7 @@ def test_update_metadata_attributes_for_data_array() -> None:
     """Update the metadata attributes on the supplied group or variable.
 
     The attributes are updated on the data array based on the metadata
-    overrides matched by earthdata-var-info for the requested path.
+    overrides matched by earthdata-varinfo for the requested path.
 
     """
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:

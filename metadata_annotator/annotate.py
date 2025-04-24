@@ -74,7 +74,7 @@ def amend_in_file_metadata(
         update_group_and_variable_attributes(datatree, items_to_update, granule_varinfo)
 
         # get all the dimension variables
-        dimension_variables = get_dimension_variables(datatree, set())
+        dimension_variables = get_dimension_variables(datatree)
 
         # create variables or update dimensions
         for variable_path in variables_to_create:
@@ -227,24 +227,24 @@ def update_group_and_variable_attributes(
         update_dimension_names(datatree, item_to_update)
 
 
-def update_dimension_names(dt: xr.DataTree, variable_to_update: str) -> None:
+def update_dimension_names(data_tree: xr.DataTree, variable_to_update: str) -> None:
     """Update the dimension names."""
-    da = dt[variable_to_update]
-    attrs = da.attrs
+    data_array = data_tree[variable_to_update]
+    attrs = data_array.attrs
     # If dimension attribute exists for variable to update,
     # get target dimension names.
     rename_dim_list = attrs.get('dimensions', '').split()
 
     # The list exists so renaming is required.
     if rename_dim_list:
-        if len(da.dims) != len(rename_dim_list):
+        if len(data_array.dims) != len(rename_dim_list):
             raise Exception(f'Incorrect configured dimensions for {variable_to_update}')
 
         # Rename from source data dimension names to VarInfo dimension names
         # and limit to the number of dimensions given in rename list.
-        source_dims = da.dims[: len(rename_dim_list)]
+        source_dims = data_array.dims[: len(rename_dim_list)]
         rename_dict = dict(zip(source_dims, rename_dim_list))
-        dt[variable_to_update] = da.rename(rename_dict)
+        data_tree[variable_to_update] = data_array.rename(rename_dict)
 
 
 def create_new_variables(
@@ -259,7 +259,9 @@ def create_new_variables(
     )
 
 
-def get_dimension_variables(data_tree: xr.DataTree, dimension_variables: set[str]):
+def get_dimension_variables(
+    data_tree: xr.DataTree, dimension_variables: set[str] = set()
+):
     """Return dimension variables."""
     for name, node in data_tree.children.items():
         dt = data_tree[name]
@@ -268,8 +270,6 @@ def get_dimension_variables(data_tree: xr.DataTree, dimension_variables: set[str
             dimension_variables.update(f'/{name}/{dim}' for dim in dt_dim_dict.keys())
         if node.children:
             get_dimension_variables(node, dimension_variables)
-
-    return dimension_variables
 
     return dimension_variables
 
