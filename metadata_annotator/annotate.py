@@ -260,9 +260,11 @@ def create_new_variables(
 
 
 def get_dimension_variables(
-    data_tree: xr.DataTree, dimension_variables: set[str] = set()
-):
+    data_tree: xr.DataTree, dimension_variables: set[str] = None
+) -> set[str]:
     """Return dimension variables."""
+    if dimension_variables is None:
+        dimension_variables = set()
     for name, node in data_tree.children.items():
         dt = data_tree[name]
         if dt.dims:
