@@ -101,13 +101,13 @@ def test_update_metadata_attributes_variable(sample_netcdf4_file, sample_varinfo
             ['coordinates', 'grid_mapping', 'units']
         )
 
-        # units had no overrides, so should be unchanged
+        # The units had no overrides, so should be unchanged.
         assert (
             test_datatree['/variable_one'].attrs['units']
             == 'seconds since 2000-00-00T12:34:56'
         )
 
-        # coordinates was updated, so should be the value in the configuration file
+        # The coordinates was updated, so should be the value in the configuration file
         assert (
             test_datatree['/variable_one'].attrs['coordinates']
             == 'time latitude longitude'
@@ -245,14 +245,14 @@ def test_update_group_and_variable_attributes() -> None:
         )
         update_group_and_variable_attributes(datatree, items_to_update, granule_varinfo)
 
-        # check attributes
+        # Check attributes expected are added.
         assert all(
             item
             in datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'].attrs.keys()
             for item in ['grid_mapping', 'dimensions']
         )
 
-        # check dimension renames
+        # Check dimension renames are as expected.
         assert set(
             datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'].dims
         ) == set(['am_pm', 'y', 'x'])
@@ -267,7 +267,7 @@ def test_update_dimension_names() -> None:
         )
         update_dimension_names(datatree, variable_to_update)
 
-        # check dimension renames
+        # Check dimension renames are as expected.
         assert set(
             datatree['/Freeze_Thaw_Retrieval_Data_Global/transition_direction'].dims
         ) == set(['y', 'x'])
@@ -285,10 +285,10 @@ def test_create_new_variables() -> None:
         )
         create_new_variables(datatree, variable_to_create, granule_varinfo)
 
-        # check if variable is created
+        # Check if the new variable is created.
         assert 'EASE2_global_projection_36km' in datatree['/'].data_vars
 
-        # check if attributes are updated for the variable
+        # Check if attributes are updated for the variable.
         assert set(datatree['/EASE2_global_projection_36km'].attrs.keys()) == set(
             [
                 'false_easting',
@@ -315,14 +315,14 @@ def test_get_dimension_variables() -> set[str]:
 
 
 def test_update_dimension_variables() -> None:
-    """Update attributes of dimension variables based on json configuration."""
+    """Ensure attributes of dimension variables are updated based on json configuration."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
         granule_varinfo = VarInfoFromNetCDF4(
             'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
             short_name='SPL3FTP',
             config_file='metadata_annotator/earthdata_varinfo_config.json',
         )
-        # rename the dim variables
+        # Rename the dim variables.
         da = datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag']
         renamed_da = da.rename({'dim0': 'am_pm', 'dim1': 'y', 'dim2': 'x'})
         datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'] = renamed_da
@@ -330,6 +330,7 @@ def test_update_dimension_variables() -> None:
         update_dimension_variables(
             datatree, '/Freeze_Thaw_Retrieval_Data_Global/y', granule_varinfo
         )
+        #Ensure that the attributes are updated.
         assert set(
             datatree['/Freeze_Thaw_Retrieval_Data_Global'].dataset['y'].attrs
         ) == set(
@@ -358,7 +359,7 @@ def test_update_metadata_attributes_for_data_array() -> None:
             short_name='SPL3FTP',
             config_file='metadata_annotator/earthdata_varinfo_config.json',
         )
-        # rename the dim variables
+        # Rename the dimension variables.
         da = datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag']
         renamed_da = da.rename({'dim0': 'am_pm', 'dim1': 'y', 'dim2': 'x'})
         datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'] = renamed_da
@@ -367,6 +368,7 @@ def test_update_metadata_attributes_for_data_array() -> None:
         update_metadata_attributes_for_data_array(
             da_dim, '/Freeze_Thaw_Retrieval_Data_Global/x', granule_varinfo
         )
+        # Ensure that the expected attributes are updated.
         assert set(da_dim.attrs) == set(
             [
                 'axis',
