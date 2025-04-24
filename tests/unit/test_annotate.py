@@ -315,7 +315,7 @@ def test_get_dimension_variables() -> set[str]:
 
 
 def test_update_dimension_variables() -> None:
-    """Ensure attributes of dimension variables are updated based on json configuration."""
+    """Ensure attributes of dimension variables are updated as expected."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
         granule_varinfo = VarInfoFromNetCDF4(
             'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
@@ -330,7 +330,7 @@ def test_update_dimension_variables() -> None:
         update_dimension_variables(
             datatree, '/Freeze_Thaw_Retrieval_Data_Global/y', granule_varinfo
         )
-        #Ensure that the attributes are updated.
+        # Ensure that the attributes are updated.
         assert set(
             datatree['/Freeze_Thaw_Retrieval_Data_Global'].dataset['y'].attrs
         ) == set(
