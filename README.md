@@ -57,7 +57,7 @@ regarding creation of a local Harmony instance.
 For local development and testing of library modifications or small functions independent of the main Harmony application:
 
 1. Create a Python virtual environment
-1. Install the dependencies in `pip_requirements.txt`, and `tests/pip_test_requirements.txt`
+1. Install the dependencies in `requirements.txt`, and `tests/test_requirements.txt`
 1. Install the pre-commit hooks ([described below](#pre-commit-hooks)).
 
 ## Enabling the service in Harmony in a Box:
@@ -150,8 +150,8 @@ http://localhost:3000/C1246896616-EEDTEST/ogc-api-coverages/1.0.0/collections/al
 
 To see that this request worked download the output (using `localhost:3000/jobs`
 to find the results URL). Then open that file in Panoply. First note the new CRS
-variables in the root group of the output: `/EASE2_global_projection` and
-`/EASE2_polar_projection_9km`. These were defined in the
+variables in the root group of the output: `/EASE2_global_projection_36km` and
+`/EASE2_north_polar_projection_36km`. These were defined in the
 `earthdata_varinfo_config.json` file. Next look at one of the variables, e.g.:
 `/Soil_Moisture_Retrieval_Data_AM/albedo`. This will now have a `grid_mapping`
 metadata attribute, which was absent in the native data.
