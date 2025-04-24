@@ -69,13 +69,14 @@ def amend_in_file_metadata(
         decode_cf=False,
         mask_and_scale=False,
     ) as datatree:
-        # Update all pre-existing variables or groups with metadata overrides
-        update_existing_variables(datatree, items_to_update, granule_varinfo)
+        # Update all pre-existing variables or groups with metadata overrides including
+        # dimension renaming where applicable.
+        update_group_and_variable_attributes(datatree, items_to_update, granule_varinfo)
 
         # get all the dimension variables
         dimension_variables = get_dimension_variables(datatree, set())
 
-        # create variables except dimension variables
+        # create variables or update dimensions
         for variable_path in variables_to_create:
             if variable_path not in dimension_variables:
                 create_new_variables(datatree, variable_path, granule_varinfo)
@@ -212,16 +213,17 @@ def update_history_metadata(datatree: xr.DataTree) -> None:
     )
 
 
-def update_existing_variables(datatree, items_to_update, granule_varinfo) -> None:
-    """Update attributes for existing variables based on configuration."""
+def update_group_and_variable_attributes(
+    datatree: xr.DataTree, items_to_update: str, granule_varinfo: VarInfoFromNetCDF4
+) -> None:
+    """Update attributes for existing variables and groups based on configuration."""
     for item_to_update in items_to_update:
         update_metadata_attributes(
             datatree,
             item_to_update,
             granule_varinfo,
         )
-        # get the dimensions that are missing or renamed
-        # update_dimensions_misnamed(datatree, items_to_update)
+        # rename the pseudo dimension names
         update_dimension_names(datatree, item_to_update)
 
 
@@ -229,24 +231,26 @@ def update_dimension_names(dt: xr.DataTree, variable_to_update: str) -> None:
     """Update the dimension names."""
     da = dt[variable_to_update]
     attrs = da.attrs
-    # if dimension attribute exists for variable_to_update,
-    # get target dimension names
+    # If dimension attribute exists for variable to update,
+    # get target dimension names.
     rename_dim_list = attrs.get('dimensions', '').split()
 
-    # list exists so renaming required
+    # The list exists so renaming is required.
     if rename_dim_list:
         if len(da.dims) != len(rename_dim_list):
             raise Exception(f'Incorrect configured dimensions for {variable_to_update}')
 
-        # rename from source data dimension names to VarInfo dimension names
-        # and limit to the number of dimensions given in rename list
+        # Rename from source data dimension names to VarInfo dimension names
+        # and limit to the number of dimensions given in rename list.
         source_dims = da.dims[: len(rename_dim_list)]
         rename_dict = dict(zip(source_dims, rename_dim_list))
         dt[variable_to_update] = da.rename(rename_dict)
 
 
-def create_new_variables(datatree, variable_path, granule_varinfo) -> None:
-    """Create new variables in the data tree as configred in the json file."""
+def create_new_variables(
+    datatree: xr.DataTree, variable_path: str, granule_varinfo: VarInfoFromNetCDF4
+) -> None:
+    """Create new variables in the data tree as configured in the json file."""
     datatree[variable_path] = xr.DataArray(data=b'')
     update_metadata_attributes(
         datatree,
@@ -255,23 +259,24 @@ def create_new_variables(datatree, variable_path, granule_varinfo) -> None:
     )
 
 
-def get_dimension_variables(
-    data_tree: xr.DataTree, dimension_variables: set[str]
-) -> set[str]:
+def get_dimension_variables(data_tree: xr.DataTree, dimension_variables: set[str]):
     """Return dimension variables."""
     for name, node in data_tree.children.items():
         dt = data_tree[name]
-        if dt.variables:
-            data_set = xr.Dataset(dt)
-            for variable in data_set.variables.values():
-                for dim in variable.dims:
-                    dimension_variables.add(f'/{name}/{dim}')
-        if node.children.items():
-            dimension_variables = get_dimension_variables(node, dimension_variables)
+        if dt.dims:
+            dt_dim_dict = dict(dt.dims)
+            dimension_variables.update(f'/{name}/{dim}' for dim in dt_dim_dict.keys())
+        if node.children:
+            get_dimension_variables(node, dimension_variables)
+
+    return dimension_variables
+
     return dimension_variables
 
 
-def update_dimension_variables(datatree, variable_path, granule_varinfo) -> None:
+def update_dimension_variables(
+    datatree: xr.DataTree, variable_path: str, granule_varinfo: VarInfoFromNetCDF4
+) -> None:
     """Update attributes of dimension variables based on json configuration."""
     group_path, dimension_name = os.path.split(variable_path)
     dt_group = datatree[group_path]
@@ -292,7 +297,7 @@ def update_metadata_attributes_for_data_array(
     """Update the metadata attributes on the supplied group or variable.
 
     The attributes are updated on the data array based on the metadata
-    overrides matched by earthdata-var-info for the requested path.
+    overrides matched by earthdata-varinfo for the requested path.
 
     """
     matching_overrides = granule_varinfo.cf_config.get_metadata_overrides(
