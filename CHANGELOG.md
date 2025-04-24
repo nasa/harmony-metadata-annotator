@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [unreleased] - 2025-04-24
+
+### Changed
+
+- The Harmony Metadata Annotator was updated to rename pseudo dimension variables
+that created in collections that do not have dimension variables. The dimension variables
+are renamed with the names provided in the earthdata-varinfo configuration file.
+
 ## [unreleased] - 2025-04-22
 
 ### Changed
