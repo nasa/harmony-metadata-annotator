@@ -13,7 +13,7 @@ from metadata_annotator.annotate import (
     get_matching_groups_and_variables,
     is_exact_path,
     update_dimension_names,
-    update_dimension_variables,
+    update_dimension_variable,
     update_group_and_variable_attributes,
     update_history_metadata,
     update_metadata_attributes,
@@ -314,8 +314,8 @@ def test_get_dimension_variables() -> set[str]:
         )
 
 
-def test_update_dimension_variables() -> None:
-    """Ensure attributes of dimension variables are updated as expected."""
+def test_update_dimension_variable() -> None:
+    """Ensure attributes of a dimension variable are updated as expected."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
         granule_varinfo = VarInfoFromNetCDF4(
             'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
@@ -327,7 +327,7 @@ def test_update_dimension_variables() -> None:
         renamed_da = da.rename({'dim0': 'am_pm', 'dim1': 'y', 'dim2': 'x'})
         datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'] = renamed_da
 
-        update_dimension_variables(
+        update_dimension_variable(
             datatree, '/Freeze_Thaw_Retrieval_Data_Global/y', granule_varinfo
         )
         # Ensure that the attributes are updated.

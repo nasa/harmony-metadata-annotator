@@ -81,7 +81,7 @@ def amend_in_file_metadata(
             if variable_path not in dimension_variables:
                 create_new_variables(datatree, variable_path, granule_varinfo)
             else:
-                update_dimension_variables(datatree, variable_path, granule_varinfo)
+                update_dimension_variable(datatree, variable_path, granule_varinfo)
         update_history_metadata(datatree)
 
         # Future improvement: It is memory intensive to try and write out the
@@ -276,10 +276,10 @@ def get_dimension_variables(
     return dimension_variables
 
 
-def update_dimension_variables(
+def update_dimension_variable(
     datatree: xr.DataTree, variable_path: str, granule_varinfo: VarInfoFromNetCDF4
 ) -> None:
-    """Update attributes of dimension variables based on json configuration."""
+    """Update attributes of a dimension variable based on json configuration."""
     group_path, dimension_name = os.path.split(variable_path)
     dt_group = datatree[group_path]
     dataset = xr.Dataset(dt_group)
