@@ -565,6 +565,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "subset_index_reference",
+          "Value": "/Soil_Moisture_Retrieval_Data_1km/EASE_column_index_1km"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -599,6 +603,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "subset_index_reference",
+          "Value": "/Soil_Moisture_Retrieval_Data_1km/EASE_row_index_1km"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -633,6 +641,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "subset_index_reference",
+          "Value": "/Soil_Moisture_Retrieval_Data_3km/EASE_column_index_3km"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -667,6 +679,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "subset_index_reference",
+          "Value": "/Soil_Moisture_Retrieval_Data_3km/EASE_row_index_3km"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
