@@ -196,6 +196,7 @@ def test_annotate_granule(
     expected_output_netcdf4_file,
     temp_output_file_path,
     varinfo_config_file,
+    mocker,
 ):
     """Confirm that a granule has all metadata updated as expected.
 
@@ -204,6 +205,11 @@ def test_annotate_granule(
     attributes are either added, updated or deleted.
 
     """
+    get_spatial_dimension_variables_mock = mocker.patch(
+        'metadata_annotator.annotate.get_spatial_dimension_variables'
+    )
+    get_spatial_dimension_variables_mock.return_value = set()
+
     annotate_granule(
         sample_netcdf4_file, temp_output_file_path, varinfo_config_file, 'TEST01'
     )
