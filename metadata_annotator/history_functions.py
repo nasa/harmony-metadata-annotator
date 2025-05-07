@@ -1,15 +1,16 @@
 """Module with history functions."""
 
 import os
-from datetime import UTC, datetime
-from urllib.parse import unquote, parse_qs
 import re
-import xarray as xr
+from datetime import UTC, datetime
+from urllib.parse import parse_qs, unquote
 
+import xarray as xr
 
 PROGRAM = 'Harmony Metadata Annotator'
 # To be improved - make dynamic based on service_version.txt
 VERSION = '0.0.1'
+
 
 def update_history_metadata(datatree: xr.DataTree) -> None:
     """Update the history global attribute of the DataTree.
@@ -17,15 +18,13 @@ def update_history_metadata(datatree: xr.DataTree) -> None:
     If either an existing History or history global attribute exists, append
     information as a new line to the existing value. Otherwise create a new
     attribute called "history".
-
     """
     history_attribute_name, existing_history = read_history_attrs(datatree)
     write_history_attrs(datatree, history_attribute_name, existing_history)
 
 
 def read_history_attrs(datatree: xr.DataTree) -> tuple[str, str]:
-    """ Read history attribute."""
-
+    """Read history attribute."""
     if 'History' in datatree.attrs:
         history_attribute_name = 'History'
         existing_history = datatree.attrs['History']
@@ -38,11 +37,10 @@ def read_history_attrs(datatree: xr.DataTree) -> tuple[str, str]:
     return history_attribute_name, existing_history
 
 
-def write_history_attrs(datatree: xr.DataTree,
-                        history_attribute_name: str,
-                        existing_history: str) -> None:
-    """ Write history attribute. """
-
+def write_history_attrs(
+    datatree: xr.DataTree, history_attribute_name: str, existing_history: str
+) -> None:
+    """Write history attribute."""
     new_history_line = ' '.join(
         [
             datetime.now(UTC).isoformat(),
@@ -55,8 +53,8 @@ def write_history_attrs(datatree: xr.DataTree,
     )
 
 
-def get_subset_start_index_for_dimension(dimension_index_map: dict[str,int],
-                                 dimension_variable_path: str
+def get_subset_start_index_for_dimension(
+    dimension_index_map: dict[str, int], dimension_variable_path: str
 ) -> int:
     """Return the start index from the dimension index map."""
     if dimension_variable_path in dimension_index_map.keys():
@@ -69,8 +67,7 @@ def get_dimension_index_map(
     requested_variables: list[str],
     dimension_variables: list[str],
 ) -> dict[str, int]:
-    """Return dimension path to start index mapping. """
-
+    """Return dimension path to start index mapping."""
     # Read history attribute and retrieve all the variables with their corresponding
     # index ranges.
     variables_with_index_ranges = parse_index_range_from_history_attr(datatree)
@@ -81,14 +78,14 @@ def get_dimension_index_map(
     )
 
     # Retrieve the mapping from the dimension variable to the start index
-    dimension_index_map = get_dim_indexes_from_variable_dimension_map(variable_dimension_map,
-                                                                   variables_with_index_ranges)
+    dimension_index_map = get_dim_index_from_var_dim_map(
+        variable_dimension_map, variables_with_index_ranges
+    )
     return dimension_index_map
 
 
-def parse_index_range_from_history_attr(datatree: xr.DataTree) -> dict[str,str]:
-    """ Return dictionary of variables with corresponding start index from the index ranges. """
-
+def parse_index_range_from_history_attr(datatree: xr.DataTree) -> dict[str, str]:
+    """Return dictionary of variables with corresponding start index."""
     history_attribute_name, existing_history = read_history_attrs(datatree)
 
     if not existing_history:
@@ -96,7 +93,7 @@ def parse_index_range_from_history_attr(datatree: xr.DataTree) -> dict[str,str]:
 
     decoded_string = unquote(existing_history)
     parsed_data = parse_qs(decoded_string)
-    opendap_entry = next(iter(parsed_data.values()),())
+    opendap_entry = next(iter(parsed_data.values()), ())
 
     if not opendap_entry:
         return {}
@@ -113,10 +110,9 @@ def parse_index_range_from_history_attr(datatree: xr.DataTree) -> dict[str,str]:
 def get_variable_dimension_map(
     data_tree: xr.DataTree,
     variables_requested: list[str],
-    dimension_variables: list[str]
+    dimension_variables: list[str],
 ) -> dict[tuple, str]:
     """Return a mapping from dimensions list to a requested variable."""
-
     var_dim_map = {}
     for variable_path in variables_requested:
         variable_group_path, variable_name = os.path.split(variable_path)
@@ -125,13 +121,12 @@ def get_variable_dimension_map(
 
         # Some variables may not have all the dimensions in the group.
         if len(data_array.dims) == len(data_tree[variable_group_path].dims):
-
             # The data array dimensions has the right order of dimensions
             variable_dim_list = [
-                f"{variable_group_path}/{dim}"
+                f'{variable_group_path}/{dim}'
                 for dim in data_array.dims
-                    if f"{variable_group_path}/{dim}" in dimension_variables
-                ]
+                if f'{variable_group_path}/{dim}' in dimension_variables
+            ]
 
             if variable_dim_list:
                 var_dim_map[tuple(variable_dim_list)] = variable_path
@@ -139,18 +134,18 @@ def get_variable_dimension_map(
     return var_dim_map
 
 
-def get_dim_indexes_from_variable_dimension_map(variable_dimension_map,
-                            variables_with_index_ranges) -> dict[str, int]:
-    """Returns the mapping from dimension to start index from the variable 
-    dimension map and the variable with index map. 
-    
+def get_dim_index_from_var_dim_map(
+    variable_dimension_map, variables_with_index_ranges
+) -> dict[str, int]:
+    """Returns the mapping from dimension to start index.
+
+    This is retrieved from the variable dimension map and the variable with index map.
     """
     dimension_index_map = {}
 
     # variable_dimension_map has a dictionary of dimensions in a tuple with
     # a corresponding variable path name
     for variable_dimensions, variable_path in variable_dimension_map.items():
-
         # variables_with_index_ranges has a dictionary with requested variable names
         # # corresponding subsetted start indexes
         if variable_path in variables_with_index_ranges:
@@ -162,10 +157,9 @@ def get_dim_indexes_from_variable_dimension_map(variable_dimension_map,
     return dimension_index_map
 
 
-def get_index_range_substring(index_range_string) -> tuple[str,list]:
-    """ return variable and index range."""
-
-    variable = ""
+def get_index_range_substring(index_range_string) -> tuple[str, list]:
+    """Return variable and index range."""
+    variable = ''
     if not index_range_string:
         return variable, []
 
@@ -190,7 +184,8 @@ def get_index_range_substring(index_range_string) -> tuple[str,list]:
         # The variable is before the index range start.
         variable = index_range_string[0:start_index]
         # Get all the index ranges in square brackets
-        index_range_dims = re.findall(r'\[(.*?)\]',
-                                      index_range_string[start_index : end_index + 1])
+        index_range_dims = re.findall(
+            r'\[(.*?)\]', index_range_string[start_index : end_index + 1]
+        )
         return variable, index_range_dims
     return variable, []
