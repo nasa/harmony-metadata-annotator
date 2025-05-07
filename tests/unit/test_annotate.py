@@ -30,6 +30,7 @@ from metadata_annotator.annotate import (
 from metadata_annotator.exceptions import (
     InvalidDimensionAttribute,
     InvalidGridMappingReference,
+    InvalidSubsetIndexShape,
     MissingDimensionAttribute,
     MissingStartIndexConfiguration,
     MissingSubsetIndexReference,
@@ -482,6 +483,17 @@ def test_get_start_index_from_row_col_variable_missing_reference(
     ) as test_datatree:
         with pytest.raises(MissingSubsetIndexReference):
             get_start_index_from_row_col_variable(test_datatree, 'missing_variable')
+
+
+def test_get_start_index_from_row_col_variable_invalid_index_shape(
+    sample_netcdf4_file_test02,
+) -> None:
+    """Ensure the expected exception is raised when index variable shape is invalid."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        with pytest.raises(InvalidSubsetIndexShape):
+            get_start_index_from_row_col_variable(test_datatree, 'x')
 
 
 def test_get_spatial_dimension_type(sample_netcdf4_file_test02) -> None:

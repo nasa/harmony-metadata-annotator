@@ -12,6 +12,7 @@ from varinfo import VarInfoFromNetCDF4
 from metadata_annotator.exceptions import (
     InvalidDimensionAttribute,
     InvalidGridMappingReference,
+    InvalidSubsetIndexShape,
     MissingDimensionAttribute,
     MissingStartIndexConfiguration,
     MissingSubsetIndexReference,
@@ -395,13 +396,21 @@ def get_grid_start_index(
 def get_start_index_from_row_col_variable(
     datatree: xr.DataTree, subset_index_reference: str
 ) -> tuple[int, int]:
-    """Get the grid start index from a 2D row or column index variable."""
+    """Return the grid start index from a row or column index variable.
+
+    The subset_index_reference must correspond to a variable in the datatree that
+    has at least two dimensions. The value at the [0, 0] position in the last two
+    dimensions (assumed to be y, x) is returned as the grid start index.
+    """
     try:
         row_col_variable = datatree[subset_index_reference]
     except KeyError as e:
         raise MissingSubsetIndexReference(subset_index_reference) from e
 
-    return row_col_variable.values[0][0]
+    if row_col_variable.ndim < 2:
+        raise InvalidSubsetIndexShape(subset_index_reference)
+
+    return row_col_variable.values[..., 0, 0].item()
 
 
 def get_spatial_dimension_type(data_array: xr.DataArray) -> str:

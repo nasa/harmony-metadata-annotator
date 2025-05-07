@@ -53,11 +53,21 @@ class InvalidGridMappingReference(MetadataAnnotatorError):
 class MissingSubsetIndexReference(MetadataAnnotatorError):
     """Raised when the row or column index variable is missing in earthdata_varinfo."""
 
-    def __init__(self, row_col_index_variable):
+    def __init__(self, variable_name):
         """Initialize the exception with the row/col index reference variable."""
         super().__init__(
-            f'Could not find row/column index reference variable '
-            f'"{row_col_index_variable}"',
+            f'Could not find row/column index reference variable "{variable_name}"',
+        )
+
+
+class InvalidSubsetIndexShape(MetadataAnnotatorError):
+    """Raised when the index variable does not have at least two dimensions."""
+
+    def __init__(self, variable_name):
+        """Initialize the exception with the row/col index reference variable."""
+        super().__init__(
+            f'The row/column index reference variable '
+            f'"{variable_name}" must have at least two dimensions.'
         )
 
 
