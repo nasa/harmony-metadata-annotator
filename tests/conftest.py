@@ -13,7 +13,7 @@ from pystac import Asset, Catalog, Item
 from pytest import fixture
 from varinfo import VarInfoFromNetCDF4
 
-from metadata_annotator.annotate import PROGRAM, VERSION
+from metadata_annotator.history_functions import PROGRAM, VERSION
 
 
 @fixture(scope='function')

@@ -5,8 +5,6 @@ from freezegun import freeze_time
 from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.annotate import (
-    PROGRAM,
-    VERSION,
     annotate_granule,
     create_new_variables,
     get_dimension_variables,
@@ -19,6 +17,7 @@ from metadata_annotator.annotate import (
     update_metadata_attributes,
     update_metadata_attributes_for_data_array,
 )
+from metadata_annotator.history_functions import PROGRAM, VERSION
 
 
 def test_is_exact_path_is_exact():
@@ -378,5 +377,6 @@ def test_update_metadata_attributes_for_data_array() -> None:
                 'standard_name',
                 'type',
                 'units',
+                'corner_point_offsets',
             ]
         )
