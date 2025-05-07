@@ -421,10 +421,9 @@ def get_spatial_dimension_type(data_array: xr.DataArray) -> str:
         raise MissingDimensionAttribute(data_array.name, 'standard_name')
     if standard_name == 'projection_x_coordinate':
         return 'x'
-    elif standard_name == 'projection_y_coordinate':
+    if standard_name == 'projection_y_coordinate':
         return 'y'
-    else:
-        raise InvalidDimensionAttribute(data_array.name, 'standard_name', standard_name)
+    raise InvalidDimensionAttribute(data_array.name, 'standard_name', standard_name)
 
 
 def get_geotransform_config(
