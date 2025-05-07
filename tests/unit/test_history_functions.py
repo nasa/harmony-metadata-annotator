@@ -6,7 +6,7 @@ from metadata_annotator.history_functions import (
     get_dim_index_from_var_dim_map,
     get_dimension_index_map,
     get_index_range_substring,
-    get_subset_start_index_for_dimension,
+    get_start_index_from_history,
     get_variable_dimension_map,
     parse_index_range_from_history_attr,
 )
@@ -128,7 +128,7 @@ def test_get_dim_indexes_from_variable_dimension_map() -> None:
     assert dim_index_map['/Freeze_Thaw_Retrieval_Data_Polar/x'] == 128
 
 
-def test_get_subset_start_index_for_dimension() -> None:
+def test_get_start_index_from_history() -> None:
     """Ensure that the start index returned for the requested dimension is correct."""
     dim_index_map = {
         '/Freeze_Thaw_Retrieval_Data_Global/y': 15,
@@ -137,7 +137,7 @@ def test_get_subset_start_index_for_dimension() -> None:
         '/Freeze_Thaw_Retrieval_Data_Polar/x': 128,
     }
     assert (
-        get_subset_start_index_for_dimension(
+        get_start_index_from_history(
             dim_index_map, '/Freeze_Thaw_Retrieval_Data_Global/x'
         )
         == 224

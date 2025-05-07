@@ -53,7 +53,7 @@ def write_history_attrs(
     )
 
 
-def get_subset_start_index_for_dimension(
+def get_start_index_from_history(
     dimension_index_map: dict[str, int], dimension_variable_path: str
 ) -> int:
     """Return the start index from the dimension index map."""

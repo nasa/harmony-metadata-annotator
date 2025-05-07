@@ -13,7 +13,7 @@ from pystac import Asset, Catalog, Item
 from pytest import fixture
 from varinfo import VarInfoFromNetCDF4
 
-from metadata_annotator.history_functions import PROGRAM, VERSION
+from metadata_annotator.annotate import PROGRAM, VERSION
 
 
 @fixture(scope='function')
@@ -225,4 +225,74 @@ def sample_harmony_message() -> HarmonyMessage:
             'stagingLocation': 's3://bucket/staging-location',
             'user': 'fakeuser',
         }
+    )
+
+
+@fixture(scope='function')
+def sample_netcdf4_file_test02(temp_dir) -> str:
+    """Create a sample NetCDF-4 file."""
+    file_name = path_join(temp_dir, 'test_input_02.nc')
+
+    sample_datatree = xr.DataTree(
+        dataset=xr.Dataset(
+            attrs={
+                'short_name': 'TEST02',
+            },
+            data_vars={
+                'x': xr.DataArray(
+                    np.array([0, 1, 2]),
+                    attrs={
+                        'standard_name': 'projection_x_coordinate',
+                        'subset_index_reference': 'EASE_column_index',
+                        'grid_mapping': '/EASE2_north_polar_projection_36km',
+                    },
+                    dims=['x'],
+                ),
+                'y': xr.DataArray(
+                    np.array([0, 1, 2]),
+                    attrs={
+                        'standard_name': 'projection_y_coordinate',
+                        'subset_index_reference': 'EASE_row_index',
+                        'grid_mapping': '/EASE2_north_polar_projection_36km',
+                    },
+                    dims=['y'],
+                ),
+                'z': xr.DataArray(
+                    np.array([]),
+                    attrs={
+                        'standard_name': 'invalid_standard_name',
+                        'grid_mapping': '/EASE2_variable_missing_geotransform',
+                    },
+                    dims=['z'],
+                ),
+                'am_pm': xr.DataArray(
+                    np.array([]),
+                    attrs={},
+                    dims=['am_pm'],
+                ),
+                'EASE_column_index': xr.DataArray(
+                    np.array([[5, 6, 7], [5, 6, 7], [5, 6, 7]]),
+                    attrs={},
+                    dims=['y', 'x'],
+                ),
+                'EASE_row_index': xr.DataArray(
+                    np.array([[5, 6, 7], [5, 6, 7], [5, 6, 7]]),
+                    attrs={},
+                    dims=['y', 'x'],
+                ),
+            },
+        ),
+    )
+
+    sample_datatree.to_netcdf(file_name, encoding=None)
+    return file_name
+
+
+@fixture(scope='function')
+def sample_varinfo_test02(
+    sample_netcdf4_file, varinfo_config_file
+) -> VarInfoFromNetCDF4:
+    """Create sample VarInfoFromNetCDF4 instance."""
+    return VarInfoFromNetCDF4(
+        sample_netcdf4_file, config_file=varinfo_config_file, short_name='TEST02'
     )

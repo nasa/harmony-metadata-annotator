@@ -2,11 +2,26 @@
 
 import os
 import re
-from datetime import UTC, datetime
 from shutil import copy
 
+import numpy as np
 import xarray as xr
 from varinfo import VarInfoFromNetCDF4
+
+from metadata_annotator.exceptions import (
+    InvalidDimensionAttribute,
+    InvalidGridMappingReference,
+    InvalidSubsetIndexShape,
+    MissingDimensionAttribute,
+    MissingStartIndexConfiguration,
+    MissingSubsetIndexReference,
+)
+from metadata_annotator.geotransform import compute_dimension_scale
+from metadata_annotator.history_functions import (
+    get_dimension_index_map,
+    get_start_index_from_history,
+    update_history_metadata,
+)
 
 PROGRAM = 'Harmony Metadata Annotator'
 # To be improved - make dynamic based on service_version.txt
@@ -81,7 +96,18 @@ def amend_in_file_metadata(
             if variable_path not in dimension_variables:
                 create_new_variables(datatree, variable_path, granule_varinfo)
             else:
-                update_dimension_variables(datatree, variable_path, granule_varinfo)
+                update_dimension_variable(datatree, variable_path, granule_varinfo)
+
+        # reads index range from history attribute and creates a dimension index map
+        dimension_index_map = get_dimension_index_map(
+            datatree, items_to_update, dimension_variables
+        )
+        spatial_dimension_variables = get_spatial_dimension_variables(
+            datatree, dimension_variables
+        )
+        update_spatial_dimension_values(
+            datatree, spatial_dimension_variables, granule_varinfo, dimension_index_map
+        )
         update_history_metadata(datatree)
 
         # Future improvement: It is memory intensive to try and write out the
@@ -182,37 +208,6 @@ def update_metadata_attributes(
             pass
 
 
-def update_history_metadata(datatree: xr.DataTree) -> None:
-    """Update the history global attribute of the DataTree.
-
-    If either an existing History or history global attribute exists, append
-    information as a new line to the existing value. Otherwise create a new
-    attribute called "history".
-
-    """
-    new_history_line = ' '.join(
-        [
-            datetime.now(UTC).isoformat(),
-            PROGRAM,
-            VERSION,
-        ]
-    )
-
-    if 'History' in datatree.attrs:
-        history_attribute_name = 'History'
-        existing_history = datatree.attrs['History']
-    elif 'history' in datatree.attrs:
-        history_attribute_name = 'history'
-        existing_history = datatree.attrs['history']
-    else:
-        history_attribute_name = 'history'
-        existing_history = None
-
-    datatree.attrs[history_attribute_name] = '\n'.join(
-        filter(None, [existing_history, new_history_line])
-    )
-
-
 def update_group_and_variable_attributes(
     datatree: xr.DataTree, items_to_update: str, granule_varinfo: VarInfoFromNetCDF4
 ) -> None:
@@ -276,10 +271,10 @@ def get_dimension_variables(
     return dimension_variables
 
 
-def update_dimension_variables(
+def update_dimension_variable(
     datatree: xr.DataTree, variable_path: str, granule_varinfo: VarInfoFromNetCDF4
 ) -> None:
-    """Update attributes of dimension variables based on json configuration."""
+    """Update attributes of a dimension variable based on json configuration."""
     group_path, dimension_name = os.path.split(variable_path)
     dt_group = datatree[group_path]
     dataset = xr.Dataset(dt_group)
@@ -313,3 +308,130 @@ def update_metadata_attributes_for_data_array(
     }
 
     data_array.attrs.update(attributes_to_update)
+
+
+def get_spatial_dimension_variables(
+    data_tree: xr.DataTree, variables: set[str] = None
+) -> set[str]:
+    """Return a set of identified spatial dimension variables."""
+    spatial_dimension_variables = set()
+    valid_dim_standard_names = ('projection_x_coordinate', 'projection_y_coordinate')
+    for variable_path in variables:
+        standard_name = data_tree[variable_path].attrs.get('standard_name', None)
+        if standard_name in valid_dim_standard_names:
+            spatial_dimension_variables.add(variable_path)
+
+    return spatial_dimension_variables
+
+
+def update_spatial_dimension_values(
+    datatree: xr.DataTree,
+    dimension_variables: set[str],
+    granule_varinfo: VarInfoFromNetCDF4,
+    dimension_index_map: dict[str, int] = None,
+) -> None:
+    """Update the spatial dimension variable values to the computed dimension scale."""
+    for variable_path in dimension_variables:
+        dim_data_array = datatree[variable_path]
+
+        grid_start_index = get_grid_start_index(
+            datatree, dim_data_array, dimension_index_map, variable_path
+        )
+        dimension_size = len(dim_data_array)
+        spatial_dimension_type = get_spatial_dimension_type(dim_data_array)
+
+        data_array_attributes = granule_varinfo.get_missing_variable_attributes(
+            variable_path
+        )
+        dimension_value_dtype = data_array_attributes.get('type', np.float64)
+
+        geotransform_config = get_geotransform_config(dim_data_array, granule_varinfo)
+
+        dimension_scale = compute_dimension_scale(
+            grid_start_index,
+            dimension_size,
+            spatial_dimension_type,
+            dimension_value_dtype,
+            geotransform_config,
+        )
+
+        datatree[variable_path] = dim_data_array.copy(data=dimension_scale)
+
+
+def get_grid_start_index(
+    datatree: xr.DataTree,
+    dim_data_array: xr.DataArray,
+    dimension_index_map: dict[str, int] = None,
+    dimension_variable_path: str = None,
+) -> tuple[int, int]:
+    """Determine the grid offset for a given dimension.
+
+    The method used to determine the grid offset index is determined based off the
+    dimension's attributes configured in earthdata-varinfo.
+
+    """
+    subset_index_reference = dim_data_array.attrs.get('subset_index_reference', None)
+    if subset_index_reference:
+        return get_start_index_from_row_col_variable(datatree, subset_index_reference)
+    if (
+        dim_data_array.attrs.get('corner_points_offsets', None)
+        == 'history_subset_index_ranges'
+    ):
+        return get_start_index_from_history(
+            dimension_index_map, dimension_variable_path
+        )
+    raise MissingStartIndexConfiguration(dim_data_array.name)
+
+
+def get_start_index_from_row_col_variable(
+    datatree: xr.DataTree, subset_index_reference: str
+) -> tuple[int, int]:
+    """Return the grid start index from a row or column index variable.
+
+    The subset_index_reference must correspond to a variable in the datatree that
+    has at least two dimensions. The value at the [0, 0] position in the last two
+    dimensions (assumed to be y, x) is returned as the grid start index.
+    """
+    try:
+        row_col_variable = datatree[subset_index_reference]
+    except KeyError as e:
+        raise MissingSubsetIndexReference(subset_index_reference) from e
+
+    if row_col_variable.ndim < 2:
+        raise InvalidSubsetIndexShape(subset_index_reference)
+
+    return row_col_variable.values[..., 0, 0].item()
+
+
+def get_spatial_dimension_type(data_array: xr.DataArray) -> str:
+    """Return whether the given spatial dimension variable is 'x' or 'y'."""
+    standard_name = data_array.attrs.get('standard_name', None)
+
+    if not standard_name:
+        raise MissingDimensionAttribute(data_array.name, 'standard_name')
+    if standard_name == 'projection_x_coordinate':
+        return 'x'
+    if standard_name == 'projection_y_coordinate':
+        return 'y'
+    raise InvalidDimensionAttribute(data_array.name, 'standard_name', standard_name)
+
+
+def get_geotransform_config(
+    data_array: xr.DataArray, granule_varinfo: VarInfoFromNetCDF4
+) -> list[int]:
+    """Get the geotransform configuration from the variable's grid mapping reference."""
+    grid_mapping_reference = data_array.attrs.get('grid_mapping')
+    if not grid_mapping_reference:
+        raise MissingDimensionAttribute(data_array.name, 'grid_mapping')
+
+    grid_mapping_attributes = granule_varinfo.get_missing_variable_attributes(
+        grid_mapping_reference
+    )
+    if not grid_mapping_attributes:
+        raise InvalidGridMappingReference(grid_mapping_reference)
+
+    geotransform_config = grid_mapping_attributes.get('master_geotransform', None)
+    if not geotransform_config:
+        raise MissingDimensionAttribute(data_array.name, 'master_geotransform')
+
+    return geotransform_config
