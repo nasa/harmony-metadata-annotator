@@ -722,7 +722,6 @@
           "Name": "corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
-
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
     },
@@ -858,10 +857,6 @@
         {
           "Name": "type",
           "Value": "uint8"
-        },
-        {
-          "Name": "corner_point_offsets",
-          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variable) to clarify the dimension name"
