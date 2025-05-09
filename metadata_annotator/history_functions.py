@@ -66,7 +66,7 @@ def get_dimension_index_map(
     datatree: xr.DataTree,
     requested_variables: list[str],
     dimension_variables: list[str],
-) -> dict[str, int]:
+) -> dict[str, int] | None:
     """Return dimension path to start index mapping."""
     if not any(
         datatree[dim].attrs.get('corner_point_offsets') == 'history_subset_index_ranges'
@@ -92,7 +92,7 @@ def get_dimension_index_map(
 
 def parse_index_range_from_history_attr(datatree: xr.DataTree) -> dict[str, str]:
     """Return dictionary of variables with corresponding start index."""
-    history_attribute_name, existing_history = read_history_attrs(datatree)
+    _, existing_history = read_history_attrs(datatree)
 
     if not existing_history:
         return {}
@@ -121,7 +121,7 @@ def get_variable_dimension_map(
     """Return a mapping from dimensions list to a requested variable."""
     var_dim_map = {}
     for variable_path in variables_requested:
-        variable_group_path, variable_name = os.path.split(variable_path)
+        variable_group_path, _ = os.path.split(variable_path)
         variable_dim_list = []
         data_array = data_tree[variable_path]
 

@@ -10,6 +10,7 @@ from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.exceptions import (
     InvalidDimensionAttribute,
+    InvalidDimensionsConfiguration,
     InvalidGridMappingReference,
     InvalidSubsetIndexShape,
     MissingDimensionAttribute,
@@ -22,10 +23,6 @@ from metadata_annotator.history_functions import (
     get_start_index_from_history,
     update_history_metadata,
 )
-
-PROGRAM = 'Harmony Metadata Annotator'
-# To be improved - make dynamic based on service_version.txt
-VERSION = '0.0.1'
 
 
 def annotate_granule(
@@ -233,7 +230,9 @@ def update_dimension_names(data_tree: xr.DataTree, variable_to_update: str) -> N
     # The list exists so renaming is required.
     if rename_dim_list:
         if len(data_array.dims) != len(rename_dim_list):
-            raise Exception(f'Incorrect configured dimensions for {variable_to_update}')
+            raise InvalidDimensionsConfiguration(
+                variable_to_update, len(rename_dim_list), len(data_array.dims)
+            )
 
         # Rename from source data dimension names to VarInfo dimension names
         # and limit to the number of dimensions given in rename list.
@@ -254,19 +253,23 @@ def create_new_variables(
     )
 
 
-def get_dimension_variables(
-    data_tree: xr.DataTree, dimension_variables: set[str] = None
-) -> set[str]:
-    """Return dimension variables."""
-    if dimension_variables is None:
-        dimension_variables = set()
-    for name, node in data_tree.children.items():
-        dt = data_tree[name]
-        if dt.dims:
-            dt_dim_dict = dict(dt.dims)
-            dimension_variables.update(f'/{name}/{dim}' for dim in dt_dim_dict.keys())
-        if node.children:
-            get_dimension_variables(node, dimension_variables)
+def get_dimension_variables(data_tree: xr.DataTree) -> set[str]:
+    """Return distinct dimensions as dimension-variable names with full path.
+
+    This is excluding dimensions defined in ancestor nodes (not datatree.dims)
+    and assuming all dimension variables are at the group level
+    (not up-level, not root level)
+    ToDo: resolve for shared up-level or root-level dimensions
+    """
+    dimension_variables = set()
+
+    for node in data_tree.subtree:
+        node_ds = node.dataset
+
+        for data_var in node_ds.data_vars:
+            dimension_variables.update(
+                [f'{node.path}/{dim}' for dim in node_ds[data_var].dims]
+            )
 
     return dimension_variables
 

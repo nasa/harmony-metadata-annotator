@@ -7,8 +7,6 @@ from freezegun import freeze_time
 from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.annotate import (
-    PROGRAM,
-    VERSION,
     annotate_granule,
     create_new_variables,
     get_dimension_variables,
@@ -28,14 +26,12 @@ from metadata_annotator.annotate import (
 )
 from metadata_annotator.exceptions import (
     InvalidDimensionAttribute,
+    InvalidDimensionsConfiguration,
     InvalidGridMappingReference,
     InvalidSubsetIndexShape,
     MissingDimensionAttribute,
     MissingStartIndexConfiguration,
     MissingSubsetIndexReference,
-)
-from metadata_annotator.history_functions import (
-    update_history_metadata,
 )
 
 
@@ -52,60 +48,6 @@ def test_is_exact_path_wild_card():
 def test_is_exact_path_alternates():
     """Returns False when the input has '(one|two)', indicating alternates."""
     assert not is_exact_path('/(path_one|path_two)/variable')
-
-
-@freeze_time('2000-01-02T03:04:05')
-def test_update_history_metadata_no_input_history(sample_netcdf4_file):
-    """A new history attribute should be created."""
-    with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
-        # Invoke the function under test:
-        update_history_metadata(test_datatree)
-
-        # Check output from the function:
-        assert 'history' in test_datatree.attrs
-        assert 'History' not in test_datatree.attrs
-        assert (
-            test_datatree.attrs['history']
-            == f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
-        )
-
-
-@freeze_time('2000-01-02T03:04:05+00:00')
-def test_update_history_metadata_append_to_existing(sample_netcdf4_file):
-    """An existing history attribute should have a new line added."""
-    with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
-        # First add a pre-existing history metadata attribute:
-        test_datatree.attrs['history'] = '1999-01-01T00 File creation v1'
-
-        # Now invoke the function under test:
-        update_history_metadata(test_datatree)
-
-        # Check output from the function:
-        assert 'history' in test_datatree.attrs
-        assert 'History' not in test_datatree.attrs
-        assert test_datatree.attrs['history'] == (
-            '1999-01-01T00 File creation v1\n'
-            f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
-        )
-
-
-@freeze_time('2000-01-02T03:04:05+00:00')
-def test_update_history_metadata_existing_uppercase(sample_netcdf4_file):
-    """If History exists instead of history, that should be used."""
-    with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
-        # First add a history metadata attribute:
-        test_datatree.attrs['History'] = '1999-01-01T00 File creation v1'
-
-        # Now invoke the function under test:
-        update_history_metadata(test_datatree)
-
-        # Check output from the function:
-        assert 'History' in test_datatree.attrs
-        assert 'history' not in test_datatree.attrs
-        assert test_datatree.attrs['History'] == (
-            '1999-01-01T00 File creation v1\n'
-            f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
-        )
 
 
 def test_update_metadata_attributes_variable(sample_netcdf4_file, sample_varinfo):
@@ -256,6 +198,41 @@ def test_annotate_granule_no_changes(
         assert results_datatree.identical(expected_datatree)
 
 
+def test_annotate_granule_with_dimension_variable_updates(temp_output_file_path):
+    """Confirm that a granule has all metadata updated as expected.
+
+    This test uses the sample SPL3FTP collection.
+
+    """
+    annotate_granule(
+        'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
+        temp_output_file_path,
+        'metadata_annotator/earthdata_varinfo_config.json',
+        'SPL3FTP',
+    )
+
+    with (
+        xr.open_datatree(temp_output_file_path, decode_times=False) as datatree,
+    ):
+        # Ensure that the attributes are updated.
+        assert (
+            set(datatree['/Freeze_Thaw_Retrieval_Data_Global'].dataset['y'].attrs)
+            == set(datatree['/Freeze_Thaw_Retrieval_Data_Global'].dataset['x'].attrs)
+            == set(
+                [
+                    'axis',
+                    'dimensions',
+                    'grid_mapping',
+                    'long_name',
+                    'standard_name',
+                    'type',
+                    'units',
+                    'corner_point_offsets',
+                ]
+            )
+        )
+
+
 def test_update_group_and_variable_attributes() -> None:
     """Confirm the attributes are updated for existing variables.
 
@@ -301,6 +278,13 @@ def test_update_dimension_names() -> None:
             datatree['/Freeze_Thaw_Retrieval_Data_Global/transition_direction'].dims
         ) == set(['y', 'x'])
 
+        # Check for incorrect dimensions list
+        datatree[variable_to_update] = datatree[variable_to_update].assign_attrs(
+            dimensions='am_pm y x'
+        )
+        with pytest.raises(InvalidDimensionsConfiguration):
+            update_dimension_names(datatree, variable_to_update)
+
 
 def test_create_new_variables() -> None:
     """Test if new variables are successfully created."""
@@ -333,7 +317,7 @@ def test_create_new_variables() -> None:
 def test_get_dimension_variables() -> set[str]:
     """Ensure return of dimension variables."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
-        dimension_variables = get_dimension_variables(datatree, set())
+        dimension_variables = get_dimension_variables(datatree)
         assert dimension_variables == set(
             [
                 '/Freeze_Thaw_Retrieval_Data_Global/dim0',
