@@ -337,14 +337,13 @@ def get_spatial_dimension_variables(
     data_tree: xr.DataTree, variables: set[str] = None
 ) -> set[str]:
     """Return a set of identified spatial dimension variables."""
-    spatial_dimension_variables = set()
     valid_dim_standard_names = ('projection_x_coordinate', 'projection_y_coordinate')
-    for variable_path in variables:
-        standard_name = data_tree[variable_path].attrs.get('standard_name', None)
-        if standard_name in valid_dim_standard_names:
-            spatial_dimension_variables.add(variable_path)
-
-    return spatial_dimension_variables
+    return set(
+        variable_path
+        for variable_path in variables
+        if data_tree[variable_path].attrs.get('standard_name', None)
+        in valid_dim_standard_names
+    )
 
 
 def update_spatial_dimension_values(
