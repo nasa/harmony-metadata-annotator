@@ -7,9 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased] - 2025-05-07
 
-- Use the index ranges from the history attribute to calculate the grid start index. The dimension 
-  scales are then determined based on the projection attributes provided in the associated grid 
-  mapping variable. 
+- Use the index ranges from the history attribute to calculate the grid start index. The dimension
+  scales are then determined based on the projection attributes provided in the associated grid
+  mapping variable.
 
 
 ## [unreleased] - 2025-05-06

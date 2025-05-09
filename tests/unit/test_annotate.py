@@ -22,7 +22,6 @@ from metadata_annotator.annotate import (
     update_dimension_names,
     update_dimension_variable,
     update_group_and_variable_attributes,
-    update_history_metadata,
     update_metadata_attributes,
     update_metadata_attributes_for_data_array,
     update_spatial_dimension_values,
@@ -34,6 +33,9 @@ from metadata_annotator.exceptions import (
     MissingDimensionAttribute,
     MissingStartIndexConfiguration,
     MissingSubsetIndexReference,
+)
+from metadata_annotator.history_functions import (
+    update_history_metadata,
 )
 
 
@@ -210,6 +212,11 @@ def test_annotate_granule(
         'metadata_annotator.annotate.get_spatial_dimension_variables'
     )
     get_spatial_dimension_variables_mock.return_value = set()
+
+    get_dimension_index_map_mock = mocker.patch(
+        'metadata_annotator.annotate.get_dimension_index_map'
+    )
+    get_dimension_index_map_mock.return_value = None
 
     annotate_granule(
         sample_netcdf4_file, temp_output_file_path, varinfo_config_file, 'TEST01'

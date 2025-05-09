@@ -68,6 +68,12 @@ def get_dimension_index_map(
     dimension_variables: list[str],
 ) -> dict[str, int]:
     """Return dimension path to start index mapping."""
+    if not any(
+        datatree[dim].attrs.get('corner_point_offsets') == 'history_subset_index_ranges'
+        for dim in dimension_variables
+    ):
+        return None
+
     # Read history attribute and retrieve all the variables with their corresponding
     # index ranges.
     variables_with_index_ranges = parse_index_range_from_history_attr(datatree)

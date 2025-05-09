@@ -78,6 +78,21 @@ def test_get_variable_dimension_map() -> None:
 def test_get_dimension_index_map() -> None:
     """Ensure that the dimensions are returned with the correct subset indexes."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
+        # Setup the test to make sure it has the updated configuration
+        data_set = xr.Dataset(datatree['/Freeze_Thaw_Retrieval_Data_Global'])
+        data_array = data_set['dim0']
+        datatree['/Freeze_Thaw_Retrieval_Data_Global/dim0'] = data_array
+
+        data_array = data_set['dim1'].assign_attrs(
+            corner_point_offsets='history_subset_index_ranges'
+        )
+        datatree['/Freeze_Thaw_Retrieval_Data_Global/dim1'] = data_array
+
+        data_array = data_set['dim2'].assign_attrs(
+            corner_point_offsets='history_subset_index_ranges'
+        )
+        datatree['/Freeze_Thaw_Retrieval_Data_Global/dim2'] = data_array
+
         dim_dict = get_dimension_index_map(
             datatree,
             [
