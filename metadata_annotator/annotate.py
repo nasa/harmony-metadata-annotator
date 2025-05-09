@@ -354,7 +354,10 @@ def update_spatial_dimension_values(
 ) -> None:
     """Update the spatial dimension variable values to the computed dimension scale."""
     for variable_path in dimension_variables:
-        dim_data_array = datatree[variable_path]
+        try:
+            dim_data_array = datatree[variable_path]
+        except KeyError:
+            raise Exception(f'Unable to find dimension variable "{variable_path}"')
 
         grid_start_index = get_grid_start_index(datatree, dim_data_array)
         dimension_size = len(dim_data_array)

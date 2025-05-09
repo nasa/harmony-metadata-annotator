@@ -419,6 +419,20 @@ def test_update_spatial_dimension_values(
         assert np.allclose(test_datatree['y'], expected_y_result)
 
 
+def test_update_spatial_dimension_values_missing_dimension(
+    sample_netcdf4_file_test02, sample_varinfo_test02
+) -> None:
+    """Ensure exception is raised if dimension variable is missing."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        with pytest.raises(Exception):
+            variables = {'/missing_dimension'}
+            update_spatial_dimension_values(
+                test_datatree, variables, sample_varinfo_test02
+            )
+
+
 def test_get_spatial_dimension_variables(sample_netcdf4_file_test02) -> None:
     """Ensure only spatial variable dimensions are returned."""
     with xr.open_datatree(
