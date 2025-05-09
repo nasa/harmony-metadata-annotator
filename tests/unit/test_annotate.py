@@ -438,7 +438,7 @@ def test_get_spatial_dimension_variables(sample_netcdf4_file_test02) -> None:
     with xr.open_datatree(
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
-        variables = {'/x', '/y', '/am_pm'}
+        variables = {'/x', '/y', '/variable_two'}
         assert get_spatial_dimension_variables(test_datatree, variables) == {'/x', '/y'}
 
 
@@ -447,7 +447,7 @@ def test_get_spatial_dimension_variables_no_matches(sample_netcdf4_file_test02) 
     with xr.open_datatree(
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
-        variables = {'/am_pm'}
+        variables = {'/variable_two'}
         assert get_spatial_dimension_variables(test_datatree, variables) == set()
 
 
@@ -474,7 +474,7 @@ def test_get_grid_start_index_missing_configuration(sample_netcdf4_file_test02) 
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
         with pytest.raises(MissingStartIndexConfiguration):
-            get_grid_start_index(test_datatree, test_datatree['am_pm'])
+            get_grid_start_index(test_datatree, test_datatree['variable_two'])
 
 
 def test_get_start_index_from_row_col_variable(sample_netcdf4_file_test02) -> None:
@@ -527,7 +527,7 @@ def test_get_spatial_dimension_type_invalid_standard_name(
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
         with pytest.raises(InvalidDimensionAttribute):
-            get_spatial_dimension_type(test_datatree['z'])
+            get_spatial_dimension_type(test_datatree['variable_one'])
 
 
 def test_get_spatial_dimension_type_missing_standard_name(
@@ -538,7 +538,7 @@ def test_get_spatial_dimension_type_missing_standard_name(
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
         with pytest.raises(MissingDimensionAttribute):
-            get_spatial_dimension_type(test_datatree['am_pm'])
+            get_spatial_dimension_type(test_datatree['variable_two'])
 
 
 def test_get_geotransform_config(
@@ -563,7 +563,9 @@ def test_get_geotransform_config_missing_grid_mapping_reference(
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
         with pytest.raises(MissingDimensionAttribute):
-            get_geotransform_config(test_datatree['am_pm'], sample_varinfo_test02)
+            get_geotransform_config(
+                test_datatree['variable_two'], sample_varinfo_test02
+            )
 
 
 def test_get_geotransform_config_invalid_grid_mapping_reference(
@@ -583,4 +585,6 @@ def test_get_geotransform_config_missing_master_geotransform(
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
         with pytest.raises(MissingDimensionAttribute):
-            get_geotransform_config(test_datatree['z'], sample_varinfo_test02)
+            get_geotransform_config(
+                test_datatree['variable_one'], sample_varinfo_test02
+            )
