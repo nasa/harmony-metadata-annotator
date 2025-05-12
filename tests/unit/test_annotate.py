@@ -1,5 +1,7 @@
 """Tests for metadata_annotator.annotate.py."""
 
+import numpy as np
+import pytest
 import xarray as xr
 from freezegun import freeze_time
 from varinfo import VarInfoFromNetCDF4
@@ -10,14 +12,28 @@ from metadata_annotator.annotate import (
     annotate_granule,
     create_new_variables,
     get_dimension_variables,
+    get_geotransform_config,
+    get_grid_start_index,
     get_matching_groups_and_variables,
+    get_spatial_dimension_type,
+    get_spatial_dimension_variables,
+    get_start_index_from_row_col_variable,
     is_exact_path,
     update_dimension_names,
-    update_dimension_variables,
+    update_dimension_variable,
     update_group_and_variable_attributes,
     update_history_metadata,
     update_metadata_attributes,
     update_metadata_attributes_for_data_array,
+    update_spatial_dimension_values,
+)
+from metadata_annotator.exceptions import (
+    InvalidDimensionAttribute,
+    InvalidGridMappingReference,
+    InvalidSubsetIndexShape,
+    MissingDimensionAttribute,
+    MissingStartIndexConfiguration,
+    MissingSubsetIndexReference,
 )
 
 
@@ -181,6 +197,7 @@ def test_annotate_granule(
     expected_output_netcdf4_file,
     temp_output_file_path,
     varinfo_config_file,
+    mocker,
 ):
     """Confirm that a granule has all metadata updated as expected.
 
@@ -189,6 +206,11 @@ def test_annotate_granule(
     attributes are either added, updated or deleted.
 
     """
+    get_spatial_dimension_variables_mock = mocker.patch(
+        'metadata_annotator.annotate.get_spatial_dimension_variables'
+    )
+    get_spatial_dimension_variables_mock.return_value = set()
+
     annotate_granule(
         sample_netcdf4_file, temp_output_file_path, varinfo_config_file, 'TEST01'
     )
@@ -314,8 +336,8 @@ def test_get_dimension_variables() -> set[str]:
         )
 
 
-def test_update_dimension_variables() -> None:
-    """Ensure attributes of dimension variables are updated as expected."""
+def test_update_dimension_variable() -> None:
+    """Ensure attributes of a dimension variable are updated as expected."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
         granule_varinfo = VarInfoFromNetCDF4(
             'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
@@ -327,7 +349,7 @@ def test_update_dimension_variables() -> None:
         renamed_da = da.rename({'dim0': 'am_pm', 'dim1': 'y', 'dim2': 'x'})
         datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'] = renamed_da
 
-        update_dimension_variables(
+        update_dimension_variable(
             datatree, '/Freeze_Thaw_Retrieval_Data_Global/y', granule_varinfo
         )
         # Ensure that the attributes are updated.
@@ -380,3 +402,189 @@ def test_update_metadata_attributes_for_data_array() -> None:
                 'units',
             ]
         )
+
+
+def test_update_spatial_dimension_values(
+    sample_netcdf4_file_test02, sample_varinfo_test02
+) -> None:
+    """Ensure spatial dimension values are updated as expected."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        variables = {'/x', '/y'}
+        update_spatial_dimension_values(test_datatree, variables, sample_varinfo_test02)
+        expected_x_result = np.array([-8802000, -8766000, -8730001], dtype=np.float64)
+        expected_y_result = np.array([8802000, 8766000, 8730000], dtype=np.float64)
+        assert np.allclose(test_datatree['x'], expected_x_result)
+        assert np.allclose(test_datatree['y'], expected_y_result)
+
+
+def test_update_spatial_dimension_values_missing_dimension(
+    sample_netcdf4_file_test02, sample_varinfo_test02
+) -> None:
+    """Ensure exception is raised if dimension variable is missing."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        with pytest.raises(Exception):
+            variables = {'/missing_dimension'}
+            update_spatial_dimension_values(
+                test_datatree, variables, sample_varinfo_test02
+            )
+
+
+def test_get_spatial_dimension_variables(sample_netcdf4_file_test02) -> None:
+    """Ensure only spatial variable dimensions are returned."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        variables = {'/x', '/y', '/variable_two'}
+        assert get_spatial_dimension_variables(test_datatree, variables) == {'/x', '/y'}
+
+
+def test_get_spatial_dimension_variables_no_matches(sample_netcdf4_file_test02) -> None:
+    """Ensure an empty set is returned when no spatial dimensions are present."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        variables = {'/variable_two'}
+        assert get_spatial_dimension_variables(test_datatree, variables) == set()
+
+
+def test_get_grid_start_index_uses_subset_index_reference(
+    sample_netcdf4_file_test02,
+) -> None:
+    """Ensure the expected grid start index is returned for a given dimension."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        assert get_grid_start_index(test_datatree, test_datatree['x']) == 5
+
+
+def test_get_grid_start_index_missing_configuration(sample_netcdf4_file_test02) -> None:
+    """Ensure the expected exception is raised when required configuration is missing.
+
+    The method used to determine the grid offset index is determined based off the
+    dimension's attributes configured in earthdata-varinfo. Currently, the attribute
+    'subset_index_reference' is the only supported attribute. If it is missing, the
+    'MissingStartIndexConfiguration' should be raised.
+
+    """
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        with pytest.raises(MissingStartIndexConfiguration):
+            get_grid_start_index(test_datatree, test_datatree['variable_two'])
+
+
+def test_get_start_index_from_row_col_variable(sample_netcdf4_file_test02) -> None:
+    """Ensure the expected start index is returned for a given row/col variable."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        assert (
+            get_start_index_from_row_col_variable(test_datatree, 'EASE_column_index')
+            == 5
+        )
+
+
+def test_get_start_index_from_row_col_variable_missing_reference(
+    sample_netcdf4_file_test02,
+) -> None:
+    """Ensure the expected exception is raised when the index reference is invalid."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        with pytest.raises(MissingSubsetIndexReference):
+            get_start_index_from_row_col_variable(test_datatree, 'missing_variable')
+
+
+def test_get_start_index_from_row_col_variable_invalid_index_shape(
+    sample_netcdf4_file_test02,
+) -> None:
+    """Ensure the expected exception is raised when index variable shape is invalid."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        with pytest.raises(InvalidSubsetIndexShape):
+            get_start_index_from_row_col_variable(test_datatree, 'x')
+
+
+def test_get_spatial_dimension_type(sample_netcdf4_file_test02) -> None:
+    """Ensure the correct spatial dimension type is returned."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        assert get_spatial_dimension_type(test_datatree['x']) == 'x'
+        assert get_spatial_dimension_type(test_datatree['y']) == 'y'
+
+
+def test_get_spatial_dimension_type_invalid_standard_name(
+    sample_netcdf4_file_test02,
+) -> None:
+    """Ensure an exception is raised when an invalid standard_name is encountered."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        with pytest.raises(InvalidDimensionAttribute):
+            get_spatial_dimension_type(test_datatree['variable_one'])
+
+
+def test_get_spatial_dimension_type_missing_standard_name(
+    sample_netcdf4_file_test02,
+) -> None:
+    """Ensure an exception is raised when a standard_name attribute is missing."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        with pytest.raises(MissingDimensionAttribute):
+            get_spatial_dimension_type(test_datatree['variable_two'])
+
+
+def test_get_geotransform_config(
+    sample_netcdf4_file_test02, sample_varinfo_test02
+) -> None:
+    """Ensure the expected geotransform list is returned."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        expected_geotransform = [-9000000, 36000, 0, 9000000, 0, -36000]
+        assert (
+            get_geotransform_config(test_datatree['x'], sample_varinfo_test02)
+            == expected_geotransform
+        )
+
+
+def test_get_geotransform_config_missing_grid_mapping_reference(
+    sample_netcdf4_file_test02, sample_varinfo_test02
+) -> None:
+    """Ensure the expected geotransform list is returned."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        with pytest.raises(MissingDimensionAttribute):
+            get_geotransform_config(
+                test_datatree['variable_two'], sample_varinfo_test02
+            )
+
+
+def test_get_geotransform_config_invalid_grid_mapping_reference(
+    sample_varinfo_test02,
+) -> None:
+    """Ensure an exception is raised when there is an invalid grid_mapping reference."""
+    data_array = xr.DataArray([], attrs={'grid_mapping': 'fake_grid_mapping_variable'})
+    with pytest.raises(InvalidGridMappingReference):
+        get_geotransform_config(data_array, sample_varinfo_test02)
+
+
+def test_get_geotransform_config_missing_master_geotransform(
+    sample_netcdf4_file_test02, sample_varinfo_test02
+) -> None:
+    """Ensure an exception is raised when master_geotransform attribute is missing."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test02, decode_times=False
+    ) as test_datatree:
+        with pytest.raises(MissingDimensionAttribute):
+            get_geotransform_config(
+                test_datatree['variable_one'], sample_varinfo_test02
+            )

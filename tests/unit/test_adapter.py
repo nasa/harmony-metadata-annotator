@@ -43,6 +43,11 @@ def test_process_item(
     stage_mock = mocker.patch('harmony_service.adapter.stage')
     stage_mock.return_value = 's3://bucketname/staged-location'
 
+    get_spatial_dimension_variables_mock = mocker.patch(
+        'metadata_annotator.annotate.get_spatial_dimension_variables'
+    )
+    get_spatial_dimension_variables_mock.return_value = set()
+
     # Create and run the service
     harmony_config = config(validate=False)
 
