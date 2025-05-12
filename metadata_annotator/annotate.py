@@ -10,7 +10,6 @@ from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.exceptions import (
     InvalidDimensionAttribute,
-
     InvalidDimensionsConfiguration,
     InvalidGridMappingReference,
     InvalidSubsetIndexShape,
@@ -20,7 +19,6 @@ from metadata_annotator.exceptions import (
     MissingSubsetIndexReference,
 )
 from metadata_annotator.geotransform import compute_dimension_scale
-
 from metadata_annotator.history_functions import (
     get_dimension_index_map,
     get_start_index_from_history,
@@ -97,7 +95,6 @@ def amend_in_file_metadata(
                 create_new_variables(datatree, variable_path, granule_varinfo)
             else:
                 update_dimension_variable(datatree, variable_path, granule_varinfo)
-
 
         # reads index range from history attribute and creates a dimension index map
         dimension_index_map = get_dimension_index_map(
@@ -375,7 +372,7 @@ def get_grid_start_index(
     datatree: xr.DataTree,
     dim_data_array: xr.DataArray,
     dimension_index_map: dict[str, int] = None,
-    dimension_variable_path: str = None
+    dimension_variable_path: str = None,
 ) -> tuple[int, int]:
     """Determine the grid offset for a given dimension.
 
