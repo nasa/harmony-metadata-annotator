@@ -14,10 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased] - 2025-05-06
 
-- Update the Harmony Metadata Annotator to update spatial dimension variables with a dimension
-  scale that is computed based off the associated grid mapping variable's `master_geotransform` and
-  the determined grid start index. Currently, the grid start index can be determined from the
-  dimension's associated row/col index variable.
+- Update spatial dimension variables with a dimension scale that is computed based off the
+  associated grid mapping variable's `master_geotransform` and the determined grid start index.
+  Currently, the grid start index can be determined from the dimension's associated row/col index
+  variable.
 
 
 ## [unreleased] - 2025-04-24

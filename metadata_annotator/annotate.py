@@ -14,6 +14,7 @@ from metadata_annotator.exceptions import (
     InvalidGridMappingReference,
     InvalidSubsetIndexShape,
     MissingDimensionAttribute,
+    MissingDimensionVariable,
     MissingStartIndexConfiguration,
     MissingSubsetIndexReference,
 )
@@ -317,14 +318,13 @@ def get_spatial_dimension_variables(
     data_tree: xr.DataTree, variables: set[str] = None
 ) -> set[str]:
     """Return a set of identified spatial dimension variables."""
-    spatial_dimension_variables = set()
     valid_dim_standard_names = ('projection_x_coordinate', 'projection_y_coordinate')
-    for variable_path in variables:
-        standard_name = data_tree[variable_path].attrs.get('standard_name', None)
-        if standard_name in valid_dim_standard_names:
-            spatial_dimension_variables.add(variable_path)
-
-    return spatial_dimension_variables
+    return set(
+        variable_path
+        for variable_path in variables
+        if data_tree[variable_path].attrs.get('standard_name', None)
+        in valid_dim_standard_names
+    )
 
 
 def update_spatial_dimension_values(
@@ -335,7 +335,12 @@ def update_spatial_dimension_values(
 ) -> None:
     """Update the spatial dimension variable values to the computed dimension scale."""
     for variable_path in dimension_variables:
-        dim_data_array = datatree[variable_path]
+        try:
+            dim_data_array = datatree[variable_path]
+        except KeyError as e:
+            raise MissingDimensionVariable(
+                f'Unable to find dimension variable "{variable_path}"'
+            ) from e
 
         grid_start_index = get_grid_start_index(
             datatree, dim_data_array, dimension_index_map, variable_path
@@ -388,19 +393,19 @@ def get_start_index_from_row_col_variable(
 ) -> tuple[int, int]:
     """Return the grid start index from a row or column index variable.
 
-    The subset_index_reference must correspond to a variable in the datatree that
-    has at least two dimensions. The value at the [0, 0] position in the last two
-    dimensions (assumed to be y, x) is returned as the grid start index.
+    The subset_index_reference must correspond to a 2D variable in the datatree.
+    The value at the [0, 0] is returned as the grid start index.
     """
     try:
         row_col_variable = datatree[subset_index_reference]
     except KeyError as e:
         raise MissingSubsetIndexReference(subset_index_reference) from e
 
-    if row_col_variable.ndim < 2:
+    # To be improved - extend to support 3D variables
+    if row_col_variable.ndim != 2:
         raise InvalidSubsetIndexShape(subset_index_reference)
 
-    return row_col_variable.values[..., 0, 0].item()
+    return row_col_variable.values[0][0]
 
 
 def get_spatial_dimension_type(data_array: xr.DataArray) -> str:

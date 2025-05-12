@@ -257,18 +257,18 @@ def sample_netcdf4_file_test02(temp_dir) -> str:
                     },
                     dims=['y'],
                 ),
-                'z': xr.DataArray(
-                    np.array([]),
+                'variable_one': xr.DataArray(
+                    np.ones((3, 3)),
                     attrs={
                         'standard_name': 'invalid_standard_name',
                         'grid_mapping': '/EASE2_variable_missing_geotransform',
                     },
-                    dims=['z'],
+                    dims=['y', 'x'],
                 ),
-                'am_pm': xr.DataArray(
-                    np.array([]),
+                'variable_two': xr.DataArray(
+                    np.ones((3, 3)),
                     attrs={},
-                    dims=['am_pm'],
+                    dims=['y', 'x'],
                 ),
                 'EASE_column_index': xr.DataArray(
                     np.array([[5, 6, 7], [5, 6, 7], [5, 6, 7]]),
