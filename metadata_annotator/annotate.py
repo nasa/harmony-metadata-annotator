@@ -10,6 +10,7 @@ from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.exceptions import (
     InvalidDimensionAttribute,
+
     InvalidDimensionsConfiguration,
     InvalidGridMappingReference,
     InvalidSubsetIndexShape,
@@ -19,6 +20,7 @@ from metadata_annotator.exceptions import (
     MissingSubsetIndexReference,
 )
 from metadata_annotator.geotransform import compute_dimension_scale
+
 from metadata_annotator.history_functions import (
     get_dimension_index_map,
     get_start_index_from_history,
@@ -95,6 +97,7 @@ def amend_in_file_metadata(
                 create_new_variables(datatree, variable_path, granule_varinfo)
             else:
                 update_dimension_variable(datatree, variable_path, granule_varinfo)
+
 
         # reads index range from history attribute and creates a dimension index map
         dimension_index_map = get_dimension_index_map(
@@ -337,6 +340,7 @@ def update_spatial_dimension_values(
     for variable_path in dimension_variables:
         try:
             dim_data_array = datatree[variable_path]
+
         except KeyError as e:
             raise MissingDimensionVariable(
                 f'Unable to find dimension variable "{variable_path}"'
@@ -345,6 +349,7 @@ def update_spatial_dimension_values(
         grid_start_index = get_grid_start_index(
             datatree, dim_data_array, dimension_index_map, variable_path
         )
+
         dimension_size = len(dim_data_array)
         spatial_dimension_type = get_spatial_dimension_type(dim_data_array)
 
@@ -370,7 +375,7 @@ def get_grid_start_index(
     datatree: xr.DataTree,
     dim_data_array: xr.DataArray,
     dimension_index_map: dict[str, int] = None,
-    dimension_variable_path: str = None,
+    dimension_variable_path: str = None
 ) -> tuple[int, int]:
     """Determine the grid offset for a given dimension.
 
@@ -381,10 +386,12 @@ def get_grid_start_index(
     subset_index_reference = dim_data_array.attrs.get('subset_index_reference', None)
     if subset_index_reference:
         return get_start_index_from_row_col_variable(datatree, subset_index_reference)
+
     if dimension_index_map:
         return get_start_index_from_history(
             dimension_index_map, dimension_variable_path
         )
+
     raise MissingStartIndexConfiguration(dim_data_array.name)
 
 
