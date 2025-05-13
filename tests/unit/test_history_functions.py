@@ -1,8 +1,11 @@
 """Tests for metadata_annotator.history_functions.py."""
 
+import pytest
 import xarray as xr
 from freezegun import freeze_time
+from varinfo import VarInfoFromNetCDF4
 
+from metadata_annotator.exceptions import MissingDimensionVariable
 from metadata_annotator.history_functions import (
     PROGRAM,
     VERSION,
@@ -128,84 +131,94 @@ def test_parse_index_range_from_history_attr(sample_netcdf4_file) -> None:
 
 def test_get_variable_dimension_map() -> None:
     """Ensure that the correct dimensions list is returned for requested variables."""
-    with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
-        variable_dimensions_dict = get_variable_dimension_map(
-            datatree,
-            [
-                '/Freeze_Thaw_Retrieval_Data_Global/surface_flag',
-                '/Freeze_Thaw_Retrieval_Data_Global/transition_direction',
-            ],
-            [
-                '/Freeze_Thaw_Retrieval_Data_Global/dim0',
-                '/Freeze_Thaw_Retrieval_Data_Global/dim1',
-                '/Freeze_Thaw_Retrieval_Data_Global/dim2',
-            ],
-        )
-        expected_dimensions = tuple(
-            [
-                '/Freeze_Thaw_Retrieval_Data_Global/dim0',
-                '/Freeze_Thaw_Retrieval_Data_Global/dim1',
-                '/Freeze_Thaw_Retrieval_Data_Global/dim2',
-            ]
-        )
+    # with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as dtree:
+    granule_varinfo = VarInfoFromNetCDF4(
+        'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
+        short_name='SPL3FTP',
+        config_file='metadata_annotator/earthdata_varinfo_config.json',
+    )
+    variable_dimensions_dict = get_variable_dimension_map(granule_varinfo)
+    expected_dimensions = tuple(
+        [
+            '/Freeze_Thaw_Retrieval_Data_Global/am_pm',
+            '/Freeze_Thaw_Retrieval_Data_Global/y',
+            '/Freeze_Thaw_Retrieval_Data_Global/x',
+        ]
+    )
 
-        expected_variable = '/Freeze_Thaw_Retrieval_Data_Global/surface_flag'
-        assert variable_dimensions_dict[expected_dimensions] == expected_variable
+    expected_variables = {
+        '/Freeze_Thaw_Retrieval_Data_Global/latitude',
+        '/Freeze_Thaw_Retrieval_Data_Global/longitude',
+        '/Freeze_Thaw_Retrieval_Data_Global/surface_flag',
+    }
+
+    assert variable_dimensions_dict[expected_dimensions] in expected_variables
 
 
 def test_get_dimension_index_map() -> None:
     """Ensure that the dimensions are returned with the correct subset indexes."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
+        granule_varinfo = VarInfoFromNetCDF4(
+            'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
+            short_name='SPL3FTP',
+            config_file='metadata_annotator/earthdata_varinfo_config.json',
+        )
         # Setup the test to make sure it has the updated configuration
         data_set = xr.Dataset(datatree['/Freeze_Thaw_Retrieval_Data_Global'])
-        data_array = data_set['dim0']
-        datatree['/Freeze_Thaw_Retrieval_Data_Global/dim0'] = data_array
+        renamed_da = datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'].rename(
+            {'dim0': 'am_pm', 'dim1': 'y', 'dim2': 'x'}
+        )
+        datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'] = renamed_da
 
-        data_array = data_set['dim1'].assign_attrs(
+        renamed_da = datatree[
+            '/Freeze_Thaw_Retrieval_Data_Global/transition_direction'
+        ].rename({'dim1': 'y', 'dim2': 'x'})
+        datatree['/Freeze_Thaw_Retrieval_Data_Global/transition_direction'] = renamed_da
+
+        data_set = xr.Dataset(datatree['/Freeze_Thaw_Retrieval_Data_Global'])
+        data_array = data_set['am_pm']
+        datatree['/Freeze_Thaw_Retrieval_Data_Global/am_pm'] = data_array
+
+        data_array = data_set['y'].assign_attrs(
             corner_point_offsets='history_subset_index_ranges'
         )
-        datatree['/Freeze_Thaw_Retrieval_Data_Global/dim1'] = data_array
+        datatree['/Freeze_Thaw_Retrieval_Data_Global/y'] = data_array
 
-        data_array = data_set['dim2'].assign_attrs(
+        data_array = data_set['x'].assign_attrs(
             corner_point_offsets='history_subset_index_ranges'
         )
-        datatree['/Freeze_Thaw_Retrieval_Data_Global/dim2'] = data_array
+        datatree['/Freeze_Thaw_Retrieval_Data_Global/x'] = data_array
 
         dim_dict = get_dimension_index_map(
             datatree,
             [
-                '/Freeze_Thaw_Retrieval_Data_Global/surface_flag',
-                '/Freeze_Thaw_Retrieval_Data_Global/transition_direction',
+                '/Freeze_Thaw_Retrieval_Data_Global/am_pm',
+                '/Freeze_Thaw_Retrieval_Data_Global/y',
+                '/Freeze_Thaw_Retrieval_Data_Global/x',
             ],
-            [
-                '/Freeze_Thaw_Retrieval_Data_Global/dim0',
-                '/Freeze_Thaw_Retrieval_Data_Global/dim1',
-                '/Freeze_Thaw_Retrieval_Data_Global/dim2',
-            ],
+            granule_varinfo,
         )
-        assert dim_dict['/Freeze_Thaw_Retrieval_Data_Global/dim0'] == 0
-        assert dim_dict['/Freeze_Thaw_Retrieval_Data_Global/dim1'] == 16
-        assert dim_dict['/Freeze_Thaw_Retrieval_Data_Global/dim2'] == 227
+        print(dim_dict)
+        assert dim_dict['/Freeze_Thaw_Retrieval_Data_Global/am_pm'] == 0
+        assert dim_dict['/Freeze_Thaw_Retrieval_Data_Global/y'] == 16
+        assert dim_dict['/Freeze_Thaw_Retrieval_Data_Global/x'] == 227
 
         # If the dimension is not there, it will be a Key Error
-        dim_dict = get_dimension_index_map(
-            datatree,
-            [
-                '/Freeze_Thaw_Retrieval_Data_Global/transition_direction',
-            ],
-            [
-                '/Freeze_Thaw_Retrieval_Data_Global/dim0',
-            ],
-        )
+        with pytest.raises(MissingDimensionVariable):
+            dim_dict = get_dimension_index_map(
+                datatree,
+                [
+                    '/Freeze_Thaw_Retrieval_Data_Global/dim0',
+                ],
+                granule_varinfo,
+            )
         # If the configuration is not there, it will return None
         dim_dict = get_dimension_index_map(
             datatree,
             [
-                '/Freeze_Thaw_Retrieval_Data_Global/surface_flag',
+                '/Freeze_Thaw_Retrieval_Data_Global/am_pm',
             ],
-            [
-                '/Freeze_Thaw_Retrieval_Data_Global/dim0',
-            ],
+            granule_varinfo,
         )
         assert dim_dict is None
 

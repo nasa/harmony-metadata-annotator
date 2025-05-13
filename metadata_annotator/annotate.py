@@ -98,7 +98,7 @@ def amend_in_file_metadata(
 
         # reads index range from history attribute and creates a dimension index map
         dimension_index_map = get_dimension_index_map(
-            datatree, items_to_update, dimension_variables
+            datatree, dimension_variables, granule_varinfo
         )
         spatial_dimension_variables = get_spatial_dimension_variables(
             datatree, dimension_variables

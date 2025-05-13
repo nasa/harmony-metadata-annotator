@@ -1,11 +1,13 @@
 """Module with history functions."""
 
-import os
 import re
 from datetime import UTC, datetime
 from urllib.parse import parse_qs, unquote
 
 import xarray as xr
+from varinfo import VariableFromNetCDF4
+
+from metadata_annotator.exceptions import MissingDimensionVariable
 
 PROGRAM = 'Harmony Metadata Annotator'
 # To be improved - make dynamic based on service_version.txt
@@ -64,29 +66,33 @@ def get_start_index_from_history(
 
 def get_dimension_index_map(
     datatree: xr.DataTree,
-    requested_variables: list[str],
     dimension_variables: list[str],
+    granule_var_info: VariableFromNetCDF4,
 ) -> dict[str, int] | None:
     """Return dimension path to start index mapping."""
-    if not any(
-        datatree[dim].attrs.get('corner_point_offsets') == 'history_subset_index_ranges'
-        for dim in dimension_variables
-    ):
-        return None
+    try:
+        if not any(
+            datatree[dim].attrs.get('corner_point_offsets')
+            == 'history_subset_index_ranges'
+            for dim in dimension_variables
+        ):
+            return None
+
+    except KeyError as e:
+        raise MissingDimensionVariable('{variable_path}') from e
 
     # Read history attribute and retrieve all the variables with their corresponding
     # index ranges.
     variables_with_index_ranges = parse_index_range_from_history_attr(datatree)
 
     # Retrieve the mapping of requested variables and the corresponding dimension paths
-    variable_dimension_map = get_variable_dimension_map(
-        datatree, requested_variables, dimension_variables
-    )
+    variable_dimension_map = get_variable_dimension_map(granule_var_info)
 
     # Retrieve the mapping from the dimension variable to the start index
     dimension_index_map = get_dim_index_from_var_dim_map(
         variable_dimension_map, variables_with_index_ranges
     )
+
     return dimension_index_map
 
 
@@ -114,28 +120,13 @@ def parse_index_range_from_history_attr(datatree: xr.DataTree) -> dict[str, str]
 
 
 def get_variable_dimension_map(
-    data_tree: xr.DataTree,
-    variables_requested: list[str],
-    dimension_variables: list[str],
+    granule_var_info: VariableFromNetCDF4,
 ) -> dict[tuple, str]:
     """Return a mapping from dimensions list to a requested variable."""
-    var_dim_map = {}
-    for variable_path in variables_requested:
-        variable_group_path, _ = os.path.split(variable_path)
-        variable_dim_list = []
-        data_array = data_tree[variable_path]
-
-        # Some variables may not have all the dimensions in the group.
-        if len(data_array.dims) == len(data_tree[variable_group_path].dims):
-            # The data array dimensions has the right order of dimensions
-            variable_dim_list = [
-                f'{variable_group_path}/{dim}'
-                for dim in data_array.dims
-                if f'{variable_group_path}/{dim}' in dimension_variables
-            ]
-
-            if variable_dim_list:
-                var_dim_map[tuple(variable_dim_list)] = variable_path
+    var_dim_map = {
+        dimlist: list(varlist)[0]
+        for dimlist, varlist in granule_var_info.group_variables_by_dimensions().items()
+    }
 
     return var_dim_map
 
