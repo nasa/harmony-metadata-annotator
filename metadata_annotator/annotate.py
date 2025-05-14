@@ -369,8 +369,8 @@ def update_spatial_dimension_values(
 def get_grid_start_index(
     datatree: xr.DataTree,
     dim_data_array: xr.DataArray,
-    dimension_index_map: dict[str, int] = None,
-    dimension_variable_path: str = None,
+    dimension_index_map: dict[str, int],
+    dimension_variable_path: str,
 ) -> tuple[int, int]:
     """Determine the grid offset for a given dimension.
 
@@ -387,7 +387,7 @@ def get_grid_start_index(
             dimension_index_map, dimension_variable_path
         )
 
-    raise MissingStartIndexConfiguration(dim_data_array.name)
+    raise MissingStartIndexConfiguration(dimension_variable_path)
 
 
 def get_start_index_from_row_col_variable(

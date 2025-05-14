@@ -451,7 +451,7 @@ def test_get_grid_start_index_uses_subset_index_reference(
     with xr.open_datatree(
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
-        assert get_grid_start_index(test_datatree, test_datatree['x']) == 5
+        assert get_grid_start_index(test_datatree, test_datatree['x'], None, '/x') == 5
 
 
 def test_get_grid_start_index_missing_configuration(sample_netcdf4_file_test02) -> None:
@@ -467,7 +467,9 @@ def test_get_grid_start_index_missing_configuration(sample_netcdf4_file_test02) 
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
         with pytest.raises(MissingStartIndexConfiguration):
-            get_grid_start_index(test_datatree, test_datatree['variable_two'])
+            get_grid_start_index(
+                test_datatree, test_datatree['variable_two'], None, '/variable_two'
+            )
 
 
 def test_get_start_index_from_row_col_variable(sample_netcdf4_file_test02) -> None:
