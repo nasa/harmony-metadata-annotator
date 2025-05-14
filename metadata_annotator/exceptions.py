@@ -89,12 +89,14 @@ class MissingStartIndexConfiguration(MetadataAnnotatorError):
 class InvalidDimensionsConfiguration(MetadataAnnotatorError):
     """Raised when a dimension variable's metadata attribute is present but invalid."""
 
-    def __init__(self, variable_name, configured_dimensions, expected_dimensions):
+    def __init__(
+        self, variable_name, num_configured_dimensions, num_expected_dimensions
+    ):
         """Initialize with variable name, configured and expected dimensions."""
         super().__init__(
-            f'Incorrect number of configured dimensions for{variable_name}'
-            f'Dimension variable "{variable_name}" has an "{configured_dimensions} '
-            f'instead of "{expected_dimensions}".'
+            f'Incorrect number of configured dimensions for {variable_name}'
+            f'Dimension variable "{variable_name}" has "{num_configured_dimensions} '
+            f'dimensions instead of "{num_expected_dimensions}".'
         )
 
 

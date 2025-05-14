@@ -83,20 +83,20 @@ def get_dimension_index_map(
 
     # Read history attribute and retrieve all the variables with their corresponding
     # index ranges.
-    variables_with_index_ranges = parse_index_range_from_history_attr(datatree)
+    variable_start_indices_map = parse_start_indices_from_history_attr(datatree)
 
     # Retrieve the mapping of requested variables and the corresponding dimension paths
     variable_dimension_map = get_variable_dimension_map(granule_var_info)
 
     # Retrieve the mapping from the dimension variable to the start index
     dimension_index_map = get_dim_index_from_var_dim_map(
-        variable_dimension_map, variables_with_index_ranges
+        variable_dimension_map, variable_start_indices_map
     )
 
     return dimension_index_map
 
 
-def parse_index_range_from_history_attr(datatree: xr.DataTree) -> dict[str, str]:
+def parse_start_indices_from_history_attr(datatree: xr.DataTree) -> dict[str, str]:
     """Return dictionary of variables with corresponding start index."""
     _, existing_history = read_history_attrs(datatree)
 
@@ -111,12 +111,12 @@ def parse_index_range_from_history_attr(datatree: xr.DataTree) -> dict[str, str]
         return {}
 
     index_range_entries = ((opendap_entry[0].split('=')[1]).rstrip()).split(';')
-    variable_index_range_dict = {}
+    variable_start_indices_map = {}
     for entry in index_range_entries:
         variable, dim_indices = get_index_range_substring(entry)
         start_dims = [int(dim.split(':')[0]) if dim else 0 for dim in dim_indices]
-        variable_index_range_dict[variable] = start_dims
-    return variable_index_range_dict
+        variable_start_indices_map[variable] = start_dims
+    return variable_start_indices_map
 
 
 def get_variable_dimension_map(
@@ -132,7 +132,8 @@ def get_variable_dimension_map(
 
 
 def get_dim_index_from_var_dim_map(
-    variable_dimension_map, variables_with_index_ranges
+    variable_dimension_map: dict[tuple, str],
+    variable_start_indices_map: dict[str, str],
 ) -> dict[str, int]:
     """Returns the mapping from dimension to start index.
 
@@ -143,18 +144,18 @@ def get_dim_index_from_var_dim_map(
     # variable_dimension_map has a dictionary of dimensions in a tuple with
     # a corresponding variable path name
     for variable_dimensions, variable_path in variable_dimension_map.items():
-        # variables_with_index_ranges has a dictionary with requested variable names
-        # # corresponding subsetted start indexes
-        if variable_path in variables_with_index_ranges:
-            start_indexes = variables_with_index_ranges[variable_path]
+        # variable_start_indices_map has a dictionary with requested variable names
+        # and corresponding subsetted start indices
+        if variable_path in variable_start_indices_map:
+            start_indices = variable_start_indices_map[variable_path]
 
             # update the map to only contain the dimension_path and start index
-            dimension_index_map.update(zip(variable_dimensions, start_indexes))
+            dimension_index_map.update(zip(variable_dimensions, start_indices))
 
     return dimension_index_map
 
 
-def get_index_range_substring(index_range_string) -> tuple[str, list]:
+def get_index_range_substring(index_range_string: str) -> tuple[str, list]:
     """Return variable and index range."""
     variable = ''
     if not index_range_string:

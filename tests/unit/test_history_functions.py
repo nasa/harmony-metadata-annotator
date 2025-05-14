@@ -14,7 +14,7 @@ from metadata_annotator.history_functions import (
     get_index_range_substring,
     get_start_index_from_history,
     get_variable_dimension_map,
-    parse_index_range_from_history_attr,
+    parse_start_indices_from_history_attr,
     update_history_metadata,
 )
 
@@ -106,10 +106,10 @@ def test_get_index_range_substring() -> None:
     assert index_ranges == []
 
 
-def test_parse_index_range_from_history_attr(sample_netcdf4_file) -> None:
+def test_parse_start_indices_from_history_attr(sample_netcdf4_file) -> None:
     """Ensure that the index range from history attribute are retrieved correctly."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
-        idxdict = parse_index_range_from_history_attr(datatree)
+        idxdict = parse_start_indices_from_history_attr(datatree)
         assert idxdict['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'] == [
             0,
             16,
@@ -121,11 +121,11 @@ def test_parse_index_range_from_history_attr(sample_netcdf4_file) -> None:
         ]
 
     with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
-        idxdict = parse_index_range_from_history_attr(test_datatree)
+        idxdict = parse_start_indices_from_history_attr(test_datatree)
         assert not idxdict
 
         test_datatree.attrs['history'] = 'This is a history attribute to test'
-        idxdict = parse_index_range_from_history_attr(test_datatree)
+        idxdict = parse_start_indices_from_history_attr(test_datatree)
         assert not idxdict
 
 
@@ -156,7 +156,7 @@ def test_get_variable_dimension_map() -> None:
 
 
 def test_get_dimension_index_map() -> None:
-    """Ensure that the dimensions are returned with the correct subset indexes."""
+    """Ensure that the dimensions are returned with the correct subset indices."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
         granule_varinfo = VarInfoFromNetCDF4(
             'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
@@ -223,8 +223,8 @@ def test_get_dimension_index_map() -> None:
         assert dim_dict is None
 
 
-def test_get_dim_indexes_from_variable_dimension_map() -> None:
-    """Ensure that the right indexes are returned for all the dimensions."""
+def test_get_dim_index_from_variable_dimension_map() -> None:
+    """Ensure that the right indices are returned for all the dimensions."""
     variable_dimension_map = {
         (
             '/Freeze_Thaw_Retrieval_Data_Global/am_pm',
