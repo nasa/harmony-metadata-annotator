@@ -13,7 +13,7 @@ from pystac import Asset, Catalog, Item
 from pytest import fixture
 from varinfo import VarInfoFromNetCDF4
 
-from metadata_annotator.history_functions import PROGRAM, VERSION
+from metadata_annotator.history_functions import PROGRAM, get_semantic_version
 
 
 @fixture(scope='function')
@@ -110,7 +110,8 @@ def expected_output_netcdf4_file(temp_dir) -> str:
                 'short_name': 'TEST01',
                 'update': 'corrected root group value',
                 'addition': 'new root group value',
-                'history': f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}',
+                'history': f'2000-01-02T03:04:05+00:00 {PROGRAM} '
+                f'{get_semantic_version()}',
             },
             data_vars={
                 'EASE2_north_polar_projection_36km': xr.DataArray(

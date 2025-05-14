@@ -1,5 +1,6 @@
 """Module with history functions."""
 
+import os
 import re
 from datetime import UTC, datetime
 from urllib.parse import parse_qs, unquote
@@ -10,8 +11,6 @@ from varinfo import VariableFromNetCDF4
 from metadata_annotator.exceptions import MissingDimensionVariable
 
 PROGRAM = 'Harmony Metadata Annotator'
-# To be improved - make dynamic based on service_version.txt
-VERSION = '0.0.1'
 
 
 def update_history_metadata(datatree: xr.DataTree) -> None:
@@ -47,7 +46,7 @@ def write_history_attrs(
         [
             datetime.now(UTC).isoformat(),
             PROGRAM,
-            VERSION,
+            get_semantic_version(),
         ]
     )
     datatree.attrs[history_attribute_name] = '\n'.join(
@@ -82,7 +81,7 @@ def get_dimension_index_map(
         raise MissingDimensionVariable(str(e)) from e
 
     # Read history attribute and retrieve all the variables with their corresponding
-    # start_indices.
+    # index ranges.
     variable_start_indices_map = parse_start_indices_from_history_attr(datatree)
 
     # Retrieve the mapping of requested variables and the corresponding dimension paths
@@ -133,7 +132,7 @@ def get_variable_dimension_map(
 
 def get_dim_index_from_var_dim_map(
     variable_dimension_map: dict[tuple, str],
-    variable_start_indices_map: dict[str, str],
+    variable_start_indices_map: dict[str, list[int]],
 ) -> dict[str, int]:
     """Returns the mapping from dimension to start index.
 
@@ -187,3 +186,13 @@ def get_index_range_substring(index_range_string: str) -> tuple[str, list]:
         )
         return variable, index_range_dims
     return variable, []
+
+
+def get_semantic_version() -> str:
+    """Parse the service_version.txt to get the semantic version number."""
+    current_directory = os.path.dirname(os.path.abspath('__file__'))
+    path = os.path.join(current_directory, 'service_version.txt')
+    with open(path, encoding='utf-8') as file_handler:
+        semantic_version = file_handler.read().strip()
+        return semantic_version
+    return 'Version not found'

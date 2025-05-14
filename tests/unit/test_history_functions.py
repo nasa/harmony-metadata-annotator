@@ -8,10 +8,10 @@ from varinfo import VarInfoFromNetCDF4
 from metadata_annotator.exceptions import MissingDimensionVariable
 from metadata_annotator.history_functions import (
     PROGRAM,
-    VERSION,
     get_dim_index_from_var_dim_map,
     get_dimension_index_map,
     get_index_range_substring,
+    get_semantic_version,
     get_start_index_from_history,
     get_variable_dimension_map,
     parse_start_indices_from_history_attr,
@@ -31,7 +31,7 @@ def test_update_history_metadata_no_input_history(sample_netcdf4_file):
         assert 'History' not in test_datatree.attrs
         assert (
             test_datatree.attrs['history']
-            == f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
+            == f'2000-01-02T03:04:05+00:00 {PROGRAM} {get_semantic_version()}'
         )
 
 
@@ -50,7 +50,7 @@ def test_update_history_metadata_append_to_existing(sample_netcdf4_file):
         assert 'History' not in test_datatree.attrs
         assert test_datatree.attrs['history'] == (
             '1999-01-01T00 File creation v1\n'
-            f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
+            f'2000-01-02T03:04:05+00:00 {PROGRAM} {get_semantic_version()}'
         )
 
 
@@ -69,7 +69,7 @@ def test_update_history_metadata_existing_uppercase(sample_netcdf4_file):
         assert 'history' not in test_datatree.attrs
         assert test_datatree.attrs['History'] == (
             '1999-01-01T00 File creation v1\n'
-            f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
+            f'2000-01-02T03:04:05+00:00 {PROGRAM} {get_semantic_version()}'
         )
 
 
