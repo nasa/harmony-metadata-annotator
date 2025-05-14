@@ -339,9 +339,7 @@ def update_spatial_dimension_values(
             dim_data_array = datatree[variable_path]
 
         except KeyError as e:
-            raise MissingDimensionVariable(
-                f'Unable to find dimension variable "{variable_path}"'
-            ) from e
+            raise MissingDimensionVariable(variable_path) from e
 
         grid_start_index = get_grid_start_index(
             datatree, dim_data_array, dimension_index_map, variable_path

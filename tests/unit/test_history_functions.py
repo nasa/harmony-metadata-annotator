@@ -198,7 +198,7 @@ def test_get_dimension_index_map() -> None:
             ],
             granule_varinfo,
         )
-        print(dim_dict)
+
         assert dim_dict['/Freeze_Thaw_Retrieval_Data_Global/am_pm'] == 0
         assert dim_dict['/Freeze_Thaw_Retrieval_Data_Global/y'] == 16
         assert dim_dict['/Freeze_Thaw_Retrieval_Data_Global/x'] == 227

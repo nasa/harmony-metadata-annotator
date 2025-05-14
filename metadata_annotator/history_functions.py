@@ -79,7 +79,7 @@ def get_dimension_index_map(
             return None
 
     except KeyError as e:
-        raise MissingDimensionVariable('{variable_path}') from e
+        raise MissingDimensionVariable(str(e)) from e
 
     # Read history attribute and retrieve all the variables with their corresponding
     # index ranges.

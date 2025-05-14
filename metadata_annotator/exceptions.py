@@ -103,6 +103,4 @@ class MissingDimensionVariable(MetadataAnnotatorError):
 
     def __init__(self, variable_name):
         """Initialize the exception with the variable name."""
-        super().__init__(
-            f'Dimension variable "{variable_name}" is not in the datatree.'
-        )
+        super().__init__(f'Dimension variable {variable_name} is not in the datatree.')
