@@ -82,7 +82,7 @@ def get_dimension_index_map(
         raise MissingDimensionVariable(str(e)) from e
 
     # Read history attribute and retrieve all the variables with their corresponding
-    # index ranges.
+    # start_indices.
     variable_start_indices_map = parse_start_indices_from_history_attr(datatree)
 
     # Retrieve the mapping of requested variables and the corresponding dimension paths

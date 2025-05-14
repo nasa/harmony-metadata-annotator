@@ -101,7 +101,7 @@ class InvalidDimensionsConfiguration(MetadataAnnotatorError):
 
 
 class MissingDimensionVariable(MetadataAnnotatorError):
-    """Raised when a dimension variable expected is not in the datatree."""
+    """Raised when an expected dimension variable is not in the datatree."""
 
     def __init__(self, variable_name):
         """Initialize the exception with the variable name."""
