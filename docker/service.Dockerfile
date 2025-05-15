@@ -24,7 +24,7 @@ RUN pip install --no-input --no-cache-dir -r requirements.txt
 # Copy service code.
 COPY ./harmony_service harmony_service
 COPY ./metadata_annotator metadata_annotator
-COPY ./docker/service_version.txt .
+COPY ./docker/service_version.txt ./docker/service_version.txt
 
 # Configure a container to be executable via the `docker run` command.
 ENTRYPOINT ["python", "-m", "harmony_service"]

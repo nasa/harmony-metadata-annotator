@@ -191,7 +191,7 @@ def get_index_range_substring(index_range_string: str) -> tuple[str, list]:
 def get_semantic_version() -> str:
     """Parse the service_version.txt to get the semantic version number."""
     current_directory = os.path.dirname(os.path.abspath('__file__'))
-    path = os.path.join(current_directory, 'service_version.txt')
+    path = os.path.join(current_directory, 'docker/service_version.txt')
     with open(path, encoding='utf-8') as file_handler:
         semantic_version = file_handler.read().strip()
         return semantic_version
