@@ -24,12 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the global grid mapping variables resolution specific, add a `master_geotransform`
   attribute to all grid mapping variables, add missing dimension variables, and create a dimensions
   attribute on their associated variables.
+
+## [v0.0.1] - 2025-02-20
 - This is the first formal release of the Harmony Metadata Annotator as
   as Docker image available through the GitHub Container Registry.
 - Service functionality: Ability to create, update, delete metadata attributes
   for a variable as specified via an `earthdata-varinfo` configuration file.
-
-## [v0.0.1] - 2025-02-20
 
 ### Added
 
