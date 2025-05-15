@@ -1681,7 +1681,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SM(AP|P_E)|SPL2SMAP_S",
-        "VariablePattern": "/Soil_Moisture_Retrieval_(?:Data(?:_AM|_Polar_AM|_1km|_3km)?)/(?!x$|y$).+$"
+        "VariablePattern": "/Soil_Moisture_Retrieval_(?:Data(?:_AM|_Polar_AM|_PM|_Polar_PM|_1km|_3km)?)/(?!x$|y$).+$"
       },
       "Attributes": [
         {
@@ -1708,7 +1708,7 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3SMP",
+        "ShortNamePath": "SPL3SMP$",
         "VariablePattern": "/Soil_Moisture_Retrieval_Data_(AM|PM)?/(?!x$|y$|landcover.*$|lc_type$).+$"
       },
       "Attributes": [
