@@ -269,6 +269,22 @@
           "Value": 0.0
         },
         {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value": 6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
+        },
+        {
           "Name": "master_geotransform",
           "Value": [-17367530.4451615, 1000.89502335, 0, 7314540.8306386, 0, -1000.89502335]
         }
@@ -301,6 +317,22 @@
         {
           "Name": "false_northing",
           "Value": 0.0
+        },
+        {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value" : 6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
         },
         {
           "Name": "master_geotransform",
@@ -337,6 +369,22 @@
           "Value": 0.0
         },
         {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value":  6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
+        },
+        {
           "Name": "master_geotransform",
           "Value": [-17367530.4451615, 9008.055210146, 0, 7314540.8306386, 0, -9008.055210146]
         }
@@ -369,6 +417,22 @@
         {
           "Name": "false_northing",
           "Value": 0.0
+        },
+        {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value": 6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
         },
         {
           "Name": "master_geotransform",
@@ -405,6 +469,22 @@
           "Value": 0.0
         },
         {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value": 6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
+        },
+        {
           "Name": "master_geotransform",
           "Value": [-9000000, 3000, 0, 9000000, 0, -3000]
         }
@@ -439,6 +519,22 @@
           "Value": 0.0
         },
         {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value": 6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
+        },
+        {
           "Name": "master_geotransform",
           "Value": [-9000000, 9000, 0, 9000000, 0, -9000]
         }
@@ -471,6 +567,22 @@
         {
           "Name": "false_northing",
           "Value": 0.0
+        },
+        {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value":  6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
         },
         {
           "Name": "master_geotransform",

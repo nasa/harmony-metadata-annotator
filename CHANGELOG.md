@@ -10,9 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Use the index ranges from the history attribute to calculate the grid start index. The dimension
-  scales are then determined based on the projection attributes provided in the associated grid
-  mapping variable.
+- Use the index ranges from the history attribute to calculate the grid start index if configured to do so.
+  The dimension scales are then determined based on the projection attributes provided in the associated grid
+  mapping variable's `master_geotransform`.
 - Update spatial dimension variables with a dimension scale that is computed based off the
   associated grid mapping variable's `master_geotransform` and the determined grid start index.
   Currently, the grid start index can be determined from the dimension's associated row/col index

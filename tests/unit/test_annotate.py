@@ -310,6 +310,10 @@ def test_create_new_variables() -> None:
                 'longitude_of_central_meridian',
                 'master_geotransform',
                 'standard_parallel',
+                'inverse_flattening',
+                'semi_minor_axis',
+                'semi_major_axis',
+                'horizontal_datum_name',
             ]
         )
 
