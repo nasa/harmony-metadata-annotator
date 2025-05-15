@@ -67,7 +67,7 @@ def get_dimension_index_map(
     datatree: xr.DataTree,
     dimension_variables: list[str],
     granule_var_info: VariableFromNetCDF4,
-) -> dict[str, int] | None:
+) -> dict[str, int]:
     """Return dimension path to start index mapping."""
     try:
         if not any(
@@ -75,7 +75,7 @@ def get_dimension_index_map(
             == 'history_subset_index_ranges'
             for dim in dimension_variables
         ):
-            return None
+            return {}
 
     except KeyError as e:
         raise MissingDimensionVariable(str(e)) from e

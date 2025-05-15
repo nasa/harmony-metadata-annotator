@@ -454,6 +454,20 @@ def test_get_grid_start_index_uses_subset_index_reference(
         assert get_grid_start_index(test_datatree, test_datatree['x'], None, '/x') == 5
 
 
+def test_get_grid_start_index_uses_history_subset_index_ranges(
+    sample_netcdf4_file_test03,
+) -> None:
+    """Ensure the expected grid start index is returned for a given dimension."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test03, decode_times=False
+    ) as test_datatree:
+        assert get_grid_start_index(test_datatree, test_datatree['x'], {}, '/x') == 0
+        assert (
+            get_grid_start_index(test_datatree, test_datatree['y'], {'/y': 10}, '/y')
+            == 10
+        )
+
+
 def test_get_grid_start_index_missing_configuration(sample_netcdf4_file_test02) -> None:
     """Ensure the expected exception is raised when required configuration is missing.
 

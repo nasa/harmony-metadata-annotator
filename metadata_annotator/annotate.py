@@ -382,7 +382,10 @@ def get_grid_start_index(
     if subset_index_reference:
         return get_start_index_from_row_col_variable(datatree, subset_index_reference)
 
-    if dimension_index_map:
+    if (
+        dim_data_array.attrs.get('corner_point_offsets', None)
+        == 'history_subset_index_ranges'
+    ):
         return get_start_index_from_history(
             dimension_index_map, dimension_variable_path
         )

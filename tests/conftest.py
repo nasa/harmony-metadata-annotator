@@ -297,3 +297,55 @@ def sample_varinfo_test02(
     return VarInfoFromNetCDF4(
         sample_netcdf4_file, config_file=varinfo_config_file, short_name='TEST02'
     )
+
+
+@fixture(scope='function')
+def sample_netcdf4_file_test03(temp_dir) -> str:
+    """Create a sample NetCDF-4 file to test index ranges from history."""
+    file_name = path_join(temp_dir, 'test_input_03.nc')
+
+    sample_datatree = xr.DataTree(
+        dataset=xr.Dataset(
+            attrs={
+                'short_name': 'TEST03',
+            },
+            data_vars={
+                'x': xr.DataArray(
+                    np.array([0, 1, 2]),
+                    attrs={
+                        'standard_name': 'projection_x_coordinate',
+                        'corner_point_offsets': 'history_subset_index_ranges',
+                        'grid_mapping': '/EASE2_north_polar_projection_36km',
+                    },
+                    dims=['x'],
+                ),
+                'y': xr.DataArray(
+                    np.array([0, 1, 2]),
+                    attrs={
+                        'standard_name': 'projection_y_coordinate',
+                        'corner_point_offsets': 'history_subset_index_ranges',
+                        'grid_mapping': '/EASE2_north_polar_projection_36km',
+                    },
+                    dims=['y'],
+                ),
+                'test_variable': xr.DataArray(
+                    np.ones((3, 3)),
+                    attrs={},
+                    dims=['y', 'x'],
+                ),
+            },
+        ),
+    )
+
+    sample_datatree.to_netcdf(file_name, encoding=None)
+    return file_name
+
+
+@fixture(scope='function')
+def sample_varinfo_test03(
+    sample_netcdf4_file, varinfo_config_file
+) -> VarInfoFromNetCDF4:
+    """Create sample VarInfoFromNetCDF4 instance."""
+    return VarInfoFromNetCDF4(
+        sample_netcdf4_file, config_file=varinfo_config_file, short_name='TEST03'
+    )

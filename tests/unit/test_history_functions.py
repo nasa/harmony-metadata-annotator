@@ -220,7 +220,7 @@ def test_get_dimension_index_map() -> None:
             ],
             granule_varinfo,
         )
-        assert dim_dict is None
+        assert dim_dict == {}
 
 
 def test_get_dim_index_from_variable_dimension_map() -> None:
