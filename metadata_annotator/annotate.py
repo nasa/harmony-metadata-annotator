@@ -86,26 +86,35 @@ def amend_in_file_metadata(
         # dimension renaming where applicable.
         update_group_and_variable_attributes(datatree, items_to_update, granule_varinfo)
 
-        # get all the dimension variables
-        dimension_variables = get_dimension_variables(datatree)
+        # Get all the dimension variables.
+        dimension_variables = set()
+        if variables_to_create:
+            dimension_variables = get_dimension_variables(datatree)
 
-        # create variables or update dimensions
+        # Create variables or update dimensions.
         for variable_path in variables_to_create:
             if variable_path not in dimension_variables:
                 create_new_variables(datatree, variable_path, granule_varinfo)
             else:
                 update_dimension_variable(datatree, variable_path, granule_varinfo)
 
-        # reads index range from history attribute and creates a dimension index map
-        dimension_index_map = get_dimension_index_map(
-            datatree, dimension_variables, granule_varinfo
-        )
-        spatial_dimension_variables = get_spatial_dimension_variables(
-            datatree, dimension_variables
-        )
-        update_spatial_dimension_values(
-            datatree, spatial_dimension_variables, granule_varinfo, dimension_index_map
-        )
+        # If dimension variables were created or updated, the dimension scales need
+        # to be computed based on the configuration method for that dimension.
+        if dimension_variables:
+            # reads index range from history attribute and creates a dimension index map
+            dimension_index_map = get_dimension_index_map(
+                datatree, dimension_variables, granule_varinfo
+            )
+            spatial_dimension_variables = get_spatial_dimension_variables(
+                datatree, dimension_variables
+            )
+            update_spatial_dimension_values(
+                datatree,
+                spatial_dimension_variables,
+                granule_varinfo,
+                dimension_index_map,
+            )
+
         update_history_metadata(datatree)
 
         # Future improvement: It is memory intensive to try and write out the

@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from urllib.parse import parse_qs, unquote
 
 import xarray as xr
-from varinfo import VariableFromNetCDF4
+from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.exceptions import MissingDimensionVariable
 
@@ -66,7 +66,7 @@ def get_start_index_from_history(
 def get_dimension_index_map(
     datatree: xr.DataTree,
     dimension_variables: list[str],
-    granule_var_info: VariableFromNetCDF4,
+    granule_var_info: VarInfoFromNetCDF4,
 ) -> dict[str, int]:
     """Return dimension path to start index mapping."""
     try:
@@ -119,7 +119,7 @@ def parse_start_indices_from_history_attr(datatree: xr.DataTree) -> dict[str, st
 
 
 def get_variable_dimension_map(
-    granule_var_info: VariableFromNetCDF4,
+    granule_var_info: VarInfoFromNetCDF4,
 ) -> dict[tuple, str]:
     """Return a mapping from dimensions list to a requested variable."""
     var_dim_map = {
