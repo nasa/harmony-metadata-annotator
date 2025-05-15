@@ -2,7 +2,6 @@
 
 import os
 import re
-from datetime import UTC, datetime
 from shutil import copy
 
 import numpy as np
@@ -11,17 +10,20 @@ from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.exceptions import (
     InvalidDimensionAttribute,
+    InvalidDimensionsConfiguration,
     InvalidGridMappingReference,
     InvalidSubsetIndexShape,
     MissingDimensionAttribute,
+    MissingDimensionVariable,
     MissingStartIndexConfiguration,
     MissingSubsetIndexReference,
 )
 from metadata_annotator.geotransform import compute_dimension_scale
-
-PROGRAM = 'Harmony Metadata Annotator'
-# To be improved - make dynamic based on service_version.txt
-VERSION = '0.0.1'
+from metadata_annotator.history_functions import (
+    get_dimension_index_map,
+    get_start_index_from_history,
+    update_history_metadata,
+)
 
 
 def annotate_granule(
@@ -84,22 +86,35 @@ def amend_in_file_metadata(
         # dimension renaming where applicable.
         update_group_and_variable_attributes(datatree, items_to_update, granule_varinfo)
 
-        # get all the dimension variables
-        dimension_variables = get_dimension_variables(datatree)
+        # Get all the dimension variables.
+        dimension_variables = set()
+        if variables_to_create:
+            dimension_variables = get_dimension_variables(datatree)
 
-        # create variables or update dimensions
+        # Create variables or update dimensions.
         for variable_path in variables_to_create:
             if variable_path not in dimension_variables:
                 create_new_variables(datatree, variable_path, granule_varinfo)
             else:
                 update_dimension_variable(datatree, variable_path, granule_varinfo)
 
-        spatial_dimension_variables = get_spatial_dimension_variables(
-            datatree, dimension_variables
-        )
-        update_spatial_dimension_values(
-            datatree, spatial_dimension_variables, granule_varinfo
-        )
+        # If dimension variables were created or updated, the dimension scales need
+        # to be computed based on the configuration method for that dimension.
+        if dimension_variables:
+            # reads index range from history attribute and creates a dimension index map
+            dimension_index_map = get_dimension_index_map(
+                datatree, dimension_variables, granule_varinfo
+            )
+            spatial_dimension_variables = get_spatial_dimension_variables(
+                datatree, dimension_variables
+            )
+            update_spatial_dimension_values(
+                datatree,
+                spatial_dimension_variables,
+                granule_varinfo,
+                dimension_index_map,
+            )
+
         update_history_metadata(datatree)
 
         # Future improvement: It is memory intensive to try and write out the
@@ -200,37 +215,6 @@ def update_metadata_attributes(
             pass
 
 
-def update_history_metadata(datatree: xr.DataTree) -> None:
-    """Update the history global attribute of the DataTree.
-
-    If either an existing History or history global attribute exists, append
-    information as a new line to the existing value. Otherwise create a new
-    attribute called "history".
-
-    """
-    new_history_line = ' '.join(
-        [
-            datetime.now(UTC).isoformat(),
-            PROGRAM,
-            VERSION,
-        ]
-    )
-
-    if 'History' in datatree.attrs:
-        history_attribute_name = 'History'
-        existing_history = datatree.attrs['History']
-    elif 'history' in datatree.attrs:
-        history_attribute_name = 'history'
-        existing_history = datatree.attrs['history']
-    else:
-        history_attribute_name = 'history'
-        existing_history = None
-
-    datatree.attrs[history_attribute_name] = '\n'.join(
-        filter(None, [existing_history, new_history_line])
-    )
-
-
 def update_group_and_variable_attributes(
     datatree: xr.DataTree, items_to_update: str, granule_varinfo: VarInfoFromNetCDF4
 ) -> None:
@@ -256,7 +240,9 @@ def update_dimension_names(data_tree: xr.DataTree, variable_to_update: str) -> N
     # The list exists so renaming is required.
     if rename_dim_list:
         if len(data_array.dims) != len(rename_dim_list):
-            raise Exception(f'Incorrect configured dimensions for {variable_to_update}')
+            raise InvalidDimensionsConfiguration(
+                variable_to_update, len(rename_dim_list), len(data_array.dims)
+            )
 
         # Rename from source data dimension names to VarInfo dimension names
         # and limit to the number of dimensions given in rename list.
@@ -277,19 +263,23 @@ def create_new_variables(
     )
 
 
-def get_dimension_variables(
-    data_tree: xr.DataTree, dimension_variables: set[str] = None
-) -> set[str]:
-    """Return dimension variables."""
-    if dimension_variables is None:
-        dimension_variables = set()
-    for name, node in data_tree.children.items():
-        dt = data_tree[name]
-        if dt.dims:
-            dt_dim_dict = dict(dt.dims)
-            dimension_variables.update(f'/{name}/{dim}' for dim in dt_dim_dict.keys())
-        if node.children:
-            get_dimension_variables(node, dimension_variables)
+def get_dimension_variables(data_tree: xr.DataTree) -> set[str]:
+    """Return distinct dimensions as dimension-variable names with full path.
+
+    This is excluding dimensions defined in ancestor nodes (not datatree.dims)
+    and assuming all dimension variables are at the group level
+    (not up-level, not root level)
+    ToDo: resolve for shared up-level or root-level dimensions
+    """
+    dimension_variables = set()
+
+    for node in data_tree.subtree:
+        node_ds = node.dataset
+
+        for data_var in node_ds.data_vars:
+            dimension_variables.update(
+                [f'{node.path}/{dim}' for dim in node_ds[data_var].dims]
+            )
 
     return dimension_variables
 
@@ -350,15 +340,20 @@ def update_spatial_dimension_values(
     datatree: xr.DataTree,
     dimension_variables: set[str],
     granule_varinfo: VarInfoFromNetCDF4,
+    dimension_index_map: dict[str, int] = None,
 ) -> None:
     """Update the spatial dimension variable values to the computed dimension scale."""
     for variable_path in dimension_variables:
         try:
             dim_data_array = datatree[variable_path]
-        except KeyError:
-            raise Exception(f'Unable to find dimension variable "{variable_path}"')
 
-        grid_start_index = get_grid_start_index(datatree, dim_data_array)
+        except KeyError as e:
+            raise MissingDimensionVariable(variable_path) from e
+
+        grid_start_index = get_grid_start_index(
+            datatree, dim_data_array, dimension_index_map, variable_path
+        )
+
         dimension_size = len(dim_data_array)
         spatial_dimension_type = get_spatial_dimension_type(dim_data_array)
 
@@ -381,7 +376,10 @@ def update_spatial_dimension_values(
 
 
 def get_grid_start_index(
-    datatree: xr.DataTree, dim_data_array: xr.DataArray
+    datatree: xr.DataTree,
+    dim_data_array: xr.DataArray,
+    dimension_index_map: dict[str, int],
+    dimension_variable_path: str,
 ) -> tuple[int, int]:
     """Determine the grid offset for a given dimension.
 
@@ -392,7 +390,16 @@ def get_grid_start_index(
     subset_index_reference = dim_data_array.attrs.get('subset_index_reference', None)
     if subset_index_reference:
         return get_start_index_from_row_col_variable(datatree, subset_index_reference)
-    raise MissingStartIndexConfiguration(dim_data_array.name)
+
+    if (
+        dim_data_array.attrs.get('corner_point_offsets', None)
+        == 'history_subset_index_ranges'
+    ):
+        return get_start_index_from_history(
+            dimension_index_map, dimension_variable_path
+        )
+
+    raise MissingStartIndexConfiguration(dimension_variable_path)
 
 
 def get_start_index_from_row_col_variable(

@@ -7,8 +7,6 @@ from freezegun import freeze_time
 from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.annotate import (
-    PROGRAM,
-    VERSION,
     annotate_granule,
     create_new_variables,
     get_dimension_variables,
@@ -22,13 +20,13 @@ from metadata_annotator.annotate import (
     update_dimension_names,
     update_dimension_variable,
     update_group_and_variable_attributes,
-    update_history_metadata,
     update_metadata_attributes,
     update_metadata_attributes_for_data_array,
     update_spatial_dimension_values,
 )
 from metadata_annotator.exceptions import (
     InvalidDimensionAttribute,
+    InvalidDimensionsConfiguration,
     InvalidGridMappingReference,
     InvalidSubsetIndexShape,
     MissingDimensionAttribute,
@@ -50,60 +48,6 @@ def test_is_exact_path_wild_card():
 def test_is_exact_path_alternates():
     """Returns False when the input has '(one|two)', indicating alternates."""
     assert not is_exact_path('/(path_one|path_two)/variable')
-
-
-@freeze_time('2000-01-02T03:04:05')
-def test_update_history_metadata_no_input_history(sample_netcdf4_file):
-    """A new history attribute should be created."""
-    with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
-        # Invoke the function under test:
-        update_history_metadata(test_datatree)
-
-        # Check output from the function:
-        assert 'history' in test_datatree.attrs
-        assert 'History' not in test_datatree.attrs
-        assert (
-            test_datatree.attrs['history']
-            == f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
-        )
-
-
-@freeze_time('2000-01-02T03:04:05+00:00')
-def test_update_history_metadata_append_to_existing(sample_netcdf4_file):
-    """An existing history attribute should have a new line added."""
-    with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
-        # First add a pre-existing history metadata attribute:
-        test_datatree.attrs['history'] = '1999-01-01T00 File creation v1'
-
-        # Now invoke the function under test:
-        update_history_metadata(test_datatree)
-
-        # Check output from the function:
-        assert 'history' in test_datatree.attrs
-        assert 'History' not in test_datatree.attrs
-        assert test_datatree.attrs['history'] == (
-            '1999-01-01T00 File creation v1\n'
-            f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
-        )
-
-
-@freeze_time('2000-01-02T03:04:05+00:00')
-def test_update_history_metadata_existing_uppercase(sample_netcdf4_file):
-    """If History exists instead of history, that should be used."""
-    with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
-        # First add a history metadata attribute:
-        test_datatree.attrs['History'] = '1999-01-01T00 File creation v1'
-
-        # Now invoke the function under test:
-        update_history_metadata(test_datatree)
-
-        # Check output from the function:
-        assert 'History' in test_datatree.attrs
-        assert 'history' not in test_datatree.attrs
-        assert test_datatree.attrs['History'] == (
-            '1999-01-01T00 File creation v1\n'
-            f'2000-01-02T03:04:05+00:00 {PROGRAM} {VERSION}'
-        )
 
 
 def test_update_metadata_attributes_variable(sample_netcdf4_file, sample_varinfo):
@@ -211,6 +155,11 @@ def test_annotate_granule(
     )
     get_spatial_dimension_variables_mock.return_value = set()
 
+    get_dimension_index_map_mock = mocker.patch(
+        'metadata_annotator.annotate.get_dimension_index_map'
+    )
+    get_dimension_index_map_mock.return_value = None
+
     annotate_granule(
         sample_netcdf4_file, temp_output_file_path, varinfo_config_file, 'TEST01'
     )
@@ -247,6 +196,41 @@ def test_annotate_granule_no_changes(
         xr.open_datatree(temp_output_file_path, decode_times=False) as results_datatree,
     ):
         assert results_datatree.identical(expected_datatree)
+
+
+def test_annotate_granule_with_dimension_variable_updates(temp_output_file_path):
+    """Confirm that a granule has all metadata updated as expected.
+
+    This test uses the sample SPL3FTP collection.
+
+    """
+    annotate_granule(
+        'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
+        temp_output_file_path,
+        'metadata_annotator/earthdata_varinfo_config.json',
+        'SPL3FTP',
+    )
+
+    with (
+        xr.open_datatree(temp_output_file_path, decode_times=False) as datatree,
+    ):
+        # Ensure that the attributes are updated.
+        assert (
+            set(datatree['/Freeze_Thaw_Retrieval_Data_Global'].dataset['y'].attrs)
+            == set(datatree['/Freeze_Thaw_Retrieval_Data_Global'].dataset['x'].attrs)
+            == set(
+                [
+                    'axis',
+                    'dimensions',
+                    'grid_mapping',
+                    'long_name',
+                    'standard_name',
+                    'type',
+                    'units',
+                    'corner_point_offsets',
+                ]
+            )
+        )
 
 
 def test_update_group_and_variable_attributes() -> None:
@@ -294,6 +278,13 @@ def test_update_dimension_names() -> None:
             datatree['/Freeze_Thaw_Retrieval_Data_Global/transition_direction'].dims
         ) == set(['y', 'x'])
 
+        # Check for incorrect dimensions list
+        datatree[variable_to_update] = datatree[variable_to_update].assign_attrs(
+            dimensions='am_pm y x'
+        )
+        with pytest.raises(InvalidDimensionsConfiguration):
+            update_dimension_names(datatree, variable_to_update)
+
 
 def test_create_new_variables() -> None:
     """Test if new variables are successfully created."""
@@ -319,6 +310,10 @@ def test_create_new_variables() -> None:
                 'longitude_of_central_meridian',
                 'master_geotransform',
                 'standard_parallel',
+                'inverse_flattening',
+                'semi_minor_axis',
+                'semi_major_axis',
+                'horizontal_datum_name',
             ]
         )
 
@@ -326,7 +321,7 @@ def test_create_new_variables() -> None:
 def test_get_dimension_variables() -> set[str]:
     """Ensure return of dimension variables."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
-        dimension_variables = get_dimension_variables(datatree, set())
+        dimension_variables = get_dimension_variables(datatree)
         assert dimension_variables == set(
             [
                 '/Freeze_Thaw_Retrieval_Data_Global/dim0',
@@ -364,6 +359,7 @@ def test_update_dimension_variable() -> None:
                 'standard_name',
                 'type',
                 'units',
+                'corner_point_offsets',
             ]
         )
 
@@ -400,6 +396,7 @@ def test_update_metadata_attributes_for_data_array() -> None:
                 'standard_name',
                 'type',
                 'units',
+                'corner_point_offsets',
             ]
         )
 
@@ -458,7 +455,21 @@ def test_get_grid_start_index_uses_subset_index_reference(
     with xr.open_datatree(
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
-        assert get_grid_start_index(test_datatree, test_datatree['x']) == 5
+        assert get_grid_start_index(test_datatree, test_datatree['x'], None, '/x') == 5
+
+
+def test_get_grid_start_index_uses_history_subset_index_ranges(
+    sample_netcdf4_file_test03,
+) -> None:
+    """Ensure the expected grid start index is returned for a given dimension."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test03, decode_times=False
+    ) as test_datatree:
+        assert get_grid_start_index(test_datatree, test_datatree['x'], {}, '/x') == 0
+        assert (
+            get_grid_start_index(test_datatree, test_datatree['y'], {'/y': 10}, '/y')
+            == 10
+        )
 
 
 def test_get_grid_start_index_missing_configuration(sample_netcdf4_file_test02) -> None:
@@ -474,7 +485,9 @@ def test_get_grid_start_index_missing_configuration(sample_netcdf4_file_test02) 
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
         with pytest.raises(MissingStartIndexConfiguration):
-            get_grid_start_index(test_datatree, test_datatree['variable_two'])
+            get_grid_start_index(
+                test_datatree, test_datatree['variable_two'], None, '/variable_two'
+            )
 
 
 def test_get_start_index_from_row_col_variable(sample_netcdf4_file_test02) -> None:
