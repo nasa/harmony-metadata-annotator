@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   attribute to all grid mapping variables, add missing dimension variables, and create a dimensions
   attribute on their associated variables.
 
-## [v0.0.1] - 2025-02-20
+## [v0.0.1] - 2025-03-28
 - This is the first formal release of the Harmony Metadata Annotator as
   as Docker image available through the GitHub Container Registry.
 - Service functionality: Ability to create, update, delete metadata attributes
