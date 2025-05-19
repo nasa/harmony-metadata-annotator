@@ -269,6 +269,22 @@
           "Value": 0.0
         },
         {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value": 6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
+        },
+        {
           "Name": "master_geotransform",
           "Value": [-17367530.4451615, 1000.89502335, 0, 7314540.8306386, 0, -1000.89502335]
         }
@@ -301,6 +317,22 @@
         {
           "Name": "false_northing",
           "Value": 0.0
+        },
+        {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value" : 6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
         },
         {
           "Name": "master_geotransform",
@@ -337,6 +369,22 @@
           "Value": 0.0
         },
         {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value":  6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
+        },
+        {
           "Name": "master_geotransform",
           "Value": [-17367530.4451615, 9008.055210146, 0, 7314540.8306386, 0, -9008.055210146]
         }
@@ -369,6 +417,22 @@
         {
           "Name": "false_northing",
           "Value": 0.0
+        },
+        {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value": 6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
         },
         {
           "Name": "master_geotransform",
@@ -405,6 +469,22 @@
           "Value": 0.0
         },
         {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value": 6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
+        },
+        {
           "Name": "master_geotransform",
           "Value": [-9000000, 3000, 0, 9000000, 0, -3000]
         }
@@ -439,6 +519,22 @@
           "Value": 0.0
         },
         {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value": 6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
+        },
+        {
           "Name": "master_geotransform",
           "Value": [-9000000, 9000, 0, 9000000, 0, -9000]
         }
@@ -471,6 +567,22 @@
         {
           "Name": "false_northing",
           "Value": 0.0
+        },
+        {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value":  6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
         },
         {
           "Name": "master_geotransform",
@@ -717,6 +829,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -751,6 +867,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -785,6 +905,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -819,6 +943,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -875,6 +1003,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -909,6 +1041,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -965,6 +1101,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -999,6 +1139,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -1033,6 +1177,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -1067,6 +1215,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -1101,6 +1253,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -1135,6 +1291,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -1169,6 +1329,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -1203,6 +1367,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -1237,6 +1405,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -1271,6 +1443,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -1371,6 +1547,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -1405,6 +1585,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -1439,6 +1623,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -1473,6 +1661,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -1529,6 +1721,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
@@ -1563,6 +1759,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
@@ -1593,7 +1793,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SM(AP|P_E)|SPL2SMAP_S",
-        "VariablePattern": "/Soil_Moisture_Retrieval_(?:Data(?:_AM|_Polar_AM|_1km|_3km)?)/(?!x$|y$).+$"
+        "VariablePattern": "/Soil_Moisture_Retrieval_(?:Data(?:_AM|_Polar_AM|_PM|_Polar_PM|_1km|_3km)?)/(?!x$|y$).+$"
       },
       "Attributes": [
         {
@@ -1620,7 +1820,7 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3SMP",
+        "ShortNamePath": "SPL3SMP$",
         "VariablePattern": "/Soil_Moisture_Retrieval_Data_(AM|PM)?/(?!x$|y$|landcover.*$|lc_type$).+$"
       },
       "Attributes": [

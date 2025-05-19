@@ -84,3 +84,25 @@ class MissingStartIndexConfiguration(MetadataAnnotatorError):
             f'Missing index range configuration attribute for dimension variable '
             f'"{dimension_name}"',
         )
+
+
+class InvalidDimensionsConfiguration(MetadataAnnotatorError):
+    """Raised when a dimension variable's metadata attribute is present but invalid."""
+
+    def __init__(
+        self, variable_name, num_configured_dimensions, num_expected_dimensions
+    ):
+        """Initialize with variable name, configured and expected dimensions."""
+        super().__init__(
+            f'Incorrect number of configured dimensions for {variable_name}'
+            f'Dimension variable "{variable_name}" has "{num_configured_dimensions} '
+            f'dimensions instead of "{num_expected_dimensions}".'
+        )
+
+
+class MissingDimensionVariable(MetadataAnnotatorError):
+    """Raised when an expected dimension variable is not in the datatree."""
+
+    def __init__(self, variable_name):
+        """Initialize the exception with the variable name."""
+        super().__init__(f'Dimension variable {variable_name} is not in the datatree.')

@@ -36,6 +36,12 @@ def test_process_item(
     # Override the configuration file with the test configuration file
     mocker.patch.object(adapter, 'VARINFO_CONFIG_FILE', varinfo_config_file)
 
+    # Override creation of dimension_index_map
+    get_dimension_index_map_mock = mocker.patch(
+        'metadata_annotator.annotate.get_dimension_index_map'
+    )
+    get_dimension_index_map_mock.return_value = None
+
     # Use the sample NetCDF-4 fixture as the downloaded file
     download_mock = mocker.patch('harmony_service.adapter.download')
     download_mock.return_value = downloaded_netcdf4_file
