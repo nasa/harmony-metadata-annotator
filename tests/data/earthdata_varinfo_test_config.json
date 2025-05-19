@@ -73,7 +73,7 @@
         },
         {
           "Name": "grid_mapping",
-          "Value": "/EASE2_polar_projection"
+          "Value": "/EASE2_north_polar_projection_36km"
         }
       ],
       "_Description": "Adding a new attribute and updating an existing attribute on an existing variable."
@@ -100,7 +100,75 @@
       "Applicability": {
         "Mission": "TEST_MISSION",
         "ShortNamePath": "TEST01",
-        "VariablePattern": "/EASE2_polar_projection"
+        "VariablePattern": "/EASE2_north_polar_projection_36km"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping_name",
+          "Value": "lambert_azimuthal_equal_area"
+        },
+        {
+          "Name": "longitude_of_projection_origin",
+          "Value": 0.0
+        },
+        {
+          "Name": "latitude_of_projection_origin",
+          "Value": 90.0
+        },
+        {
+          "Name": "false_easting",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_northing",
+          "Value": 0.0
+        },
+        {
+          "Name": "master_geotransform",
+          "Value": [-9000000, 36000, 0, 9000000, 0, -36000]
+        }
+      ],
+      "_Description": "Adding a new attribute-only variable with specified attributes."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST02",
+        "VariablePattern": "/EASE2_north_polar_projection_36km"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping_name",
+          "Value": "lambert_azimuthal_equal_area"
+        },
+        {
+          "Name": "longitude_of_projection_origin",
+          "Value": 0.0
+        },
+        {
+          "Name": "latitude_of_projection_origin",
+          "Value": 90.0
+        },
+        {
+          "Name": "false_easting",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_northing",
+          "Value": 0.0
+        },
+        {
+          "Name": "master_geotransform",
+          "Value": [-9000000, 36000, 0, 9000000, 0, -36000]
+        }
+      ],
+      "_Description": "Adding a new attribute-only variable with specified attributes."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST02",
+        "VariablePattern": "/EASE2_variable_missing_geotransform"
       },
       "Attributes": [
         {
@@ -124,7 +192,7 @@
           "Value": 0.0
         }
       ],
-      "_Description": "Adding a new attribute-only variable with specified attributes."
+      "_Description": "Adding a new attribute-only variable with missing master_geotransform attribute."
     }
   ]
 }
