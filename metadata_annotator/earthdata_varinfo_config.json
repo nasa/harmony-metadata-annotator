@@ -623,7 +623,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SM(P|P_E)",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_PM/(?!x$|y$|lc_type$|longitude_pm$|longitude_pm$).+$"
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_PM/(?!x$|y$|lc_type$|latitude_pm$|longitude_pm$).+$"
       },
       "Attributes": [
         {
@@ -637,7 +637,8 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SMP_E",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_Polar_PM/(?!x$|y$|longitude_pm$|longitude_pm$).+$"      },
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_Polar_PM/(?!x$|y$|latitude_pm$|longitude_pm$).+$"
+      },
       "Attributes": [
         {
           "Name": "coordinates",
@@ -645,6 +646,20 @@
         }
       ],
       "_Description": "Ensure variables in /Soil_Moisture_Retrieval_Data_Polar_PM group point to correct coordinate variables."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SM(P|P_E)",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_(PM|Polar_PM)/(latitude_pm|longitude_pm)$"
+      },
+      "Attributes": [
+        {
+          "Name": "coordinates",
+          "Value": null
+        }
+      ],
+      "_Description": "Delete the coordinates attribute from coordinate variables in the /Soil_Moisture_Retrieval_Data_PM and /Soil_Moisture_Retrieval_Data_Polar_PM groups."
     },
     {
       "Applicability": {
