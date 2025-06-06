@@ -436,7 +436,7 @@
         },
         {
           "Name": "master_geotransform",
-          "Value": [-17367530.44, 36032.22084058, 0, 7314540.83, 0, -36032.22084058]
+          "Value": [-17367530.4451615, 36032.22084058, 0, 7314540.8306386, 0, -36032.22084058]
         }
       ],
       "_Description": "Provide missing global grid mapping attributes for SMAP L3 collections."
