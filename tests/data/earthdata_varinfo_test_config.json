@@ -193,6 +193,34 @@
         }
       ],
       "_Description": "Adding a new attribute-only variable with missing master_geotransform attribute."
+    },
+        {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST02",
+        "VariablePattern": "/variable_one"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_36km"
+        }
+      ],
+      "_Description": "Adding a grid mapping attribute to an existing variable."
+    },
+        {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST02",
+        "VariablePattern": "/variable_two"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_variable_missing_geotransform"
+        }
+      ],
+      "_Description": "Adding a grid mapping attribute to an existing variable."
     }
   ]
 }

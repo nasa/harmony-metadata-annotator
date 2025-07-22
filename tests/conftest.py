@@ -291,11 +291,11 @@ def sample_netcdf4_file_test02(temp_dir) -> str:
 
 @fixture(scope='function')
 def sample_varinfo_test02(
-    sample_netcdf4_file, varinfo_config_file
+    sample_netcdf4_file_test02, varinfo_config_file
 ) -> VarInfoFromNetCDF4:
     """Create sample VarInfoFromNetCDF4 instance."""
     return VarInfoFromNetCDF4(
-        sample_netcdf4_file, config_file=varinfo_config_file, short_name='TEST02'
+        sample_netcdf4_file_test02, config_file=varinfo_config_file, short_name='TEST02'
     )
 
 

@@ -8,17 +8,18 @@ from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.annotate import (
     annotate_granule,
-    create_new_variables,
+    create_new_variable,
     get_dimension_variables,
     get_geotransform_config,
     get_grid_start_index,
     get_matching_groups_and_variables,
+    get_referenced_variables,
     get_spatial_dimension_type,
     get_spatial_dimension_variables,
     get_start_index_from_row_col_variable,
     is_exact_path,
     update_dimension_names,
-    update_dimension_variable,
+    update_dimension_variable_attributes,
     update_group_and_variable_attributes,
     update_metadata_attributes,
     update_metadata_attributes_for_data_array,
@@ -286,8 +287,8 @@ def test_update_dimension_names() -> None:
             update_dimension_names(datatree, variable_to_update)
 
 
-def test_create_new_variables() -> None:
-    """Test if new variables are successfully created."""
+def test_create_new_variable() -> None:
+    """Test if a new variable is successfully created."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
         variable_to_create = '/EASE2_global_projection_36km'
 
@@ -296,7 +297,7 @@ def test_create_new_variables() -> None:
             short_name='SPL3FTP',
             config_file='metadata_annotator/earthdata_varinfo_config.json',
         )
-        create_new_variables(datatree, variable_to_create, granule_varinfo)
+        create_new_variable(datatree, variable_to_create, granule_varinfo)
 
         # Check if the new variable is created.
         assert 'EASE2_global_projection_36km' in datatree['/'].data_vars
@@ -331,7 +332,7 @@ def test_get_dimension_variables() -> set[str]:
         )
 
 
-def test_update_dimension_variable() -> None:
+def test_update_dimension_variable_attributes() -> None:
     """Ensure attributes of a dimension variable are updated as expected."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
         granule_varinfo = VarInfoFromNetCDF4(
@@ -344,7 +345,7 @@ def test_update_dimension_variable() -> None:
         renamed_da = da.rename({'dim0': 'am_pm', 'dim1': 'y', 'dim2': 'x'})
         datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'] = renamed_da
 
-        update_dimension_variable(
+        update_dimension_variable_attributes(
             datatree, '/Freeze_Thaw_Retrieval_Data_Global/y', granule_varinfo
         )
         # Ensure that the attributes are updated.
@@ -601,3 +602,15 @@ def test_get_geotransform_config_missing_master_geotransform(
             get_geotransform_config(
                 test_datatree['variable_one'], sample_varinfo_test02
             )
+
+
+def test_get_referenced_variables(sample_varinfo_test02):
+    """Ensure the expected referenced variable set is returned."""
+    expected_result = {
+        '/EASE2_north_polar_projection_36km',
+        '/EASE2_variable_missing_geotransform',
+    }
+    assert (
+        get_referenced_variables(sample_varinfo_test02, ['grid_mapping'])
+        == expected_result
+    )
