@@ -87,11 +87,18 @@ def amend_in_file_metadata(
         update_group_and_variable_attributes(datatree, items_to_update, granule_varinfo)
 
         if variables_to_create:
-            reference_attributes = ['grid_mapping']
-            referenced_variables = get_referenced_variables(
-                granule_varinfo, reference_attributes
+            # Find candidate variables that might be in our configuration for creation,
+            # and get the references to those variables. Such variables without
+            # references, should not be created. Currently, we only support creating
+            # "empty" variables with attributes, thus only grid_mapping and
+            # ancillary_variables.
+            candidate_reference_attributes = ['grid_mapping', 'ancillary_variables']
+            candidate_referenced_variables = get_referenced_variables(
+                granule_varinfo, candidate_reference_attributes
             )
-            referenced_variables_to_create = variables_to_create & referenced_variables
+            referenced_variables_to_create = (
+                variables_to_create & candidate_referenced_variables
+            )
             for variable_path in referenced_variables_to_create:
                 create_new_variable(datatree, variable_path, granule_varinfo)
 

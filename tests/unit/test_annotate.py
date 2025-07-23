@@ -609,8 +609,12 @@ def test_get_referenced_variables(sample_varinfo_test02):
     expected_result = {
         '/EASE2_north_polar_projection_36km',
         '/EASE2_variable_missing_geotransform',
+        '/ancillary_variable_one',
+        '/ancillary_variable_two',
     }
     assert (
-        get_referenced_variables(sample_varinfo_test02, ['grid_mapping'])
+        get_referenced_variables(
+            sample_varinfo_test02, ['grid_mapping', 'ancillary_variables']
+        )
         == expected_result
     )
