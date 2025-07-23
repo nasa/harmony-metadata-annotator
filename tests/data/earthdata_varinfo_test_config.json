@@ -218,6 +218,10 @@
         {
           "Name": "grid_mapping",
           "Value": "/EASE2_variable_missing_geotransform"
+        },
+        {
+          "Name": "ancillary_variables",
+          "Value": "/ancillary_variable_one, /ancillary_variable_two"
         }
       ],
       "_Description": "Adding a grid mapping attribute to an existing variable."
