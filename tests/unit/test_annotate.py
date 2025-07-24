@@ -1,5 +1,7 @@
 """Tests for metadata_annotator.annotate.py."""
 
+from unittest.mock import patch
+
 import numpy as np
 import pytest
 import xarray as xr
@@ -8,17 +10,19 @@ from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.annotate import (
     annotate_granule,
-    create_new_variables,
+    create_new_variable,
     get_dimension_variables,
     get_geotransform_config,
     get_grid_start_index,
     get_matching_groups_and_variables,
+    get_referenced_variables,
     get_spatial_dimension_type,
     get_spatial_dimension_variables,
     get_start_index_from_row_col_variable,
     is_exact_path,
     update_dimension_names,
-    update_dimension_variable,
+    update_dimension_variable_attributes,
+    update_dimension_variables,
     update_group_and_variable_attributes,
     update_metadata_attributes,
     update_metadata_attributes_for_data_array,
@@ -286,8 +290,8 @@ def test_update_dimension_names() -> None:
             update_dimension_names(datatree, variable_to_update)
 
 
-def test_create_new_variables() -> None:
-    """Test if new variables are successfully created."""
+def test_create_new_variable() -> None:
+    """Test if a new variable is successfully created."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
         variable_to_create = '/EASE2_global_projection_36km'
 
@@ -296,7 +300,7 @@ def test_create_new_variables() -> None:
             short_name='SPL3FTP',
             config_file='metadata_annotator/earthdata_varinfo_config.json',
         )
-        create_new_variables(datatree, variable_to_create, granule_varinfo)
+        create_new_variable(datatree, variable_to_create, granule_varinfo)
 
         # Check if the new variable is created.
         assert 'EASE2_global_projection_36km' in datatree['/'].data_vars
@@ -331,7 +335,7 @@ def test_get_dimension_variables() -> set[str]:
         )
 
 
-def test_update_dimension_variable() -> None:
+def test_update_dimension_variable_attributes() -> None:
     """Ensure attributes of a dimension variable are updated as expected."""
     with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
         granule_varinfo = VarInfoFromNetCDF4(
@@ -344,7 +348,7 @@ def test_update_dimension_variable() -> None:
         renamed_da = da.rename({'dim0': 'am_pm', 'dim1': 'y', 'dim2': 'x'})
         datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'] = renamed_da
 
-        update_dimension_variable(
+        update_dimension_variable_attributes(
             datatree, '/Freeze_Thaw_Retrieval_Data_Global/y', granule_varinfo
         )
         # Ensure that the attributes are updated.
@@ -600,4 +604,69 @@ def test_get_geotransform_config_missing_master_geotransform(
         with pytest.raises(MissingDimensionAttribute):
             get_geotransform_config(
                 test_datatree['variable_one'], sample_varinfo_test02
+            )
+
+
+def test_get_referenced_variables(sample_varinfo_test02):
+    """Ensure the expected referenced variable set is returned."""
+    expected_result = {
+        '/EASE2_north_polar_projection_36km',
+        '/EASE2_variable_missing_geotransform',
+        '/ancillary_variable_one',
+        '/ancillary_variable_two',
+    }
+    assert (
+        get_referenced_variables(
+            sample_varinfo_test02, ['grid_mapping', 'ancillary_variables']
+        )
+        == expected_result
+    )
+
+
+def test_update_dimension_variables(sample_netcdf4_file_test04, sample_varinfo_test04):
+    """Ensure the dimension variables are updated correctly."""
+    expected_x_attributes = {
+        'standard_name': 'projection_x_coordinate',
+        'long_name': 'x coordinate of projection',
+        'dimensions': 'x',
+        'axis': 'X',
+        'units': 'm',
+        'type': 'float64',
+        'corner_point_offsets': 'history_subset_index_ranges',
+        'grid_mapping': '/EASE2_north_polar_projection_3km',
+    }
+    expected_y_attributes = {
+        'standard_name': 'projection_y_coordinate',
+        'long_name': 'y coordinate of projection',
+        'dimensions': 'y',
+        'axis': 'Y',
+        'units': 'm',
+        'type': 'float64',
+        'corner_point_offsets': 'history_subset_index_ranges',
+        'grid_mapping': '/EASE2_north_polar_projection_3km',
+    }
+    expected_x_values = np.array([-8998500.0, -8995500.0, -8992500.0], dtype=np.float64)
+    expected_y_values = np.array([8998500.0, 8995500.0, 8992500.0], dtype=np.float64)
+    with patch(
+        'metadata_annotator.annotate.get_dimension_index_map',
+        return_value={'/sub_group/y': 0, '/sub_group/x': 0},
+    ):
+        with xr.open_datatree(
+            sample_netcdf4_file_test04, decode_times=False
+        ) as test_datatree:
+            dimension_variables = {'/sub_group/x', '/sub_group/y'}
+            update_dimension_variables(
+                test_datatree, dimension_variables, sample_varinfo_test04
+            )
+            assert (
+                test_datatree['sub_group'].dataset['x'].attrs == expected_x_attributes
+            )
+            assert (
+                test_datatree['sub_group'].dataset['y'].attrs == expected_y_attributes
+            )
+            assert np.allclose(
+                test_datatree['sub_group'].dataset['x'], expected_x_values
+            )
+            assert np.allclose(
+                test_datatree['sub_group'].dataset['y'], expected_y_values
             )

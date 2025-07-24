@@ -86,34 +86,28 @@ def amend_in_file_metadata(
         # dimension renaming where applicable.
         update_group_and_variable_attributes(datatree, items_to_update, granule_varinfo)
 
-        # Get all the dimension variables.
-        dimension_variables = set()
         if variables_to_create:
+            # Find candidate variables that might be in our configuration for creation,
+            # and get the references to those variables. Such variables without
+            # references, should not be created. Currently, we only support creating
+            # "empty" variables with attributes, thus only grid_mapping and
+            # ancillary_variables.
+            candidate_reference_attributes = ['grid_mapping', 'ancillary_variables']
+            candidate_referenced_variables = get_referenced_variables(
+                granule_varinfo, candidate_reference_attributes
+            )
+            referenced_variables_to_create = (
+                variables_to_create & candidate_referenced_variables
+            )
+            for variable_path in referenced_variables_to_create:
+                create_new_variable(datatree, variable_path, granule_varinfo)
+
             dimension_variables = get_dimension_variables(datatree)
-
-        # Create variables or update dimensions.
-        for variable_path in variables_to_create:
-            if variable_path not in dimension_variables:
-                create_new_variables(datatree, variable_path, granule_varinfo)
-            else:
-                update_dimension_variable(datatree, variable_path, granule_varinfo)
-
-        # If dimension variables were created or updated, the dimension scales need
-        # to be computed based on the configuration method for that dimension.
-        if dimension_variables:
-            # reads index range from history attribute and creates a dimension index map
-            dimension_index_map = get_dimension_index_map(
-                datatree, dimension_variables, granule_varinfo
-            )
-            spatial_dimension_variables = get_spatial_dimension_variables(
-                datatree, dimension_variables
-            )
-            update_spatial_dimension_values(
-                datatree,
-                spatial_dimension_variables,
-                granule_varinfo,
-                dimension_index_map,
-            )
+            dimension_variables_to_create = variables_to_create & dimension_variables
+            if dimension_variables_to_create:
+                update_dimension_variables(
+                    datatree, dimension_variables, granule_varinfo
+                )
 
         update_history_metadata(datatree)
 
@@ -216,7 +210,9 @@ def update_metadata_attributes(
 
 
 def update_group_and_variable_attributes(
-    datatree: xr.DataTree, items_to_update: str, granule_varinfo: VarInfoFromNetCDF4
+    datatree: xr.DataTree,
+    items_to_update: set[str],
+    granule_varinfo: VarInfoFromNetCDF4,
 ) -> None:
     """Update attributes for existing variables and groups based on configuration."""
     for item_to_update in items_to_update:
@@ -225,17 +221,15 @@ def update_group_and_variable_attributes(
             item_to_update,
             granule_varinfo,
         )
-        # rename the pseudo dimension names
-        update_dimension_names(datatree, item_to_update)
+        # If dimensions override attribute exists, rename the pseudo dimension names.
+        if datatree[item_to_update].attrs.get('dimensions', ''):
+            update_dimension_names(datatree, item_to_update)
 
 
-def update_dimension_names(data_tree: xr.DataTree, variable_to_update: str) -> None:
+def update_dimension_names(datatree: xr.DataTree, variable_to_update: str) -> None:
     """Update the dimension names."""
-    data_array = data_tree[variable_to_update]
-    attrs = data_array.attrs
-    # If dimension attribute exists for variable to update,
-    # get target dimension names.
-    rename_dim_list = attrs.get('dimensions', '').split()
+    data_array = datatree[variable_to_update]
+    rename_dim_list = data_array.attrs.get('dimensions', '').split()
 
     # The list exists so renaming is required.
     if rename_dim_list:
@@ -248,13 +242,13 @@ def update_dimension_names(data_tree: xr.DataTree, variable_to_update: str) -> N
         # and limit to the number of dimensions given in rename list.
         source_dims = data_array.dims[: len(rename_dim_list)]
         rename_dict = dict(zip(source_dims, rename_dim_list))
-        data_tree[variable_to_update] = data_array.rename(rename_dict)
+        datatree[variable_to_update] = data_array.rename(rename_dict)
 
 
-def create_new_variables(
+def create_new_variable(
     datatree: xr.DataTree, variable_path: str, granule_varinfo: VarInfoFromNetCDF4
 ) -> None:
-    """Create new variables in the data tree as configured in the json file."""
+    """Create a new variable in the datatree as configured in the json file."""
     datatree[variable_path] = xr.DataArray(data=b'')
     update_metadata_attributes(
         datatree,
@@ -263,7 +257,7 @@ def create_new_variables(
     )
 
 
-def get_dimension_variables(data_tree: xr.DataTree) -> set[str]:
+def get_dimension_variables(datatree: xr.DataTree) -> set[str]:
     """Return distinct dimensions as dimension-variable names with full path.
 
     This is excluding dimensions defined in ancestor nodes (not datatree.dims)
@@ -273,7 +267,7 @@ def get_dimension_variables(data_tree: xr.DataTree) -> set[str]:
     """
     dimension_variables = set()
 
-    for node in data_tree.subtree:
+    for node in datatree.subtree:
         node_ds = node.dataset
 
         for data_var in node_ds.data_vars:
@@ -284,7 +278,31 @@ def get_dimension_variables(data_tree: xr.DataTree) -> set[str]:
     return dimension_variables
 
 
-def update_dimension_variable(
+def update_dimension_variables(
+    datatree: xr.DataTree,
+    dimension_variables: set[str],
+    granule_varinfo: VarInfoFromNetCDF4,
+) -> None:
+    """Update the attributes and data values (spatial only) for dimension variables."""
+    for dimension in dimension_variables:
+        update_dimension_variable_attributes(datatree, dimension, granule_varinfo)
+
+    spatial_dimension_variables = get_spatial_dimension_variables(
+        datatree, dimension_variables
+    )
+    if spatial_dimension_variables:
+        dimension_index_map = get_dimension_index_map(
+            datatree, dimension_variables, granule_varinfo
+        )
+        update_spatial_dimension_values(
+            datatree,
+            spatial_dimension_variables,
+            granule_varinfo,
+            dimension_index_map,
+        )
+
+
+def update_dimension_variable_attributes(
     datatree: xr.DataTree, variable_path: str, granule_varinfo: VarInfoFromNetCDF4
 ) -> None:
     """Update attributes of a dimension variable based on json configuration."""
@@ -324,14 +342,14 @@ def update_metadata_attributes_for_data_array(
 
 
 def get_spatial_dimension_variables(
-    data_tree: xr.DataTree, variables: set[str] = None
+    datatree: xr.DataTree, variables: set[str] = None
 ) -> set[str]:
     """Return a set of identified spatial dimension variables."""
     valid_dim_standard_names = ('projection_x_coordinate', 'projection_y_coordinate')
     return set(
         variable_path
         for variable_path in variables
-        if data_tree[variable_path].attrs.get('standard_name', None)
+        if datatree[variable_path].attrs.get('standard_name', None)
         in valid_dim_standard_names
     )
 
@@ -454,3 +472,18 @@ def get_geotransform_config(
         raise MissingDimensionAttribute(data_array.name, 'master_geotransform')
 
     return geotransform_config
+
+
+def get_referenced_variables(
+    granule_varinfo: VarInfoFromNetCDF4, reference_attributes: list[str]
+) -> set[str]:
+    """Return a set of variable names referenced by the given attributes."""
+    referenced_variables = set()
+
+    all_variables = granule_varinfo.get_all_variables()
+    for attribute in reference_attributes:
+        referenced_variables.update(
+            granule_varinfo.get_references_for_attribute(all_variables, attribute)
+        )
+
+    return referenced_variables
