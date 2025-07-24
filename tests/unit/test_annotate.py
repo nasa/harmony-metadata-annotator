@@ -1,5 +1,7 @@
 """Tests for metadata_annotator.annotate.py."""
 
+from unittest.mock import patch
+
 import numpy as np
 import pytest
 import xarray as xr
@@ -20,6 +22,7 @@ from metadata_annotator.annotate import (
     is_exact_path,
     update_dimension_names,
     update_dimension_variable_attributes,
+    update_dimension_variables,
     update_group_and_variable_attributes,
     update_metadata_attributes,
     update_metadata_attributes_for_data_array,
@@ -618,3 +621,52 @@ def test_get_referenced_variables(sample_varinfo_test02):
         )
         == expected_result
     )
+
+
+def test_update_dimension_variables(sample_netcdf4_file_test04, sample_varinfo_test04):
+    """Ensure the dimension variables are updated correctly."""
+    expected_x_attributes = {
+        'standard_name': 'projection_x_coordinate',
+        'long_name': 'x coordinate of projection',
+        'dimensions': 'x',
+        'axis': 'X',
+        'units': 'm',
+        'type': 'float64',
+        'corner_point_offsets': 'history_subset_index_ranges',
+        'grid_mapping': '/EASE2_north_polar_projection_3km',
+    }
+    expected_y_attributes = {
+        'standard_name': 'projection_y_coordinate',
+        'long_name': 'y coordinate of projection',
+        'dimensions': 'y',
+        'axis': 'Y',
+        'units': 'm',
+        'type': 'float64',
+        'corner_point_offsets': 'history_subset_index_ranges',
+        'grid_mapping': '/EASE2_north_polar_projection_3km',
+    }
+    expected_x_values = np.array([-8998500.0, -8995500.0, -8992500.0], dtype=np.float64)
+    expected_y_values = np.array([8998500.0, 8995500.0, 8992500.0], dtype=np.float64)
+    with patch(
+        'metadata_annotator.annotate.get_dimension_index_map',
+        return_value={'/sub_group/y': 0, '/sub_group/x': 0},
+    ):
+        with xr.open_datatree(
+            sample_netcdf4_file_test04, decode_times=False
+        ) as test_datatree:
+            dimension_variables = {'/sub_group/x', '/sub_group/y'}
+            update_dimension_variables(
+                test_datatree, dimension_variables, sample_varinfo_test04
+            )
+            assert (
+                test_datatree['sub_group'].dataset['x'].attrs == expected_x_attributes
+            )
+            assert (
+                test_datatree['sub_group'].dataset['y'].attrs == expected_y_attributes
+            )
+            assert np.allclose(
+                test_datatree['sub_group'].dataset['x'], expected_x_values
+            )
+            assert np.allclose(
+                test_datatree['sub_group'].dataset['y'], expected_y_values
+            )

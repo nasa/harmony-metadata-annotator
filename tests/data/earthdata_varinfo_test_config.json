@@ -225,6 +225,140 @@
         }
       ],
       "_Description": "Adding a grid mapping attribute to an existing variable."
+    },
+        {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST04",
+        "VariablePattern": "/EASE2_north_polar_projection_3km"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping_name",
+          "Value": "lambert_azimuthal_equal_area"
+        },
+        {
+          "Name": "longitude_of_projection_origin",
+          "Value": 0.0
+        },
+        {
+          "Name": "latitude_of_projection_origin",
+          "Value": 90.0
+        },
+        {
+          "Name": "false_easting",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_northing",
+          "Value": 0.0
+        },
+        {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value": 6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
+        },
+        {
+          "Name": "master_geotransform",
+          "Value": [-9000000, 3000, 0, 9000000, 0, -3000]
+        }
+      ],
+      "_Description": "Adding a new attribute-only variable with specified attributes."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST04",
+        "VariablePattern": "/sub_group/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_x_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "x coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
+        },
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_3km"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST04",
+        "VariablePattern": "/sub_group/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        },
+        {
+          "Name": "corner_point_offsets",
+          "Value": "history_subset_index_ranges"
+        },
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_3km"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
     }
   ]
 }
