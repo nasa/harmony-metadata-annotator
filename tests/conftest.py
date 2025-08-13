@@ -92,7 +92,14 @@ def sample_netcdf4_file(temp_dir) -> str:
                     'coordinates': 'time latitude longitude',
                     'delete': 'attribute needs to be deleted',
                 },
-            )
+            ),
+            'variable_four': xr.DataArray(
+                np.array([]),
+                attrs={
+                    '_FillValue': -9999.0,
+                    'coordinates': 'original_value',
+                },
+            ),
         },
     )
     sample_datatree.to_netcdf(file_name, encoding=None)
@@ -122,7 +129,6 @@ def expected_output_netcdf4_file(temp_dir) -> str:
                         'grid_mapping_name': 'lambert_azimuthal_equal_area',
                         'latitude_of_projection_origin': 90.0,
                         'longitude_of_projection_origin': 0.0,
-                        'master_geotransform': [-9000000, 36000, 0, 9000000, 0, -36000],
                     },
                 ),
                 'variable_one': xr.DataArray(
@@ -158,7 +164,14 @@ def expected_output_netcdf4_file(temp_dir) -> str:
                     '_FillValue': -9999.0,
                     'coordinates': 'time latitude longitude',
                 },
-            )
+            ),
+            'variable_four': xr.DataArray(
+                np.array([]),
+                attrs={
+                    '_FillValue': -9999.0,
+                    'coordinates': 'time latitude longitude',
+                },
+            ),
         },
     )
     sample_datatree.to_netcdf(file_name, encoding=None)
@@ -244,7 +257,7 @@ def sample_netcdf4_file_test02(temp_dir) -> str:
                     np.array([0, 1, 2]),
                     attrs={
                         'standard_name': 'projection_x_coordinate',
-                        'subset_index_reference': 'EASE_column_index',
+                        '_*subset_index_reference': 'EASE_column_index',
                         'grid_mapping': '/EASE2_north_polar_projection_36km',
                     },
                     dims=['x'],
@@ -253,7 +266,7 @@ def sample_netcdf4_file_test02(temp_dir) -> str:
                     np.array([0, 1, 2]),
                     attrs={
                         'standard_name': 'projection_y_coordinate',
-                        'subset_index_reference': 'EASE_row_index',
+                        '_*subset_index_reference': 'EASE_row_index',
                         'grid_mapping': '/EASE2_north_polar_projection_36km',
                     },
                     dims=['y'],
@@ -314,7 +327,6 @@ def sample_netcdf4_file_test03(temp_dir) -> str:
                     np.array([0, 1, 2]),
                     attrs={
                         'standard_name': 'projection_x_coordinate',
-                        'corner_point_offsets': 'history_subset_index_ranges',
                         'grid_mapping': '/EASE2_north_polar_projection_36km',
                     },
                     dims=['x'],
@@ -323,7 +335,6 @@ def sample_netcdf4_file_test03(temp_dir) -> str:
                     np.array([0, 1, 2]),
                     attrs={
                         'standard_name': 'projection_y_coordinate',
-                        'corner_point_offsets': 'history_subset_index_ranges',
                         'grid_mapping': '/EASE2_north_polar_projection_36km',
                     },
                     dims=['y'],
@@ -343,11 +354,11 @@ def sample_netcdf4_file_test03(temp_dir) -> str:
 
 @fixture(scope='function')
 def sample_varinfo_test03(
-    sample_netcdf4_file, varinfo_config_file
+    sample_netcdf4_file_test03, varinfo_config_file
 ) -> VarInfoFromNetCDF4:
     """Create sample VarInfoFromNetCDF4 instance."""
     return VarInfoFromNetCDF4(
-        sample_netcdf4_file, config_file=varinfo_config_file, short_name='TEST03'
+        sample_netcdf4_file_test03, config_file=varinfo_config_file, short_name='TEST03'
     )
 
 

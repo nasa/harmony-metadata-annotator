@@ -285,7 +285,7 @@
           "Value": 6356752.314245
         },
         {
-          "Name": "master_geotransform",
+          "Name": "_*master_geotransform",
           "Value": [-17367530.4451615, 1000.89502335, 0, 7314540.8306386, 0, -1000.89502335]
         }
       ],
@@ -335,7 +335,7 @@
           "Value": 6356752.314245
         },
         {
-          "Name": "master_geotransform",
+          "Name": "_*master_geotransform",
           "Value": [-17367530.4451615, 3002.6850700487, 0, 7314540.8306386, 0, -3002.6850700487]
         }
       ],
@@ -385,7 +385,7 @@
           "Value": 6356752.314245
         },
         {
-          "Name": "master_geotransform",
+          "Name": "_*master_geotransform",
           "Value": [-17367530.4451615, 9008.055210146, 0, 7314540.8306386, 0, -9008.055210146]
         }
       ],
@@ -435,7 +435,7 @@
           "Value": 6356752.314245
         },
         {
-          "Name": "master_geotransform",
+          "Name": "_*master_geotransform",
           "Value": [-17367530.4451615, 36032.22084058, 0, 7314540.8306386, 0, -36032.22084058]
         }
       ],
@@ -485,7 +485,7 @@
           "Value": 6356752.314245
         },
         {
-          "Name": "master_geotransform",
+          "Name": "_*master_geotransform",
           "Value": [-9000000, 3000, 0, 9000000, 0, -3000]
         }
       ],
@@ -535,7 +535,7 @@
           "Value": 6356752.314245
         },
         {
-          "Name": "master_geotransform",
+          "Name": "_*master_geotransform",
           "Value": [-9000000, 9000, 0, 9000000, 0, -9000]
         }
       ],
@@ -585,7 +585,7 @@
           "Value": 6356752.314245
         },
         {
-          "Name": "master_geotransform",
+          "Name": "_*master_geotransform",
           "Value": [-9000000, 36000, 0, 9000000, 0, -36000]
         }
       ],
@@ -707,7 +707,7 @@
           "Value": "float64"
         },
         {
-          "Name": "subset_index_reference",
+          "Name": "_*subset_index_reference",
           "Value": "/Soil_Moisture_Retrieval_Data_1km/EASE_column_index_1km"
         }
       ],
@@ -745,7 +745,7 @@
           "Value": "float64"
         },
         {
-          "Name": "subset_index_reference",
+          "Name": "_*subset_index_reference",
           "Value": "/Soil_Moisture_Retrieval_Data_1km/EASE_row_index_1km"
         }
       ],
@@ -783,7 +783,7 @@
           "Value": "float64"
         },
         {
-          "Name": "subset_index_reference",
+          "Name": "_*subset_index_reference",
           "Value": "/Soil_Moisture_Retrieval_Data_3km/EASE_column_index_3km"
         }
       ],
@@ -821,7 +821,7 @@
           "Value": "float64"
         },
         {
-          "Name": "subset_index_reference",
+          "Name": "_*subset_index_reference",
           "Value": "/Soil_Moisture_Retrieval_Data_3km/EASE_row_index_3km"
         }
       ],
@@ -859,7 +859,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -897,7 +897,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -935,7 +935,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -973,7 +973,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1033,7 +1033,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1071,7 +1071,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1131,7 +1131,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1169,7 +1169,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1207,7 +1207,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1245,7 +1245,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1283,7 +1283,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1321,7 +1321,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1359,7 +1359,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1397,7 +1397,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1435,7 +1435,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1473,7 +1473,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1577,7 +1577,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1615,7 +1615,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1653,7 +1653,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1691,7 +1691,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1751,7 +1751,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
@@ -1789,7 +1789,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],

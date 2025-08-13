@@ -96,6 +96,24 @@
       ],
       "_Description": "Deleting an existing attribute and attempting to delete a non-existent attribute on an existing variable."
     },
+        {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST01",
+        "VariablePattern": "/sub_group/variable_four"
+      },
+      "Attributes": [
+        {
+          "Name": "coordinates",
+          "Value": "time latitude longitude"
+        },
+        {
+          "Name": "_*temp",
+          "Value": "temporary attribute"
+        }
+      ],
+      "_Description": "Temporary attribute should not be added to the variable."
+    },
     {
       "Applicability": {
         "Mission": "TEST_MISSION",
@@ -124,7 +142,7 @@
           "Value": 0.0
         },
         {
-          "Name": "master_geotransform",
+          "Name": "_*master_geotransform",
           "Value": [-9000000, 36000, 0, 9000000, 0, -36000]
         }
       ],
@@ -158,7 +176,7 @@
           "Value": 0.0
         },
         {
-          "Name": "master_geotransform",
+          "Name": "_*master_geotransform",
           "Value": [-9000000, 36000, 0, 9000000, 0, -36000]
         }
       ],
@@ -192,9 +210,53 @@
           "Value": 0.0
         }
       ],
-      "_Description": "Adding a new attribute-only variable with missing master_geotransform attribute."
+      "_Description": "Adding a new attribute-only variable with missing _*master_geotransform attribute."
     },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST02",
+        "VariablePattern": "/x"
+      },
+      "Attributes": [
         {
+          "Name": "standard_name",
+          "Value": "/projection_x_coordinate"
+        },
+        {
+          "Name": "_*subset_index_reference",
+          "Value": "/EASE_column_index"
+        },
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_36km"
+        }
+      ],
+      "_Description": "Adding a grid mapping attribute to an existing variable."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST02",
+        "VariablePattern": "/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "/projection_y_coordinate"
+        },
+        {
+          "Name": "_*subset_index_reference",
+          "Value": "/EASE_row_index"
+        },
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_36km"
+        }
+      ],
+      "_Description": "Adding a grid mapping attribute to an existing variable."
+    },
+    {
       "Applicability": {
         "Mission": "TEST_MISSION",
         "ShortNamePath": "TEST02",
@@ -208,7 +270,7 @@
       ],
       "_Description": "Adding a grid mapping attribute to an existing variable."
     },
-        {
+    {
       "Applicability": {
         "Mission": "TEST_MISSION",
         "ShortNamePath": "TEST02",
@@ -227,6 +289,114 @@
       "_Description": "Adding a grid mapping attribute to an existing variable."
     },
         {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST03",
+        "VariablePattern": "/EASE2_north_polar_projection_36km"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping_name",
+          "Value": "lambert_azimuthal_equal_area"
+        },
+        {
+          "Name": "longitude_of_projection_origin",
+          "Value": 0.0
+        },
+        {
+          "Name": "latitude_of_projection_origin",
+          "Value": 90.0
+        },
+        {
+          "Name": "false_easting",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_northing",
+          "Value": 0.0
+        },
+        {
+          "Name": "_*master_geotransform",
+          "Value": [-9000000, 36000, 0, 9000000, 0, -36000]
+        }
+      ],
+      "_Description": "Adding a new attribute-only variable with specified attributes."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST03",
+        "VariablePattern": "/EASE2_variable_missing_geotransform"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping_name",
+          "Value": "lambert_azimuthal_equal_area"
+        },
+        {
+          "Name": "longitude_of_projection_origin",
+          "Value": 0.0
+        },
+        {
+          "Name": "latitude_of_projection_origin",
+          "Value": 90.0
+        },
+        {
+          "Name": "false_easting",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_northing",
+          "Value": 0.0
+        }
+      ],
+      "_Description": "Adding a new attribute-only variable with missing _*master_geotransform attribute."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST03",
+        "VariablePattern": "/x"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "/projection_x_coordinate"
+        },
+        {
+          "Name": "_*corner_point_offsets",
+          "Value": "history_subset_index_ranges"
+        },
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_36km"
+        }
+      ],
+      "_Description": "Adding a grid mapping attribute to an existing variable."
+    },
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST03",
+        "VariablePattern": "/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "/projection_y_coordinate"
+        },
+        {
+          "Name": "_*corner_point_offsets",
+          "Value": "history_subset_index_ranges"
+        },
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_36km"
+        }
+      ],
+      "_Description": "Adding a grid mapping attribute to an existing variable."
+    },
+    {
       "Applicability": {
         "Mission": "TEST_MISSION",
         "ShortNamePath": "TEST04",
@@ -270,7 +440,7 @@
           "Value": 6356752.314245
         },
         {
-          "Name": "master_geotransform",
+          "Name": "_*master_geotransform",
           "Value": [-9000000, 3000, 0, 9000000, 0, -3000]
         }
       ],
@@ -308,7 +478,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         },
         {
@@ -350,7 +520,7 @@
           "Value": "float64"
         },
         {
-          "Name": "corner_point_offsets",
+          "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         },
         {
