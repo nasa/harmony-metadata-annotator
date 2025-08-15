@@ -68,16 +68,25 @@ SMAP L3 collections are missing spatial dimension variables. This service can ge
 
 **Temporary attributes** are identified by a `_*` prefix. They are defined in the earthdata-varinfo configuration and made available in the VarInfoFromNetCDF4 object for use in annotations. These attributes are not written to the DataTree object or the NetCDF output file.
 
-#### Required attributes
+#### Required spatial dimension attributes
 - `standard_name` — Must be either `projection_x_coordinate` or `projection_y_coordinate` (per CF conventions).
-- `grid_mapping` — References a properly configured grid mapping variable.
-- `_*master_geotransform` — Defines the grid details used to generate dimension scales and must be included in the grid mapping variable configuration.
-  **One of the following is also required**:
-  - `_*corner_point_offsets` — Indicates that the index range should be parsed from the `history` metadata attribute.
-  - `_*subset_index_reference` — Indicates that the index range should be obtained from the referenced row or column grid variable. The referenced variable must be configured as an ancillary variable in [harmony-opendap-subsetter](https://github.com/nasa/harmony-opendap-subsetter/) to ensure it is always available to the metadata-annotator.
+- `grid_mapping` — References a properly configured CRS variable ([described below](#crs-variables)).
 
+**To accommodate possible subsetting, one of the following is also required in the dimension coordinate variable configuration**:
+  - `_*corner_point_offsets: history_subset_index_ranges` — Indicates that the  subset index range should be parsed from the history metadata attribute.
+  - `_*subset_index_reference: <variable-reference>` — Indicates that the subset index range should be obtained from the referenced row or column grid variable. The referenced variable must be explicitly requested or, preferably configured as an ancillary variable in [Harmony Opendap SubSetter - varinfo confituration](https://github.com/nasa/harmony-opendap-subsetter/earthdata_varinfo_config.json) to ensure it is always available to the metadata-annotator.
 
-#### Example SPL3SMAP Metadata Override configuration for creating a spatial dimension:
+#### CRS variables
+- When used for creating spatial dimensions, the following attribute is required:
+  - `_*master_geotransform` — Defines the grid details used to generate dimension coordinates.
+
+#### Example Metadata Override configuration for creating a spatial dimension:
+The configuration example below creates the `/Soil_Moisture_Retrieval_Data/y` variable for SPL3SMAP.
+
+For the service to create a spatial dimension variable, all 3 overrides are required.
+- The first override creates `/Soil_Moisture_Retrieval_Data/y` as a new variable in the VarInfoFromNetCDF4 object.
+- The second override adds the `grid_mapping` attribute to all variables in the `/Soil_Moisture_Retrieval_Data/` group (including `/Soil_Moisture_Retrieval_Data/y`).
+- The third override creates the CRS variable and includes the `_*master_geotransform` attribute (required for creating the spatial dimension coordinates).
 ```
     {
       "Applicability": {
