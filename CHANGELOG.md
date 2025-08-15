@@ -9,8 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Adds the concept and use of temporary attribute metadata overrides. Temporary attributes can be defined in the earthdata-varinfo configuration by using a prefix of `_*` on the attribute name. The metadata-annotator makes these attributes accessible in the varinfo object to assist with other annotations, but prevents these from being written to the datatree object and netcdf output file.
-- Updates `master_geotransform`, `corner_point_offsets`, `subset_index_reference` from persistent attribute annotations to temporary attributes.
+- Adds the concept and use of temporary attribute metadata overrides. Temporary attributes can be
+  defined in the earthdata-varinfo configuration by using a prefix of `_*` on the attribute name.
+  The metadata-annotator makes these attributes accessible in the varinfo object to assist with
+  other annotations, but prevents these from being written to the datatree object and netcdf output
+  file.
+- Updates `master_geotransform`, `corner_point_offsets`, `subset_index_reference` from persistent
+  attribute annotations to temporary attributes.
+- Add Developer Notes section to README to detail the configuration required for creating spatial
+  dimension variables and explain temporary attributes.
 
 
 ## [v1.0.4] - 2025-07-22
