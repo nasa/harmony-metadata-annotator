@@ -48,7 +48,9 @@ corrections to the metadata.
 * `requirements.txt` - Contains a list of Python packages needed to run the service.
 * `tests` -  Contains the `pytest` test suite.
 
-## Local development
+## Developer Notes
+
+### Local development
 
 Local testing of service functionality can be achieved via a local instance of
 [Harmony](https://github.com/nasa/harmony) aka Harmony-In-A-Box. Please see instructions there
@@ -59,6 +61,136 @@ For local development and testing of library modifications or small functions in
 1. Create a Python virtual environment
 1. Install the dependencies in `requirements.txt`, and `tests/test_requirements.txt`
 1. Install the pre-commit hooks ([described below](#pre-commit-hooks)).
+
+### Creating spatial dimension variables
+
+SMAP L3 collections are missing spatial dimension variables. This service can generate them by using a combination of required CF-compliant attributes and temporary helper attributes.
+
+**Temporary attributes** are identified by a `_*` prefix. They are defined in the earthdata-varinfo configuration and made available in the VarInfoFromNetCDF4 object for use in annotations. These attributes are not written to the DataTree object or the NetCDF output file.
+
+#### Required spatial dimension attributes
+- `standard_name` — Must be either `projection_x_coordinate` or `projection_y_coordinate` (per CF conventions).
+- `grid_mapping` — References a properly configured CRS variable ([described below](#crs-variables)).
+
+**To accommodate possible subsetting, one of the following is also required in the dimension coordinate variable configuration**:
+  - `_*corner_point_offsets: history_subset_index_ranges` — Indicates that the  subset index range should be parsed from the history metadata attribute.
+  - `_*subset_index_reference: <variable-reference>` — Indicates that the subset index range should be obtained from the referenced row or column grid variable. The referenced variable must be explicitly requested or, preferably configured as an ancillary variable in [Harmony Opendap SubSetter - varinfo confituration](https://github.com/nasa/harmony-opendap-subsetter/earthdata_varinfo_config.json) to ensure it is always available to the metadata-annotator.
+
+#### CRS variables
+- When used for creating spatial dimensions, the following attribute is required:
+  - `_*master_geotransform` — Defines the grid details used to generate dimension coordinates.
+
+#### Example Metadata Override configuration for creating a spatial dimension:
+The configuration example below creates the `/Soil_Moisture_Retrieval_Data/y` variable for SPL3SMAP.
+
+For the service to create a spatial dimension variable, all 3 overrides are required.
+- The first override creates `/Soil_Moisture_Retrieval_Data/y` as a new variable in the VarInfoFromNetCDF4 object.
+- The second override adds the `grid_mapping` attribute to all variables in the `/Soil_Moisture_Retrieval_Data/` group (including `/Soil_Moisture_Retrieval_Data/y`).
+- The third override creates the CRS variable and includes the `_*master_geotransform` attribute (required for creating the spatial dimension coordinates).
+```
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMAP",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data/y"
+      },
+      "Attributes": [
+        {
+          "Name": "standard_name",
+          "Value": "projection_y_coordinate"
+        },
+        {
+          "Name": "long_name",
+          "Value": "y coordinate of projection"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        },
+        {
+          "Name": "units",
+          "Value": "m"
+        },
+        {
+          "Name": "type",
+          "Value": "float64"
+        },
+        {
+          "Name": "_*corner_point_offsets",
+          "Value": "history_subset_index_ranges"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMAP",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data/.*"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_global_projection_9km"
+        }
+      ],
+      "_Description": "SMAP L3 collections omit global grid mapping information"
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMAP",
+        "VariablePattern": "/EASE2_global_projection_9km"
+      },
+      "Attributes": [
+        {
+          "Name": "grid_mapping_name",
+          "Value": "lambert_cylindrical_equal_area"
+        },
+        {
+          "Name": "standard_parallel",
+          "Value": 30.0
+        },
+        {
+          "Name": "longitude_of_central_meridian",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_easting",
+          "Value": 0.0
+        },
+        {
+          "Name": "false_northing",
+          "Value": 0.0
+        },
+        {
+          "Name": "horizontal_datum_name",
+          "Value": "WGS84"
+        },
+        {
+          "Name": "inverse_flattening",
+          "Value": 298.257223563
+        },
+        {
+          "Name": "semi_major_axis",
+          "Value":  6378137.0
+        },
+        {
+          "Name": "semi_minor_axis",
+          "Value": 6356752.314245
+        },
+        {
+          "Name": "_*master_geotransform",
+          "Value": [-17367530.4451615, 9008.055210146, 0, 7314540.8306386, 0, -9008.055210146]
+        }
+      ],
+      "_Description": "Provide missing global grid mapping attributes for SMAP L3 collections."
+    },
+```
 
 ## Tests
 

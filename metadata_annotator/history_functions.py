@@ -69,16 +69,21 @@ def get_dimension_index_map(
     granule_var_info: VarInfoFromNetCDF4,
 ) -> dict[str, int]:
     """Return dimension path to start index mapping."""
-    try:
-        if not any(
-            datatree[dim].attrs.get('corner_point_offsets')
-            == 'history_subset_index_ranges'
-            for dim in dimension_variables
-        ):
-            return {}
+    # Check that all dimension variables exist in the datatree
+    for dim in dimension_variables:
+        try:
+            datatree[dim]
+        except KeyError as e:
+            raise MissingDimensionVariable(str(e)) from e
 
-    except KeyError as e:
-        raise MissingDimensionVariable(str(e)) from e
+    if not any(
+        granule_var_info.get_missing_variable_attributes(dim).get(
+            '_*corner_point_offsets'
+        )
+        == 'history_subset_index_ranges'
+        for dim in dimension_variables
+    ):
+        return {}
 
     # Read history attribute and retrieve all the variables with their corresponding
     # index ranges.

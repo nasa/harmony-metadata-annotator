@@ -190,13 +190,22 @@ def update_metadata_attributes(
         group_or_variable_path,
     )
 
+    temp_attributes = {
+        attribute_name: attribute_value
+        for attribute_name, attribute_value in matching_overrides.items()
+        if is_temporary_attribute(attribute_name)
+    }
+
     attributes_to_update = {
         attribute_name: attribute_value
         for attribute_name, attribute_value in matching_overrides.items()
-        if attribute_value is not None
+        if not is_temporary_attribute(attribute_name) and attribute_value is not None
     }
-    attributes_to_delete = set(matching_overrides.keys()) - set(
-        attributes_to_update.keys()
+
+    attributes_to_delete = (
+        set(matching_overrides.keys())
+        - set(attributes_to_update.keys())
+        - set(temp_attributes.keys())
     )
 
     datatree[group_or_variable_path].attrs.update(attributes_to_update)
@@ -207,6 +216,16 @@ def update_metadata_attributes(
         except KeyError:
             # Trying to delete a non-existent attribute should not fail
             pass
+
+
+def is_temporary_attribute(attribute_name: str) -> bool:
+    """Determine if an attribute is temporary.
+
+    Temporary attributes are attributes defined in earthdata-varinfo that are intended
+    to be used by the metadata-annotator, but not written to the output file. The prefix
+    '_*' is used to indicate whether an attribute is temporary or not.
+    """
+    return attribute_name.startswith('_*') and len(attribute_name) > 2
 
 
 def update_group_and_variable_attributes(
@@ -335,7 +354,7 @@ def update_metadata_attributes_for_data_array(
     attributes_to_update = {
         attribute_name: attribute_value
         for attribute_name, attribute_value in matching_overrides.items()
-        if attribute_value is not None
+        if not is_temporary_attribute(attribute_name) and attribute_value is not None
     }
 
     data_array.attrs.update(attributes_to_update)
@@ -364,12 +383,11 @@ def update_spatial_dimension_values(
     for variable_path in dimension_variables:
         try:
             dim_data_array = datatree[variable_path]
-
         except KeyError as e:
             raise MissingDimensionVariable(variable_path) from e
 
         grid_start_index = get_grid_start_index(
-            datatree, dim_data_array, dimension_index_map, variable_path
+            datatree, dimension_index_map, variable_path, granule_varinfo
         )
 
         dimension_size = len(dim_data_array)
@@ -395,9 +413,9 @@ def update_spatial_dimension_values(
 
 def get_grid_start_index(
     datatree: xr.DataTree,
-    dim_data_array: xr.DataArray,
     dimension_index_map: dict[str, int],
     dimension_variable_path: str,
+    granule_varinfo: VarInfoFromNetCDF4,
 ) -> tuple[int, int]:
     """Determine the grid offset for a given dimension.
 
@@ -405,12 +423,15 @@ def get_grid_start_index(
     dimension's attributes configured in earthdata-varinfo.
 
     """
-    subset_index_reference = dim_data_array.attrs.get('subset_index_reference', None)
+    var_attributes = granule_varinfo.get_missing_variable_attributes(
+        dimension_variable_path
+    )
+    subset_index_reference = var_attributes.get('_*subset_index_reference', None)
     if subset_index_reference:
         return get_start_index_from_row_col_variable(datatree, subset_index_reference)
 
     if (
-        dim_data_array.attrs.get('corner_point_offsets', None)
+        var_attributes.get('_*corner_point_offsets', None)
         == 'history_subset_index_ranges'
     ):
         return get_start_index_from_history(
@@ -467,9 +488,9 @@ def get_geotransform_config(
     if not grid_mapping_attributes:
         raise InvalidGridMappingReference(grid_mapping_reference)
 
-    geotransform_config = grid_mapping_attributes.get('master_geotransform', None)
+    geotransform_config = grid_mapping_attributes.get('_*master_geotransform', None)
     if not geotransform_config:
-        raise MissingDimensionAttribute(data_array.name, 'master_geotransform')
+        raise MissingDimensionAttribute(data_array.name, '_*master_geotransform')
 
     return geotransform_config
 

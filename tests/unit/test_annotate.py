@@ -20,6 +20,7 @@ from metadata_annotator.annotate import (
     get_spatial_dimension_variables,
     get_start_index_from_row_col_variable,
     is_exact_path,
+    is_temporary_attribute,
     update_dimension_names,
     update_dimension_variable_attributes,
     update_dimension_variables,
@@ -117,6 +118,47 @@ def test_update_metadata_attributes_deletion(sample_netcdf4_file, sample_varinfo
         )
 
 
+def test_update_metadata_attributes_ignore_temporary_variables(
+    sample_netcdf4_file, sample_varinfo
+):
+    """Ensure temporary attributes are not added to the variable."""
+    with xr.open_datatree(
+        sample_netcdf4_file, decode_times=False, decode_coords=False
+    ) as test_datatree:
+        # First call the function under test:
+        update_metadata_attributes(
+            test_datatree, '/sub_group/variable_four', sample_varinfo
+        )
+
+        # Check outputs from the function:
+        # Only coordinates should remain as "_*temp" should be ignored
+        assert set(test_datatree['/sub_group/variable_four'].attrs.keys()) == set(
+            ['coordinates']
+        )
+
+        # The coordinates was updated, so should be the value in the configuration file
+        assert (
+            test_datatree['/sub_group/variable_four'].attrs['coordinates']
+            == 'time latitude longitude'
+        )
+
+
+@pytest.mark.parametrize(
+    'attr, expected',
+    [
+        ('_*attr', True),
+        ('attr', False),
+        ('_attr', False),
+        ('*attr', False),
+        ('', False),
+        ('_*', False),
+    ],
+)
+def test_is_temporary_attribute(attr, expected):
+    """Ensure correct evaluation of temporary attributes."""
+    assert is_temporary_attribute(attr) is expected
+
+
 def test_get_matching_groups_and_variables(sample_varinfo):
     """Ensure variables matching the override rules, and missing variables are found."""
     matching_items, missing_variables = get_matching_groups_and_variables(
@@ -127,7 +169,13 @@ def test_get_matching_groups_and_variables(sample_varinfo):
     # to check: the root group, a sub group, a variable in the root group and
     # a nested variable.
     assert matching_items == set(
-        ['/', '/sub_group', '/variable_one', '/sub_group/variable_two']
+        [
+            '/',
+            '/sub_group',
+            '/variable_one',
+            '/sub_group/variable_two',
+            '/sub_group/variable_four',
+        ]
     )
 
     # The /EASE2_north_polar_projection_36km variable is specifically included in the
@@ -231,7 +279,6 @@ def test_annotate_granule_with_dimension_variable_updates(temp_output_file_path)
                     'standard_name',
                     'type',
                     'units',
-                    'corner_point_offsets',
                 ]
             )
         )
@@ -312,7 +359,6 @@ def test_create_new_variable() -> None:
                 'false_northing',
                 'grid_mapping_name',
                 'longitude_of_central_meridian',
-                'master_geotransform',
                 'standard_parallel',
                 'inverse_flattening',
                 'semi_minor_axis',
@@ -363,7 +409,6 @@ def test_update_dimension_variable_attributes() -> None:
                 'standard_name',
                 'type',
                 'units',
-                'corner_point_offsets',
             ]
         )
 
@@ -400,7 +445,6 @@ def test_update_metadata_attributes_for_data_array() -> None:
                 'standard_name',
                 'type',
                 'units',
-                'corner_point_offsets',
             ]
         )
 
@@ -453,30 +497,34 @@ def test_get_spatial_dimension_variables_no_matches(sample_netcdf4_file_test02) 
 
 
 def test_get_grid_start_index_uses_subset_index_reference(
-    sample_netcdf4_file_test02,
+    sample_netcdf4_file_test02, sample_varinfo_test02
 ) -> None:
     """Ensure the expected grid start index is returned for a given dimension."""
     with xr.open_datatree(
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
-        assert get_grid_start_index(test_datatree, test_datatree['x'], None, '/x') == 5
+        assert (
+            get_grid_start_index(test_datatree, None, '/x', sample_varinfo_test02) == 5
+        )
 
 
 def test_get_grid_start_index_uses_history_subset_index_ranges(
-    sample_netcdf4_file_test03,
+    sample_netcdf4_file_test03, sample_varinfo_test03
 ) -> None:
     """Ensure the expected grid start index is returned for a given dimension."""
     with xr.open_datatree(
         sample_netcdf4_file_test03, decode_times=False
     ) as test_datatree:
-        assert get_grid_start_index(test_datatree, test_datatree['x'], {}, '/x') == 0
+        assert get_grid_start_index(test_datatree, {}, '/x', sample_varinfo_test03) == 0
         assert (
-            get_grid_start_index(test_datatree, test_datatree['y'], {'/y': 10}, '/y')
+            get_grid_start_index(test_datatree, {'/y': 10}, '/y', sample_varinfo_test03)
             == 10
         )
 
 
-def test_get_grid_start_index_missing_configuration(sample_netcdf4_file_test02) -> None:
+def test_get_grid_start_index_missing_configuration(
+    sample_netcdf4_file_test02, sample_varinfo_test02
+) -> None:
     """Ensure the expected exception is raised when required configuration is missing.
 
     The method used to determine the grid offset index is determined based off the
@@ -490,7 +538,7 @@ def test_get_grid_start_index_missing_configuration(sample_netcdf4_file_test02) 
     ) as test_datatree:
         with pytest.raises(MissingStartIndexConfiguration):
             get_grid_start_index(
-                test_datatree, test_datatree['variable_two'], None, '/variable_two'
+                test_datatree, None, '/variable_two', sample_varinfo_test02
             )
 
 
@@ -632,7 +680,6 @@ def test_update_dimension_variables(sample_netcdf4_file_test04, sample_varinfo_t
         'axis': 'X',
         'units': 'm',
         'type': 'float64',
-        'corner_point_offsets': 'history_subset_index_ranges',
         'grid_mapping': '/EASE2_north_polar_projection_3km',
     }
     expected_y_attributes = {
@@ -642,7 +689,6 @@ def test_update_dimension_variables(sample_netcdf4_file_test04, sample_varinfo_t
         'axis': 'Y',
         'units': 'm',
         'type': 'float64',
-        'corner_point_offsets': 'history_subset_index_ranges',
         'grid_mapping': '/EASE2_north_polar_projection_3km',
     }
     expected_x_values = np.array([-8998500.0, -8995500.0, -8992500.0], dtype=np.float64)
