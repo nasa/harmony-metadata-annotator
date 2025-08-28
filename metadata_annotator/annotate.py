@@ -115,7 +115,7 @@ def amend_in_file_metadata(
         # whole `xarray.DataTree` in one operation. Making this write variables
         # and group separately reduces the memory usage, but makes the
         # operation slower. (See Harmony SMAP L2 Gridder implementation)
-        datatree.to_netcdf(output_file_name)
+        datatree.to_netcdf(output_file_name, write_inherited_coords=True)
 
 
 def get_matching_groups_and_variables(
