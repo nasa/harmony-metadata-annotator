@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Child groups no longer have dimensions propagated down from the parent. This allows panoply to plot the output fields correctly.
+- Child groups no longer have dimensions propagated down from the parent allowing panoply to plot output fields correctly.
 
 ## [v1.1.0] - 2025-08-13
 
