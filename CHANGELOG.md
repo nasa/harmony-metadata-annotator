@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- No user facing changes. Internally updates of Xarray and removal of h5netcdf.
+- No user facing changes. Internally updates xarray and removes h5netcdf dependencies.
 
 ## [v1.2.0] - 2025-09-02
 
