@@ -78,8 +78,10 @@ def amend_in_file_metadata(
     with xr.open_datatree(
         input_file_name,
         decode_times=False,
+        decode_timedelta=False,
         decode_coords=False,
-        decode_cf=False,
+        concat_characters=True,
+        use_cftime=False,
         mask_and_scale=False,
     ) as datatree:
         # Update all pre-existing variables or groups with metadata overrides including
