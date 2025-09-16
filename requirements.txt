@@ -3,5 +3,4 @@ cftime ~= 1.6.4
 earthdata-varinfo ~= 3.0.2
 harmony-service-lib ~= 2.5.0
 netCDF4 ~= 1.6.5
-xarray == 2025.8.0
-h5netcdf == 1.6.4
+xarray == 2025.9.0
