@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updates the units attribute on SMAP L3 timestamp variables to
   `seconds since 2000-01-01 11:58:55.816Z`.
 
+## [vX.Y.Z] - Unreleased
+
+### Changed
+
+- Release notes for the Metadata Annotator will now include the commit history
+  for that release.
+
 ## [v1.3.0] - 2025-09-16
 
 ### Changed
