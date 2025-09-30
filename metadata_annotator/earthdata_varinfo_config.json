@@ -1914,6 +1914,48 @@
         }
       ],
       "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
+    },
+        {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL2SMAP_S",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_(1km|3km)/.*spacecraft_overpass_time_seconds_.*"
+      },
+      "Attributes": [
+        {
+          "Name": "units",
+          "Value": "seconds since 2000-01-01 11:58:55.816Z"
+        }
+      ],
+      "_Description": "SMAP L3 timestamp variables have an incomplete units value."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FT(A|P|P_E)",
+        "VariablePattern": "/Freeze_Thaw_Retrieval_(Data|Data_Global|Data_Polar)/.*time.*"
+      },
+      "Attributes": [
+        {
+          "Name": "units",
+          "Value": "seconds since 2000-01-01 11:58:55.816Z"
+        }
+      ],
+      "_Description": "SMAP L3 timestamp variables have an incomplete units value."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SM(A|P|AP|P_E)",
+        "VariablePattern": "/Soil_Moisture_Retrieval_(Data|Data_AM|Data_PM|Data_Polar_AM|Data_Polar_PM)/.*time.*"
+      },
+      "Attributes": [
+        {
+          "Name": "units",
+          "Value": "seconds since 2000-01-01 11:58:55.816Z"
+        }
+      ],
+      "_Description": "SMAP L3 timestamp variables have an incomplete units value."
     }
   ]
 }
