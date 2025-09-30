@@ -100,6 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for a variable as specified via an `earthdata-varinfo` configuration file.
 - Initial repository setup with utility scripts and Dockerfiles.
 
+[v1.4.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.4.0
 [v1.3.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.3.0
 [v1.2.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.2.0
 [v1.1.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.1.0
