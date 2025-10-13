@@ -394,3 +394,74 @@ def sample_varinfo_test04(
     return VarInfoFromNetCDF4(
         sample_netcdf4_file, config_file=varinfo_config_file, short_name='TEST04'
     )
+
+
+@fixture(scope='function')
+def sample_netcdf4_file_test05(temp_dir) -> str:
+    """Create a sample NetCDF-4 file for testing excluding variables."""
+    file_name = path_join(temp_dir, 'test_input_05.nc')
+
+    sample_datatree = xr.DataTree(
+        xr.Dataset(
+            data_vars={
+                'string_time_utc_seconds': xr.DataArray(np.ones((3, 3))),
+                'string_time_seconds': xr.DataArray(np.ones((3, 3))),
+            },
+        )
+    )
+
+    sample_datatree['/sub_group'] = xr.Dataset(
+        data_vars={
+            'string_time_utc_seconds': xr.DataArray(np.ones((3, 3))),
+            'string_time_seconds': xr.DataArray(np.ones((3, 3))),
+        },
+    )
+
+    sample_datatree['/sub_group/nested_group'] = xr.Dataset(
+        data_vars={
+            'string_time_utc_seconds': xr.DataArray(np.ones((3, 3))),
+            'string_time_seconds': xr.DataArray(np.ones((3, 3))),
+        },
+    )
+
+    sample_datatree.to_netcdf(file_name, encoding=None)
+    return file_name
+
+
+@fixture(scope='function')
+def expected_output_netcdf4_file_test05(temp_dir) -> str:
+    """Create a sample NetCDF-4 file for testing excluding variables."""
+    file_name = path_join(temp_dir, 'test_input_05.nc')
+
+    sample_datatree = xr.DataTree(
+        xr.Dataset(
+            data_vars={
+                'string_time_seconds': xr.DataArray(np.ones((3, 3))),
+            },
+        )
+    )
+
+    sample_datatree['/sub_group'] = xr.Dataset(
+        data_vars={
+            'string_time_seconds': xr.DataArray(np.ones((3, 3))),
+        },
+    )
+
+    sample_datatree['/sub_group/nested_group'] = xr.Dataset(
+        data_vars={
+            'string_time_seconds': xr.DataArray(np.ones((3, 3))),
+        },
+    )
+
+    sample_datatree.to_netcdf(file_name, encoding=None)
+    return file_name
+
+
+@fixture(scope='function')
+def sample_varinfo_test05(
+    sample_netcdf4_file_test05, varinfo_config_file
+) -> VarInfoFromNetCDF4:
+    """Create sample VarInfoFromNetCDF4 instance."""
+    return VarInfoFromNetCDF4(
+        sample_netcdf4_file_test05, config_file=varinfo_config_file, short_name='TEST05'
+    )

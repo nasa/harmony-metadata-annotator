@@ -11,6 +11,7 @@ from varinfo import VarInfoFromNetCDF4
 from metadata_annotator.annotate import (
     annotate_granule,
     create_new_variable,
+    delete_variable,
     get_dimension_variables,
     get_geotransform_config,
     get_grid_start_index,
@@ -19,7 +20,9 @@ from metadata_annotator.annotate import (
     get_spatial_dimension_type,
     get_spatial_dimension_variables,
     get_start_index_from_row_col_variable,
+    get_variables_to_delete,
     is_exact_path,
+    is_excluded_science_variable,
     is_temporary_attribute,
     update_dimension_names,
     update_dimension_variable_attributes,
@@ -245,6 +248,31 @@ def test_annotate_granule_no_changes(
 
     with (
         xr.open_datatree(sample_netcdf4_file, decode_times=False) as expected_datatree,
+        xr.open_datatree(temp_output_file_path, decode_times=False) as results_datatree,
+    ):
+        assert results_datatree.identical(expected_datatree)
+
+
+def test_annotate_granule_variable_exclusions_only(
+    sample_netcdf4_file_test05,
+    expected_output_netcdf4_file_test05,
+    temp_output_file_path,
+    varinfo_config_file,
+    mocker,
+):
+    """Confirm that a granule with only variable exclusion configuration is updated."""
+    _ = mocker.patch('metadata_annotator.annotate.update_history_metadata')
+    annotate_granule(
+        sample_netcdf4_file_test05,
+        temp_output_file_path,
+        varinfo_config_file,
+        'TEST05',
+    )
+
+    with (
+        xr.open_datatree(
+            expected_output_netcdf4_file_test05, decode_times=False
+        ) as expected_datatree,
         xr.open_datatree(temp_output_file_path, decode_times=False) as results_datatree,
     ):
         assert results_datatree.identical(expected_datatree)
@@ -716,3 +744,65 @@ def test_update_dimension_variables(sample_netcdf4_file_test04, sample_varinfo_t
             assert np.allclose(
                 test_datatree['sub_group'].dataset['y'], expected_y_values
             )
+
+
+def test_get_variables_to_delete(sample_varinfo_test05):
+    """Ensure correct list of variables to delete is obtained."""
+    expected_result = set(
+        [
+            '/string_time_utc_seconds',
+            '/sub_group/string_time_utc_seconds',
+            '/sub_group/nested_group/string_time_utc_seconds',
+        ]
+    )
+    assert set(get_variables_to_delete(sample_varinfo_test05)) == expected_result
+
+
+def test_is_excluded_science_variable(sample_varinfo_test05):
+    """Ensure excluded science variables are determined correctly."""
+    assert is_excluded_science_variable(
+        sample_varinfo_test05, '/string_time_utc_seconds'
+    )
+    assert is_excluded_science_variable(
+        sample_varinfo_test05, '/sub_group/string_time_utc_seconds'
+    )
+    assert is_excluded_science_variable(
+        sample_varinfo_test05, '/sub_group/nested_group/string_time_utc_seconds'
+    )
+    assert not is_excluded_science_variable(
+        sample_varinfo_test05, '/string_time_seconds'
+    )
+    assert not is_excluded_science_variable(
+        sample_varinfo_test05, '/sub_group/string_time_seconds'
+    )
+    assert not is_excluded_science_variable(
+        sample_varinfo_test05, '/sub_group/nested/string_time_seconds'
+    )
+
+
+@pytest.mark.parametrize(
+    'group_name',
+    [
+        '/',
+        '/sub_group',
+        '/sub_group/nested_group',
+    ],
+)
+def test_delete_variable(sample_netcdf4_file_test05, group_name):
+    """Ensure correct variables are deleted from the datatree."""
+    with xr.open_datatree(
+        sample_netcdf4_file_test05, decode_times=False
+    ) as test_datatree:
+        variable_name = 'string_time_utc_seconds'
+        if group_name == '/':
+            full_path = f'/{variable_name}'
+        else:
+            full_path = f'{group_name}/{variable_name}'
+
+        # check that variable is in datatree before deletion
+        assert variable_name in test_datatree[group_name].ds.data_vars
+        initial_var_count = len(test_datatree[group_name].ds.data_vars)
+
+        delete_variable(test_datatree, full_path)
+        assert variable_name not in test_datatree[group_name].ds.data_vars
+        assert len(test_datatree[group_name].ds.data_vars) == initial_var_count - 1

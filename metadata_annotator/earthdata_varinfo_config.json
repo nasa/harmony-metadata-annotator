@@ -16,6 +16,26 @@
   "Mission": {
     "SPL[1234].+": "SMAP"
   },
+  "ExcludedScienceVariables": [
+    {
+      "Applicability": {
+        "Mission": "SMAP"
+      },
+      "VariablePattern": [
+	      "/.*time_utc.*"
+      ]
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FTA"
+      },
+      "VariablePattern": [
+	      "/Freeze_Thaw_Retrieval_Data/freeze_reference_date",
+	      "/Freeze_Thaw_Retrieval_Data/thaw_reference_date"
+      ]
+    }
+  ],
   "MetadataOverrides": [
     {
       "Applicability": {
@@ -1915,7 +1935,7 @@
       ],
       "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
     },
-        {
+    {
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL2SMAP_S",
