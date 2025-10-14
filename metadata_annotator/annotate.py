@@ -87,6 +87,7 @@ def amend_in_file_metadata(
         concat_characters=True,
         use_cftime=False,
         mask_and_scale=False,
+        engine='h5netcdf',
     ) as datatree:
         # Delete the excluded variables from the datatree and remove them from
         # the set of items to update
@@ -128,7 +129,7 @@ def amend_in_file_metadata(
         # whole `xarray.DataTree` in one operation. Making this write variables
         # and group separately reduces the memory usage, but makes the
         # operation slower. (See Harmony SMAP L2 Gridder implementation)
-        datatree.to_netcdf(output_file_name)
+        datatree.to_netcdf(output_file_name, engine='h5netcdf')
 
 
 def get_matching_groups_and_variables(
