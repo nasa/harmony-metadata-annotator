@@ -528,13 +528,8 @@ def get_variables_to_delete(
     var_info: VarInfoFromNetCDF4,
 ) -> list[str]:
     """Returns a list of variables to delete identified by VarInfo configuration."""
-    vars_to_delete = []
     var_list = var_info.get_all_variables()
-
-    vars_to_delete = [
-        var for var in var_list if is_excluded_science_variable(var_info, var)
-    ]
-    return vars_to_delete
+    return [var for var in var_list if is_excluded_science_variable(var_info, var)]
 
 
 def is_excluded_science_variable(var_info: VarInfoFromNetCDF4, var) -> bool:

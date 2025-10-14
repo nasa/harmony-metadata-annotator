@@ -430,7 +430,12 @@ def sample_netcdf4_file_test05(temp_dir) -> str:
 
 @fixture(scope='function')
 def expected_output_netcdf4_file_test05(temp_dir) -> str:
-    """Create a sample NetCDF-4 file for testing excluding variables."""
+    """Create a sample NetCDF-4 file for testing excluding variables.
+
+    The generated file omits the 'string_time_utc_seconds' variable from each group.
+    This ensures that the metadata annotator correctly excludes these variables
+    from its output during testing.
+    """
     file_name = path_join(temp_dir, 'test_input_05.nc')
 
     sample_datatree = xr.DataTree(
