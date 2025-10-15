@@ -46,8 +46,12 @@ def annotate_granule(
         config_file=varinfo_config_file,
     )
 
-    if len(granule_varinfo.cf_config.metadata_overrides):
-        # There are metadata overrides applicable to the granule's collection:
+    if (
+        len(granule_varinfo.cf_config.metadata_overrides)
+        or granule_varinfo.cf_config.excluded_science_variables
+    ):
+        # There are metadata overrides or excluded variables
+        # applicable to the granule's collection:
         amend_in_file_metadata(input_file_name, output_file_name, granule_varinfo)
     else:
         # There are no updates required, so copy the input file as-is:
@@ -60,10 +64,10 @@ def amend_in_file_metadata(
     """Update metadata attributes according to known rules.
 
     First, identify the variables or groups needing to be updated, or variables
-    that need to be created. Next create any missing, attribute only, variables.
-    Update the metadata attributes of all variables listed in overrides, or
-    removing any attributes with an overriding value of None. Lastly, update
-    the `history` global attribute.
+    that need to be created. Then, delete any variables that are configured to be
+    excluded. Next create any missing, attribute only, variables. Update the metadata
+    attributes of all variables listed in overrides, or removing any attributes with an
+    overriding value of None. Lastly, update the `history` global attribute.
 
     When opening the file as a DataTree, attempts to decode times, coordinates
     and other CF-Convention metadata are disabled, to allow updates to be made
@@ -74,7 +78,7 @@ def amend_in_file_metadata(
     items_to_update, variables_to_create = get_matching_groups_and_variables(
         granule_varinfo,
     )
-
+    variables_to_delete = get_variables_to_delete(granule_varinfo)
     with xr.open_datatree(
         input_file_name,
         decode_times=False,
@@ -83,7 +87,15 @@ def amend_in_file_metadata(
         concat_characters=True,
         use_cftime=False,
         mask_and_scale=False,
+        engine='h5netcdf',
     ) as datatree:
+        # Delete the excluded variables from the datatree and remove them from
+        # the set of items to update
+        for variable in variables_to_delete:
+            if variable in items_to_update:
+                items_to_update.remove(variable)
+            delete_variable(datatree, variable)
+
         # Update all pre-existing variables or groups with metadata overrides including
         # dimension renaming where applicable.
         update_group_and_variable_attributes(datatree, items_to_update, granule_varinfo)
@@ -117,7 +129,7 @@ def amend_in_file_metadata(
         # whole `xarray.DataTree` in one operation. Making this write variables
         # and group separately reduces the memory usage, but makes the
         # operation slower. (See Harmony SMAP L2 Gridder implementation)
-        datatree.to_netcdf(output_file_name)
+        datatree.to_netcdf(output_file_name, engine='h5netcdf')
 
 
 def get_matching_groups_and_variables(
@@ -510,3 +522,26 @@ def get_referenced_variables(
         )
 
     return referenced_variables
+
+
+def get_variables_to_delete(
+    var_info: VarInfoFromNetCDF4,
+) -> list[str]:
+    """Returns a list of variables to delete identified by VarInfo configuration."""
+    var_list = var_info.get_all_variables()
+    return [var for var in var_list if is_excluded_science_variable(var_info, var)]
+
+
+def is_excluded_science_variable(var_info: VarInfoFromNetCDF4, var) -> bool:
+    """Returns True if variable is explicitly excluded by VarInfo configuration."""
+    exclusions_pattern = re.compile(
+        '|'.join(var_info.cf_config.excluded_science_variables)
+    )
+    return var_info.variable_is_excluded(var, exclusions_pattern)
+
+
+def delete_variable(datatree, full_variable_path: str) -> None:
+    """Delete a variable from the DataTree."""
+    parent_group, variable_name = full_variable_path.rsplit('/', 1)
+    node = datatree[parent_group] if parent_group else datatree
+    del node[variable_name]

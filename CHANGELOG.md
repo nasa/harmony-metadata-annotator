@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.5.0] - 2025-10-13
+
+### Changed
+
+- Adds ability to exclude variables from the output using earthdata-varinfo configuration.
+- Adds configuration entries to exclude SMAP L3 string variables.
+- Changes xarray engine from default netcdf4 to h5netcdf.
+
 ## [v1.4.0] - 2025-09-30
 
 ### Changed

@@ -15,6 +15,17 @@
   "Mission": {
     "TEST\\d{2}": "TEST_MISSION"
   },
+    "ExcludedScienceVariables": [
+    {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST05"
+      },
+      "VariablePattern": [
+        "/.*time_utc.*"
+      ]
+    }
+  ],
   "MetadataOverrides": [
     {
       "Applicability": {
