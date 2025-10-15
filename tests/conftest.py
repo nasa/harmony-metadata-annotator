@@ -404,7 +404,7 @@ def sample_netcdf4_file_test05(temp_dir) -> str:
     sample_datatree = xr.DataTree(
         xr.Dataset(
             data_vars={
-                'string_time_utc_seconds': xr.DataArray(np.ones((3, 3))),
+                'string_time_utc_seconds': xr.DataArray(['time1', 'time2', 'time3']),
                 'string_time_seconds': xr.DataArray(np.ones((3, 3))),
             },
         )
@@ -412,14 +412,14 @@ def sample_netcdf4_file_test05(temp_dir) -> str:
 
     sample_datatree['/sub_group'] = xr.Dataset(
         data_vars={
-            'string_time_utc_seconds': xr.DataArray(np.ones((3, 3))),
+            'string_time_utc_seconds': xr.DataArray(['time1', 'time2', 'time3']),
             'string_time_seconds': xr.DataArray(np.ones((3, 3))),
         },
     )
 
     sample_datatree['/sub_group/nested_group'] = xr.Dataset(
         data_vars={
-            'string_time_utc_seconds': xr.DataArray(np.ones((3, 3))),
+            'string_time_utc_seconds': xr.DataArray(['time1', 'time2', 'time3']),
             'string_time_seconds': xr.DataArray(np.ones((3, 3))),
         },
     )
