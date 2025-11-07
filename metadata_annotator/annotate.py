@@ -115,12 +115,9 @@ def amend_in_file_metadata(
             )
             for variable_path in referenced_variables_to_create:
                 create_new_variable(datatree, variable_path, granule_varinfo)
-
-            dimension_variables = get_dimension_variables(datatree)
-            dimension_variables_to_create = variables_to_create & dimension_variables
-            if dimension_variables_to_create:
+            if is_dimension_renaming_required(granule_varinfo, items_to_update):
                 update_dimension_variables(
-                    datatree, dimension_variables, granule_varinfo
+                    datatree, items_to_update, variables_to_create, granule_varinfo
                 )
 
         update_history_metadata(datatree)
@@ -254,9 +251,6 @@ def update_group_and_variable_attributes(
             item_to_update,
             granule_varinfo,
         )
-        # If dimensions override attribute exists, rename the pseudo dimension names.
-        if datatree[item_to_update].attrs.get('dimensions', ''):
-            update_dimension_names(datatree, item_to_update)
 
 
 def update_dimension_names(datatree: xr.DataTree, variable_to_update: str) -> None:
@@ -311,14 +305,86 @@ def get_dimension_variables(datatree: xr.DataTree) -> set[str]:
     return dimension_variables
 
 
+def is_dimension_renaming_required(
+    var_info: VarInfoFromNetCDF4, items_to_update: set[str]
+):
+    """Determine if dimension renaming is required.
+
+    This function checks if any of the variables that have been marked for updates
+    include a `dimensions` attribute override.
+    """
+    return any(has_dimension_override(var_info, item) for item in items_to_update)
+
+
+def get_new_dimension_variables(
+    datatree: xr.DataTree, variables_to_create: set[str]
+) -> set[str]:
+    """Return the dimensions from the DataTree that are marked for creation.
+
+    For each node in the DataTree, this function checks all dataset dimensions
+    and returns those whose fully qualified paths exist in `variables_to_create`.
+    """
+    return {
+        dim_full_path
+        for node in datatree.subtree
+        for dim in node.ds.dims
+        if (dim_full_path := construct_dim_path(node.path, dim)) in variables_to_create
+    }
+
+
+def copy_shared_dimensions_to_parent(
+    datatree: xr.DataTree, variables_to_create: set[str]
+) -> None:
+    """Copy shared dimension variables to their configured parent group.
+
+    For each node in the DataTree, this function iterates over its dataset dimensions.
+    If a dimension is listed in `variables_to_create` for any parent, the dimension
+    variable is copied to the first matching parent node. This allows shared dimensions
+    to exist at higher-level groups as configured. No action is taken on dimensions that
+    are not shared between groups.
+
+    """
+    for node in datatree.subtree:
+        for dim in node.ds.dims:
+            dim_src = node.ds[dim]
+            for parent in node.parents:
+                dim_candidate_path = construct_dim_path(parent.path, dim)
+                if dim_candidate_path in variables_to_create:
+                    parent.ds = parent.ds.assign(**{dim: dim_src})
+                    break
+
+
+def construct_dim_path(parent_path: str, dim_name: str) -> str:
+    """Construct the full path to the dimension variable."""
+    return f'{parent_path}/{dim_name}' if parent_path != '/' else f'/{dim_name}'
+
+
 def update_dimension_variables(
     datatree: xr.DataTree,
-    dimension_variables: set[str],
+    items_to_update: set[str],
+    variables_to_create: set[str],
     granule_varinfo: VarInfoFromNetCDF4,
 ) -> None:
-    """Update the attributes and data values (spatial only) for dimension variables."""
+    """Update the dimensions in the DataTree.
+
+    Performs a series of updates to dimension variables in the DataTree
+    based on the varinfo configuration. The process includes:
+    - Renaming existing dimensions
+    - Creating DataTree nodes for dimensions at the configured locations
+    - Updating attributes of newly created dimension variables
+    - Updating values for spatial dimension variables
+    """
+    for item in items_to_update:
+        if has_dimension_override(granule_varinfo, item):
+            print(f'Update dimension name: {item}')
+            update_dimension_names(datatree, item)
+
+    copy_shared_dimensions_to_parent(datatree, variables_to_create)
+    dimension_variables = get_new_dimension_variables(datatree, variables_to_create)
+
     for dimension in dimension_variables:
-        update_dimension_variable_attributes(datatree, dimension, granule_varinfo)
+        ensure_dimension_node_exists(datatree, dimension)
+        update_metadata_attributes(datatree, dimension, granule_varinfo)
 
     spatial_dimension_variables = get_spatial_dimension_variables(
         datatree, dimension_variables
@@ -335,43 +401,22 @@ def update_dimension_variables(
         )
 
 
-def update_dimension_variable_attributes(
-    datatree: xr.DataTree, variable_path: str, granule_varinfo: VarInfoFromNetCDF4
-) -> None:
-    """Update attributes of a dimension variable based on json configuration."""
-    group_path, dimension_name = os.path.split(variable_path)
-    dt_group = datatree[group_path]
-    dataset = xr.Dataset(dt_group)
-    data_array = dataset[dimension_name]
-    update_metadata_attributes_for_data_array(
-        data_array, variable_path, granule_varinfo
-    )
-    dataset[dimension_name] = data_array
-    datatree[group_path] = dt_group.assign(dataset)
+def has_dimension_override(var_info, variable) -> bool:
+    """Determine if the given variable has a `dimensions` attribute override."""
+    return bool(var_info.cf_config.get_metadata_overrides(variable).get('dimensions'))
 
 
-def update_metadata_attributes_for_data_array(
-    data_array: xr.DataArray,
-    group_or_variable_path: str,
-    granule_varinfo: VarInfoFromNetCDF4,
-) -> None:
-    """Update the metadata attributes on the supplied group or variable.
+def ensure_dimension_node_exists(datatree: xr.DataTree, dimension_path: str) -> None:
+    """Ensure that a DataTree node exists for the given dimension variable path.
 
-    The attributes are updated on the data array based on the metadata
-    overrides matched by earthdata-varinfo for the requested path.
-
+    After dimensions have been renamed, a dimension variable exists in the dataset
+    but not as a corresponding node in the DataTree. This function ensures that
+    the specified dimension variable can be accessed as a DataTree node by creating
+    it if necessary.
     """
-    matching_overrides = granule_varinfo.cf_config.get_metadata_overrides(
-        group_or_variable_path,
-    )
-
-    attributes_to_update = {
-        attribute_name: attribute_value
-        for attribute_name, attribute_value in matching_overrides.items()
-        if not is_temporary_attribute(attribute_name) and attribute_value is not None
-    }
-
-    data_array.attrs.update(attributes_to_update)
+    group_path, dimension_name = os.path.split(dimension_path)
+    if dimension_name not in datatree[group_path]:
+        datatree[dimension_path] = datatree[group_path].ds[dimension_name]
 
 
 def get_spatial_dimension_variables(

@@ -926,8 +926,8 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3SM(P|P_E)",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_AM/x"
+        "ShortNamePath": "SPL3SMP$",
+        "VariablePattern": "/x"
       },
       "Attributes": [
         {
@@ -955,6 +955,10 @@
           "Value": "float64"
         },
         {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_global_projection_36km"
+        },
+        {
           "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
@@ -964,8 +968,8 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3SM(P|P_E)",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_AM/y"
+        "ShortNamePath": "SPL3SMP$",
+        "VariablePattern": "/y"
       },
       "Attributes": [
         {
@@ -993,6 +997,10 @@
           "Value": "float64"
         },
         {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_global_projection_36km"
+        },
+        {
           "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
@@ -1003,7 +1011,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SMP$",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_AM/lc_type"
+        "VariablePattern": "/lc_type"
       },
       "Attributes": [
         {
@@ -1021,109 +1029,11 @@
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variable) to clarify the dimension name"
     },
-    {
-      "Applicability": {
-        "Mission": "SMAP",
-        "ShortNamePath": "SPL3SM(P|P_E)",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_PM/x"
-      },
-      "Attributes": [
         {
-          "Name": "standard_name",
-          "Value": "projection_x_coordinate"
-        },
-        {
-          "Name": "long_name",
-          "Value": "x coordinate of projection"
-        },
-        {
-          "Name": "dimensions",
-          "Value": "x"
-        },
-        {
-          "Name": "axis",
-          "Value": "X"
-        },
-        {
-          "Name": "units",
-          "Value": "m"
-        },
-        {
-          "Name": "type",
-          "Value": "float64"
-        },
-        {
-          "Name": "_*corner_point_offsets",
-          "Value": "history_subset_index_ranges"
-        }
-      ],
-      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
-    },
-    {
-      "Applicability": {
-        "Mission": "SMAP",
-        "ShortNamePath": "SPL3SM(P|P_E)",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_PM/y"
-      },
-      "Attributes": [
-        {
-          "Name": "standard_name",
-          "Value": "projection_y_coordinate"
-        },
-        {
-          "Name": "long_name",
-          "Value": "y coordinate of projection"
-        },
-        {
-          "Name": "dimensions",
-          "Value": "y"
-        },
-        {
-          "Name": "axis",
-          "Value": "Y"
-        },
-        {
-          "Name": "units",
-          "Value": "m"
-        },
-        {
-          "Name": "type",
-          "Value": "float64"
-        },
-        {
-          "Name": "_*corner_point_offsets",
-          "Value": "history_subset_index_ranges"
-        }
-      ],
-      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
-    },
-    {
-      "Applicability": {
-        "Mission": "SMAP",
-        "ShortNamePath": "SPL3SMP$",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_PM/lc_type"
-      },
-      "Attributes": [
-        {
-          "Name": "dimensions",
-          "Value": "lc_type"
-        },
-        {
-          "Name": "long_name",
-          "Value": "land cover type"
-        },
-        {
-          "Name": "type",
-          "Value": "uint8"
-        }
-      ],
-      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variable) to clarify the dimension name"
-    },
-    {
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SMP_E",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_Polar_AM/x"
+        "VariablePattern": "/x_global"
       },
       "Attributes": [
         {
@@ -1149,6 +1059,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_global_projection_9km"
         },
         {
           "Name": "_*corner_point_offsets",
@@ -1161,7 +1075,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SMP_E",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_Polar_AM/y"
+        "VariablePattern": "/y_global"
       },
       "Attributes": [
         {
@@ -1189,6 +1103,10 @@
           "Value": "float64"
         },
         {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_global_projection_9km"
+        },
+        {
           "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
@@ -1199,7 +1117,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SMP_E",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_Polar_PM/x"
+        "VariablePattern": "/x_polar"
       },
       "Attributes": [
         {
@@ -1225,6 +1143,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_9km"
         },
         {
           "Name": "_*corner_point_offsets",
@@ -1237,7 +1159,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SMP_E",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data_Polar_PM/y"
+        "VariablePattern": "/y_polar"
       },
       "Attributes": [
         {
@@ -1263,6 +1185,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_9km"
         },
         {
           "Name": "_*corner_point_offsets",
@@ -1275,7 +1201,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/Freeze_Thaw_Retrieval_Data/x"
+        "VariablePattern": "/x"
       },
       "Attributes": [
         {
@@ -1303,93 +1229,21 @@
           "Value": "float64"
         },
         {
-          "Name": "_*corner_point_offsets",
-          "Value": "history_subset_index_ranges"
-        }
-      ],
-      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
-    },
-    {
-      "Applicability": {
-        "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTA|SPL3SMA$",
-        "VariablePattern": "/Ancillary_Data/x"
-      },
-      "Attributes": [
-        {
-          "Name": "standard_name",
-          "Value": "projection_x_coordinate"
-        },
-        {
-          "Name": "long_name",
-          "Value": "x coordinate of projection"
-        },
-        {
-          "Name": "dimensions",
-          "Value": "x"
-        },
-        {
-          "Name": "axis",
-          "Value": "X"
-        },
-        {
-          "Name": "units",
-          "Value": "m"
-        },
-        {
-          "Name": "type",
-          "Value": "float64"
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_3km"
         },
         {
           "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
-      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
-    },
-    {
-      "Applicability": {
-        "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTA|SPL3SMA$",
-        "VariablePattern": "/Radar_Data/x"
-      },
-      "Attributes": [
-        {
-          "Name": "standard_name",
-          "Value": "projection_x_coordinate"
-        },
-        {
-          "Name": "long_name",
-          "Value": "x coordinate of projection"
-        },
-        {
-          "Name": "dimensions",
-          "Value": "x"
-        },
-        {
-          "Name": "axis",
-          "Value": "X"
-        },
-        {
-          "Name": "units",
-          "Value": "m"
-        },
-        {
-          "Name": "type",
-          "Value": "float64"
-        },
-        {
-          "Name": "_*corner_point_offsets",
-          "Value": "history_subset_index_ranges"
-        }
-      ],
-      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
+      "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the X dimension."
     },
     {
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/Freeze_Thaw_Retrieval_Data/y"
+        "VariablePattern": "/y"
       },
       "Attributes": [
         {
@@ -1417,42 +1271,8 @@
           "Value": "float64"
         },
         {
-          "Name": "_*corner_point_offsets",
-          "Value": "history_subset_index_ranges"
-        }
-      ],
-      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
-    },
-    {
-      "Applicability": {
-        "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTA|SPL3SMA$",
-        "VariablePattern": "/Ancillary_Data/y"
-      },
-      "Attributes": [
-        {
-          "Name": "standard_name",
-          "Value": "projection_y_coordinate"
-        },
-        {
-          "Name": "long_name",
-          "Value": "y coordinate of projection"
-        },
-        {
-          "Name": "dimensions",
-          "Value": "y"
-        },
-        {
-          "Name": "axis",
-          "Value": "Y"
-        },
-        {
-          "Name": "units",
-          "Value": "m"
-        },
-        {
-          "Name": "type",
-          "Value": "float64"
+          "Name": "grid_mapping",
+          "Value": "/EASE2_north_polar_projection_3km"
         },
         {
           "Name": "_*corner_point_offsets",
@@ -1460,116 +1280,12 @@
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
-    },
-    {
-      "Applicability": {
-        "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTA|SPL3SMA$",
-        "VariablePattern": "/Radar_Data/y"
-      },
-      "Attributes": [
-        {
-          "Name": "standard_name",
-          "Value": "projection_y_coordinate"
-        },
-        {
-          "Name": "long_name",
-          "Value": "y coordinate of projection"
-        },
-        {
-          "Name": "dimensions",
-          "Value": "y"
-        },
-        {
-          "Name": "axis",
-          "Value": "Y"
-        },
-        {
-          "Name": "units",
-          "Value": "m"
-        },
-        {
-          "Name": "type",
-          "Value": "float64"
-        },
-        {
-          "Name": "_*corner_point_offsets",
-          "Value": "history_subset_index_ranges"
-        }
-      ],
-      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
-    },
-    {
-      "Applicability": {
-        "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/Freeze_Thaw_Retrieval_Data/am_pm"
-      },
-      "Attributes": [
-        {
-          "Name": "dimensions",
-          "Value": "am_pm"
-        },
-        {
-          "Name": "long_name",
-          "Value": "AM-PM dimension of size 2, 0 => AM, 1=> PM"
-        },
-        {
-          "Name": "type",
-          "Value": "uint8"
-        }
-      ],
-      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to clarify the dimension name"
-    },
-    {
-      "Applicability": {
-        "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/Ancillary_Data/am_pm"
-      },
-      "Attributes": [
-        {
-          "Name": "dimensions",
-          "Value": "am_pm"
-        },
-        {
-          "Name": "long_name",
-          "Value": "AM-PM dimension of size 2, 0 => AM, 1=> PM"
-        },
-        {
-          "Name": "type",
-          "Value": "uint8"
-        }
-      ],
-      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to clarify the dimension name"
-    },
-    {
-      "Applicability": {
-        "Mission": "SMAP",
-        "ShortNamePath": "SPL3FTA",
-        "VariablePattern": "/Radar_Data/am_pm"
-      },
-      "Attributes": [
-        {
-          "Name": "dimensions",
-          "Value": "am_pm"
-        },
-        {
-          "Name": "long_name",
-          "Value": "AM-PM dimension of size 2, 0 => AM, 1=> PM"
-        },
-        {
-          "Name": "type",
-          "Value": "uint8"
-        }
-      ],
-      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to clarify the dimension name"
     },
     {
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SMA$",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data/x"
+        "VariablePattern": "/x"
       },
       "Attributes": [
         {
@@ -1595,6 +1311,10 @@
         {
           "Name": "type",
           "Value": "float64"
+        },
+        {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_global_projection_3km"
         },
         {
           "Name": "_*corner_point_offsets",
@@ -1607,7 +1327,7 @@
       "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3SMA$",
-        "VariablePattern": "/Soil_Moisture_Retrieval_Data/y"
+        "VariablePattern": "/y"
       },
       "Attributes": [
         {
@@ -1635,11 +1355,37 @@
           "Value": "float64"
         },
         {
+          "Name": "grid_mapping",
+          "Value": "/EASE2_global_projection_3km"
+        },
+        {
           "Name": "_*corner_point_offsets",
           "Value": "history_subset_index_ranges"
         }
       ],
       "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3FTA",
+        "VariablePattern": "/am_pm"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "am_pm"
+        },
+        {
+          "Name": "long_name",
+          "Value": "AM-PM dimension of size 2, 0 => AM, 1=> PM"
+        },
+        {
+          "Name": "type",
+          "Value": "uint8"
+        }
+      ],
+      "_Description": "The pseudo-dimension variable is here supplemented with variable attributes (as if it was a dimension variables) to clarify the dimension name"
     },
     {
       "Applicability": {
@@ -1840,13 +1586,41 @@
     {
       "Applicability": {
         "Mission": "SMAP",
-        "ShortNamePath": "SPL3SM(AP|P_E)|SPL2SMAP_S",
+        "ShortNamePath": "SPL3SMAP|SPL2SMAP_S",
         "VariablePattern": "/Soil_Moisture_Retrieval_(?:Data(?:_AM|_Polar_AM|_PM|_Polar_PM|_1km|_3km)?)/(?!x$|y$).+$"
       },
       "Attributes": [
         {
           "Name": "dimensions",
           "Value": "y x"
+        }
+      ],
+      "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMP_E",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_(AM|PM)/.*"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "y_global x_global"
+        }
+      ],
+      "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
+    },
+    {
+      "Applicability": {
+        "Mission": "SMAP",
+        "ShortNamePath": "SPL3SMP_E",
+        "VariablePattern": "/Soil_Moisture_Retrieval_Data_Polar_(AM|PM)/.*"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "y_polar x_polar"
         }
       ],
       "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."

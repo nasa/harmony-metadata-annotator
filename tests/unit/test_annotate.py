@@ -1,5 +1,6 @@
 """Tests for metadata_annotator.annotate.py."""
 
+import os
 from unittest.mock import patch
 
 import numpy as np
@@ -10,26 +11,29 @@ from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.annotate import (
     annotate_granule,
+    construct_dim_path,
+    copy_shared_dimensions_to_parent,
     create_new_variable,
     delete_variable,
+    ensure_dimension_node_exists,
     get_dimension_variables,
     get_geotransform_config,
     get_grid_start_index,
     get_matching_groups_and_variables,
+    get_new_dimension_variables,
     get_referenced_variables,
     get_spatial_dimension_type,
     get_spatial_dimension_variables,
     get_start_index_from_row_col_variable,
     get_variables_to_delete,
+    has_dimension_override,
     is_exact_path,
     is_excluded_science_variable,
     is_temporary_attribute,
     update_dimension_names,
-    update_dimension_variable_attributes,
     update_dimension_variables,
     update_group_and_variable_attributes,
     update_metadata_attributes,
-    update_metadata_attributes_for_data_array,
     update_spatial_dimension_values,
 )
 from metadata_annotator.exceptions import (
@@ -337,11 +341,6 @@ def test_update_group_and_variable_attributes() -> None:
             for item in ['grid_mapping', 'dimensions']
         )
 
-        # Check dimension renames are as expected.
-        assert set(
-            datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'].dims
-        ) == set(['am_pm', 'y', 'x'])
-
 
 def test_update_dimension_names() -> None:
     """Verify that the dimension names are renamed as expected."""
@@ -405,74 +404,6 @@ def test_get_dimension_variables() -> set[str]:
                 '/Freeze_Thaw_Retrieval_Data_Global/dim0',
                 '/Freeze_Thaw_Retrieval_Data_Global/dim1',
                 '/Freeze_Thaw_Retrieval_Data_Global/dim2',
-            ]
-        )
-
-
-def test_update_dimension_variable_attributes() -> None:
-    """Ensure attributes of a dimension variable are updated as expected."""
-    with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
-        granule_varinfo = VarInfoFromNetCDF4(
-            'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
-            short_name='SPL3FTP',
-            config_file='metadata_annotator/earthdata_varinfo_config.json',
-        )
-        # Rename the dim variables.
-        da = datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag']
-        renamed_da = da.rename({'dim0': 'am_pm', 'dim1': 'y', 'dim2': 'x'})
-        datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'] = renamed_da
-
-        update_dimension_variable_attributes(
-            datatree, '/Freeze_Thaw_Retrieval_Data_Global/y', granule_varinfo
-        )
-        # Ensure that the attributes are updated.
-        assert set(
-            datatree['/Freeze_Thaw_Retrieval_Data_Global'].dataset['y'].attrs
-        ) == set(
-            [
-                'axis',
-                'dimensions',
-                'grid_mapping',
-                'long_name',
-                'standard_name',
-                'type',
-                'units',
-            ]
-        )
-
-
-def test_update_metadata_attributes_for_data_array() -> None:
-    """Update the metadata attributes on the supplied group or variable.
-
-    The attributes are updated on the data array based on the metadata
-    overrides matched by earthdata-varinfo for the requested path.
-
-    """
-    with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as datatree:
-        granule_varinfo = VarInfoFromNetCDF4(
-            'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
-            short_name='SPL3FTP',
-            config_file='metadata_annotator/earthdata_varinfo_config.json',
-        )
-        # Rename the dimension variables.
-        da = datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag']
-        renamed_da = da.rename({'dim0': 'am_pm', 'dim1': 'y', 'dim2': 'x'})
-        datatree['/Freeze_Thaw_Retrieval_Data_Global/surface_flag'] = renamed_da
-        ds = xr.Dataset(datatree['/Freeze_Thaw_Retrieval_Data_Global'])
-        da_dim = ds['x']
-        update_metadata_attributes_for_data_array(
-            da_dim, '/Freeze_Thaw_Retrieval_Data_Global/x', granule_varinfo
-        )
-        # Ensure that the expected attributes are updated.
-        assert set(da_dim.attrs) == set(
-            [
-                'axis',
-                'dimensions',
-                'grid_mapping',
-                'long_name',
-                'standard_name',
-                'type',
-                'units',
             ]
         )
 
@@ -728,9 +659,13 @@ def test_update_dimension_variables(sample_netcdf4_file_test04, sample_varinfo_t
         with xr.open_datatree(
             sample_netcdf4_file_test04, decode_times=False
         ) as test_datatree:
-            dimension_variables = {'/sub_group/x', '/sub_group/y'}
+            variables_to_create = {'/sub_group/x', '/sub_group/y'}
+            items_to_update = {'/sub_group/variable_one'}
             update_dimension_variables(
-                test_datatree, dimension_variables, sample_varinfo_test04
+                test_datatree,
+                items_to_update,
+                variables_to_create,
+                sample_varinfo_test04,
             )
             assert (
                 test_datatree['sub_group'].dataset['x'].attrs == expected_x_attributes
@@ -806,3 +741,85 @@ def test_delete_variable(sample_netcdf4_file_test05, group_name):
         delete_variable(test_datatree, full_path)
         assert variable_name not in test_datatree[group_name].ds.data_vars
         assert len(test_datatree[group_name].ds.data_vars) == initial_var_count - 1
+
+
+@pytest.mark.parametrize(
+    'ancestor_path, dim_name, expected',
+    [('/', 'x', '/x'), ('/sub_group', 'x', '/sub_group/x')],
+)
+def test_construct_dim_path(ancestor_path, dim_name, expected):
+    """Verify the correct full dimension path is constructed."""
+    assert construct_dim_path(ancestor_path, dim_name) == expected
+
+
+@pytest.mark.parametrize(
+    'variable_path, expected', [('/variable_one', True), ('/variable_two', False)]
+)
+def test_has_dimension_override(sample_varinfo_test06, variable_path, expected):
+    """Ensure variables correctly evaluated to contain non-null dimensions override."""
+    assert has_dimension_override(sample_varinfo_test06, variable_path) == expected
+
+
+@pytest.mark.parametrize(
+    'variables_to_create, expected',
+    [
+        (
+            {'/x_root', '/y_root', '/sub_group/x', '/sub_group/y'},
+            {'/x_root', '/y_root', '/sub_group/x', '/sub_group/y'},
+        ),
+        ({'/x_root', '/y_root'}, {'/x_root', '/y_root'}),
+        ({'/sub_group/x', '/sub_group/y'}, {'/sub_group/x', '/sub_group/y'}),
+        (set(), set()),
+    ],
+)
+def test_get_new_dimension_variables(
+    sample_netcdf4_file_test07, variables_to_create, expected
+):
+    """Ensure the correct dimensions are returned.
+
+    This test ensures that the dimension variables present in both the datatree and the
+    `variables_to_create` set are returned.
+    """
+    with xr.open_datatree(sample_netcdf4_file_test07) as test_datatree:
+        assert (
+            get_new_dimension_variables(test_datatree, variables_to_create) == expected
+        )
+
+
+@pytest.mark.parametrize(
+    'variable_path',
+    [
+        ('/x_root'),
+        ('/y_root'),
+        ('/sub_group/x'),
+        ('/sub_group/y'),
+    ],
+)
+def test_ensure_dimension_node_exists(sample_netcdf4_file_test07, variable_path):
+    """Verify a DataTree node is created for a dimension variable.
+
+    For each dimension path, the test confirms that the variable does not initially
+    exist as a node in the corresponding group, then ensures that the function
+    creates it successfully.
+    """
+    with xr.open_datatree(sample_netcdf4_file_test07) as datatree:
+        group_path, variable_name = os.path.split(variable_path)
+        assert variable_name not in datatree[group_path]
+        ensure_dimension_node_exists(datatree, variable_path)
+        assert variable_name in datatree[group_path]
+
+
+def test_copy_shared_dimensions_to_parent(sample_netcdf4_file_test08):
+    """Ensure dimension variables are copied to their configured parent group."""
+    with xr.open_datatree(sample_netcdf4_file_test08) as test_datatree:
+        variables_to_create = set(['/x', '/y'])
+        # This inital check confirms the dimension variables are not present in the
+        # configured parent group before being processed.
+        for variable in variables_to_create:
+            group_path, variable_name = os.path.split(variable)
+            assert variable_name not in test_datatree[group_path]
+
+        copy_shared_dimensions_to_parent(test_datatree, variables_to_create)
+        for variable in variables_to_create:
+            group_path, variable_name = os.path.split(variable)
+            assert variable_name in test_datatree[group_path]
