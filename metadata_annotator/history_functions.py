@@ -90,8 +90,9 @@ def get_dimension_index_map(
     variable_start_indices_map = parse_start_indices_from_history_attr(datatree)
 
     # Retrieve the mapping of requested variables and the corresponding dimension paths
-    variable_dimension_map = get_variable_dimension_map(granule_var_info)
-
+    variable_dimension_map = get_variable_dimension_map(
+        granule_var_info, datatree, dimension_variables
+    )
     # Retrieve the mapping from the dimension variable to the start index
     dimension_index_map = get_dim_index_from_var_dim_map(
         variable_dimension_map, variable_start_indices_map
@@ -125,14 +126,49 @@ def parse_start_indices_from_history_attr(datatree: xr.DataTree) -> dict[str, st
 
 def get_variable_dimension_map(
     granule_var_info: VarInfoFromNetCDF4,
+    datatree: xr.DataTree,
+    dimension_variables: set[str],
 ) -> dict[tuple, str]:
-    """Return a mapping from dimensions list to a requested variable."""
+    """Return a mapping from dimensions list to a requested variable.
+
+    Note that this function utilizes a temporary solution for location up-level (shared)
+    dimension variables by updating the dimension map returned by the earthdata-varinfo
+    method `group_variables_by_dimensions`. This should remain place until
+    earthdata-varinfo supports up-level dimensions.
+    """
     var_dim_map = {
         dimlist: list(varlist)[0]
         for dimlist, varlist in granule_var_info.group_variables_by_dimensions().items()
     }
 
-    return var_dim_map
+    # Identify dimensions that have been created up-level and update map
+    updated_map = {}
+    for dim_list, var_path in var_dim_map.items():
+        new_dim_list = []
+        for dim in dim_list:
+            if dim in dimension_variables:
+                new_dim_list.append(dim)
+                continue
+
+            group_path, dimension_name = os.path.split(dim)
+            new_dim = None
+            for parent in datatree[group_path].parents:
+                parent_dim_path = (
+                    f'{parent.path}/{dimension_name}'
+                    if parent.path != '/'
+                    else f'/{dimension_name}'
+                )
+                if parent_dim_path in dimension_variables:
+                    new_dim = parent_dim_path
+                    break
+
+            if not new_dim:
+                raise MissingDimensionVariable(dim)
+            new_dim_list.append(new_dim)
+
+        updated_map[tuple(new_dim_list)] = var_path
+
+    return updated_map
 
 
 def get_dim_index_from_var_dim_map(
