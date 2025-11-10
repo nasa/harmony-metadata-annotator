@@ -229,9 +229,13 @@
         {
           "Name": "grid_mapping",
           "Value": "/EASE2_global_projection_3km"
+        },
+        {
+          "Name": "dimensions",
+          "Value": "y x"
         }
       ],
-      "_Description": "SMAP L3 collections omit global grid mapping information"
+      "_Description": "SMAP L3 collections omit global grid mapping information. Additionally, SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
     },
     {
       "Applicability": {
@@ -1621,20 +1625,6 @@
         {
           "Name": "dimensions",
           "Value": "y_polar x_polar"
-        }
-      ],
-      "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
-    },
-    {
-      "Applicability": {
-        "Mission": "SMAP",
-        "ShortNamePath": "SPL3SMA$",
-        "VariablePattern": "/(Soil_Moisture_Retrieval_Data|Radar_Data|Ancillary_Data)/.*"
-      },
-      "Attributes": [
-        {
-          "Name": "dimensions",
-          "Value": "y x"
         }
       ],
       "_Description": "SMAP L3 data are HDF5 and without dimension settings. Overrides here define the dimensions, a useful reference name, and critically, the dimension order."
