@@ -550,10 +550,10 @@
       "Attributes": [
         {
           "Name": "dimensions",
-          "Value": "y X"
+          "Value": "y x"
         }
       ],
-      "_Description": ""
+      "_Description": "Dimensions override used to rename dimensions"
     },
       {
       "Applicability": {

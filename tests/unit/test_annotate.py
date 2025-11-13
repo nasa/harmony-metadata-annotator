@@ -1,6 +1,7 @@
 """Tests for metadata_annotator.annotate.py."""
 
-import os
+from os.path import join as path_join
+from os.path import split as path_split
 from unittest.mock import patch
 
 import numpy as np
@@ -630,8 +631,37 @@ def test_get_referenced_variables(sample_varinfo_test02):
     )
 
 
-def test_update_dimension_variables(sample_netcdf4_file_test04, sample_varinfo_test04):
+def test_update_dimension_variables(
+    varinfo_config_file,
+    temp_dir,
+):
     """Ensure the dimension variables are updated correctly."""
+    file_name = path_join(temp_dir, 'test_input_04.nc')
+    sample_datatree = xr.DataTree(xr.Dataset())
+    sample_datatree['/sub_group'] = xr.Dataset(
+        attrs={'short_name': 'TEST04'},
+        data_vars={
+            'variable_one': xr.DataArray(
+                np.ones((3, 3)),
+                attrs={'dimensions': 'y x'},
+                dims=['y_old', 'x_old'],
+            ),
+            'x_old': xr.DataArray(
+                np.array([0, 1, 2]),
+                dims=['x_old'],
+            ),
+            'y_old': xr.DataArray(
+                np.array([0, 1, 2]),
+                dims=['y_old'],
+            ),
+        },
+    )
+    sample_datatree.to_netcdf(file_name, encoding=None)
+
+    varinfo = VarInfoFromNetCDF4(
+        file_name, config_file=varinfo_config_file, short_name='TEST04'
+    )
+
     expected_x_attributes = {
         'standard_name': 'projection_x_coordinate',
         'long_name': 'x coordinate of projection',
@@ -656,16 +686,14 @@ def test_update_dimension_variables(sample_netcdf4_file_test04, sample_varinfo_t
         'metadata_annotator.annotate.get_dimension_index_map',
         return_value={'/sub_group/y': 0, '/sub_group/x': 0},
     ):
-        with xr.open_datatree(
-            sample_netcdf4_file_test04, decode_times=False
-        ) as test_datatree:
+        with xr.open_datatree(file_name, decode_times=False) as test_datatree:
             variables_to_create = {'/sub_group/x', '/sub_group/y'}
             items_to_update = {'/sub_group/variable_one'}
             update_dimension_variables(
                 test_datatree,
                 items_to_update,
                 variables_to_create,
-                sample_varinfo_test04,
+                varinfo,
             )
             assert (
                 test_datatree['sub_group'].dataset['x'].attrs == expected_x_attributes
@@ -755,20 +783,32 @@ def test_construct_dim_path(ancestor_path, dim_name, expected):
 @pytest.mark.parametrize(
     'variable_path, expected', [('/variable_one', True), ('/variable_two', False)]
 )
-def test_has_dimension_override(sample_varinfo_test06, variable_path, expected):
+def test_has_dimension_override(varinfo_config_file, temp_dir, variable_path, expected):
     """Ensure variables correctly evaluated to contain non-null dimensions override."""
-    assert has_dimension_override(sample_varinfo_test06, variable_path) == expected
+    file_name = path_join(temp_dir, 'test_input.nc')
+    sample_datatree = xr.DataTree(
+        dataset=xr.Dataset(
+            attrs={'short_name': 'TEST06'},
+            data_vars={
+                'variable_one': xr.DataArray([]),
+                'variable_two': xr.DataArray([]),
+            },
+        ),
+    )
+    sample_datatree.to_netcdf(file_name, encoding=None)
+    varinfo = VarInfoFromNetCDF4(
+        file_name, config_file=varinfo_config_file, short_name='TEST06'
+    )
+    assert has_dimension_override(varinfo, variable_path) == expected
 
 
 @pytest.mark.parametrize(
     'variables_to_create, expected',
     [
         (
-            {'/x_root', '/y_root', '/sub_group/x', '/sub_group/y'},
-            {'/x_root', '/y_root', '/sub_group/x', '/sub_group/y'},
+            {'/y_root', '/sub_group/y', '/missing/dimension/z'},
+            {'/y_root', '/sub_group/y'},
         ),
-        ({'/x_root', '/y_root'}, {'/x_root', '/y_root'}),
-        ({'/sub_group/x', '/sub_group/y'}, {'/sub_group/x', '/sub_group/y'}),
         (set(), set()),
     ],
 )
@@ -803,23 +843,29 @@ def test_ensure_dimension_node_exists(sample_netcdf4_file_test07, variable_path)
     creates it successfully.
     """
     with xr.open_datatree(sample_netcdf4_file_test07) as datatree:
-        group_path, variable_name = os.path.split(variable_path)
+        group_path, variable_name = path_split(variable_path)
         assert variable_name not in datatree[group_path]
         ensure_dimension_node_exists(datatree, variable_path)
         assert variable_name in datatree[group_path]
 
 
-def test_copy_shared_dimensions_to_parent(sample_netcdf4_file_test08):
+def test_copy_shared_dimensions_to_parent(temp_dir):
     """Ensure dimension variables are copied to their configured parent group."""
-    with xr.open_datatree(sample_netcdf4_file_test08) as test_datatree:
+    file_name = path_join(temp_dir, 'test_input.nc')
+    sample_datatree = xr.DataTree(dataset=xr.Dataset())
+    sample_datatree['/sub_group'] = xr.Dataset(
+        data_vars={'variable_one': xr.DataArray(np.ones((3, 3)), dims=['y', 'x'])}
+    )
+    sample_datatree.to_netcdf(file_name, encoding=None)
+    with xr.open_datatree(file_name) as test_datatree:
         variables_to_create = set(['/x', '/y'])
         # This inital check confirms the dimension variables are not present in the
         # configured parent group before being processed.
         for variable in variables_to_create:
-            group_path, variable_name = os.path.split(variable)
+            group_path, variable_name = path_split(variable)
             assert variable_name not in test_datatree[group_path]
 
         copy_shared_dimensions_to_parent(test_datatree, variables_to_create)
         for variable in variables_to_create:
-            group_path, variable_name = os.path.split(variable)
+            group_path, variable_name = path_split(variable)
             assert variable_name in test_datatree[group_path]
