@@ -141,6 +141,10 @@ def get_variable_dimension_map(
         for dimlist, varlist in granule_var_info.group_variables_by_dimensions().items()
     }
 
+    def construct_dim_path(parent_path: str, dim_name: str) -> str:
+        """Construct the full path to the dimension variable."""
+        return f'{parent_path}/{dim_name}' if parent_path != '/' else f'/{dim_name}'
+
     # Identify dimensions that have been created up-level and update map
     updated_map = {}
     for dim_list, var_path in var_dim_map.items():
@@ -153,11 +157,7 @@ def get_variable_dimension_map(
             group_path, dimension_name = os.path.split(dim)
             new_dim = None
             for parent in datatree[group_path].parents:
-                parent_dim_path = (
-                    f'{parent.path}/{dimension_name}'
-                    if parent.path != '/'
-                    else f'/{dimension_name}'
-                )
+                parent_dim_path = construct_dim_path(parent.path, dimension_name)
                 if parent_dim_path in dimension_variables:
                     new_dim = parent_dim_path
                     break
