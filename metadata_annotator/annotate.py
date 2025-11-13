@@ -324,12 +324,13 @@ def get_new_dimension_variables(
     For each node in the DataTree, this function checks all dataset dimensions
     and returns those whose fully qualified paths exist in `variables_to_create`.
     """
-    return {
-        dim_full_path
-        for node in datatree.subtree
-        for dim in node.ds.dims
-        if (dim_full_path := construct_dim_path(node.path, dim)) in variables_to_create
-    }
+    new_dimension_variables = set()
+    for node in datatree.subtree:
+        for dim in node.ds.dims:
+            dim_path = construct_dim_path(node.path, dim)
+            if dim_path in variables_to_create:
+                new_dimension_variables.add(dim_path)
+    return new_dimension_variables
 
 
 def copy_shared_dimensions_to_parent(
@@ -350,7 +351,7 @@ def copy_shared_dimensions_to_parent(
             for parent in node.parents:
                 dim_candidate_path = construct_dim_path(parent.path, dim)
                 if dim_candidate_path in variables_to_create:
-                    parent.ds = parent.ds.assign(**{dim: dim_src})
+                    parent.ds = parent.ds.assign({dim: dim_src})
                     break
 
 
