@@ -1058,7 +1058,7 @@
         },
         {
           "Name": "dimensions",
-          "Value": "x"
+          "Value": "x_global"
         },
         {
           "Name": "axis",
@@ -1100,7 +1100,7 @@
         },
         {
           "Name": "dimensions",
-          "Value": "y"
+          "Value": "y_global"
         },
         {
           "Name": "axis",
@@ -1142,7 +1142,7 @@
         },
         {
           "Name": "dimensions",
-          "Value": "x"
+          "Value": "x_polar"
         },
         {
           "Name": "axis",
@@ -1184,7 +1184,7 @@
         },
         {
           "Name": "dimensions",
-          "Value": "y"
+          "Value": "y_polar"
         },
         {
           "Name": "axis",
