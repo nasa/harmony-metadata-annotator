@@ -540,6 +540,34 @@
         }
       ],
       "_Description": "The pseudo-dimension variable is supplemented with variable attributes (as if it was a dimension variables) to fully specify the Y dimension."
+    },
+        {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST04",
+        "VariablePattern": "/sub_group/variable_one"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "y x"
+        }
+      ],
+      "_Description": "Dimensions override used to rename dimensions"
+    },
+      {
+      "Applicability": {
+        "Mission": "TEST_MISSION",
+        "ShortNamePath": "TEST06",
+        "VariablePattern": "/variable_one"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "x"
+        }
+      ],
+      "_Description": "Dimensions override used to rename dimensions"
     }
   ]
 }

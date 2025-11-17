@@ -131,13 +131,16 @@ def test_parse_start_indices_from_history_attr(sample_netcdf4_file) -> None:
 
 def test_get_variable_dimension_map() -> None:
     """Ensure that the correct dimensions list is returned for requested variables."""
-    # with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as dtree:
     granule_varinfo = VarInfoFromNetCDF4(
         'tests/data/SC_SPL3FTP_spatially_subsetted.nc4',
         short_name='SPL3FTP',
         config_file='metadata_annotator/earthdata_varinfo_config.json',
     )
-    variable_dimensions_dict = get_variable_dimension_map(granule_varinfo)
+    dimension_variables = {
+        '/Freeze_Thaw_Retrieval_Data_Global/am_pm',
+        '/Freeze_Thaw_Retrieval_Data_Global/y',
+        '/Freeze_Thaw_Retrieval_Data_Global/x',
+    }
     expected_dimensions = tuple(
         [
             '/Freeze_Thaw_Retrieval_Data_Global/am_pm',
@@ -151,6 +154,10 @@ def test_get_variable_dimension_map() -> None:
         '/Freeze_Thaw_Retrieval_Data_Global/longitude',
         '/Freeze_Thaw_Retrieval_Data_Global/surface_flag',
     }
+    with xr.open_datatree('tests/data/SC_SPL3FTP_spatially_subsetted.nc4') as dtree:
+        variable_dimensions_dict = get_variable_dimension_map(
+            granule_varinfo, dtree, dimension_variables
+        )
 
     assert variable_dimensions_dict[expected_dimensions] in expected_variables
 

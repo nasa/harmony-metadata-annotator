@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.6.0] - 2025-11-07
+
+### Changed
+
+- Adds ability to create dimensions shared between groups.
+- Adds configuration entries to create shared dimensions at the root level for SPL3SMP, SPL3SMP_E,
+  SPL3FTA, and SPL3SMA.
+
 ## [v1.5.0] - 2025-10-13
 
 ### Changed
@@ -115,6 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for a variable as specified via an `earthdata-varinfo` configuration file.
 - Initial repository setup with utility scripts and Dockerfiles.
 
+[v1.6.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.6.0
 [v1.5.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.5.0
 [v1.4.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.4.0
 [v1.3.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.3.0
