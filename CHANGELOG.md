@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Add history_json attributes to NetCDF4 output file.
+- Metadata Annotator adds and updates history_json attributes to HDF5 and NetCDF4
+ output file
 
 ## [v1.6.0] - 2025-11-07
 
