@@ -120,7 +120,7 @@ def amend_in_file_metadata(
                     datatree, items_to_update, variables_to_create, granule_varinfo
                 )
 
-        update_history_metadata(datatree)
+        update_history_metadata(input_file_name, datatree)
 
         # Future improvement: It is memory intensive to try and write out the
         # whole `xarray.DataTree` in one operation. Making this write variables
