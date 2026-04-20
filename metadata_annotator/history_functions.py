@@ -159,7 +159,7 @@ def create_history_json_record(granule_url: str) -> dict:
     """
     history_json_record = {
         '$schema': HISTORY_JSON_SCHEMA,
-        'date_time': datetime.utcnow().replace(tzinfo=timezone.utc).isoformat(),
+        'date_time': datetime.now(timezone.utc).isoformat(),
         'program': PROGRAM,
         'version': get_semantic_version(),
         'derived_from': granule_url,
