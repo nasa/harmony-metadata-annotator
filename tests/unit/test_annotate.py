@@ -201,6 +201,7 @@ def test_annotate_granule(
     expected_output_netcdf4_file,
     temp_output_file_path,
     varinfo_config_file,
+    temp_dir,
     mocker,
 ):
     """Confirm that a granule has all metadata updated as expected.
@@ -219,6 +220,13 @@ def test_annotate_granule(
         'metadata_annotator.annotate.get_dimension_index_map'
     )
     get_dimension_index_map_mock.return_value = None
+
+    get_request_url_attribute_mock = mocker.patch(
+        'metadata_annotator.history_functions.get_request_url_attribute'
+    )
+    get_request_url_attribute_mock.return_value = path_join(
+        temp_dir, 'expected_output.nc'
+    )
 
     annotate_granule(
         sample_netcdf4_file, temp_output_file_path, varinfo_config_file, 'TEST01'

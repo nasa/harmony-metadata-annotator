@@ -1,5 +1,7 @@
 """Tests for metadata_annotator.history_functions.py."""
 
+import json
+
 import pytest
 import xarray as xr
 from freezegun import freeze_time
@@ -11,6 +13,7 @@ from metadata_annotator.history_functions import (
     get_dim_index_from_var_dim_map,
     get_dimension_index_map,
     get_index_range_substring,
+    get_request_url_attribute,
     get_semantic_version,
     get_start_index_from_history,
     get_variable_dimension_map,
@@ -24,7 +27,7 @@ def test_update_history_metadata_no_input_history(sample_netcdf4_file):
     """A new history attribute should be created."""
     with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
         # Invoke the function under test:
-        update_history_metadata(test_datatree)
+        update_history_metadata(sample_netcdf4_file, test_datatree)
 
         # Check output from the function:
         assert 'history' in test_datatree.attrs
@@ -43,7 +46,7 @@ def test_update_history_metadata_append_to_existing(sample_netcdf4_file):
         test_datatree.attrs['history'] = '1999-01-01T00 File creation v1'
 
         # Now invoke the function under test:
-        update_history_metadata(test_datatree)
+        update_history_metadata(sample_netcdf4_file, test_datatree)
 
         # Check output from the function:
         assert 'history' in test_datatree.attrs
@@ -62,7 +65,7 @@ def test_update_history_metadata_existing_uppercase(sample_netcdf4_file):
         test_datatree.attrs['History'] = '1999-01-01T00 File creation v1'
 
         # Now invoke the function under test:
-        update_history_metadata(test_datatree)
+        update_history_metadata(sample_netcdf4_file, test_datatree)
 
         # Check output from the function:
         assert 'History' in test_datatree.attrs
@@ -284,3 +287,28 @@ def test_get_start_index_from_history() -> None:
         )
         == 0
     )
+
+
+def test_get_request_url_attribute(sample_netcdf4_file):
+    """Test parameter and fallback scenarios for request_url extraction."""
+    with xr.open_datatree(sample_netcdf4_file, decode_times=False) as test_datatree:
+        # history_json is present, parameters is a dict, but NO request_url
+        history_data_no_url = {
+            'parameters': [
+                {'some_other_key': 'some_value'},
+                {'some_other_key2': 'some_value2'},
+            ]
+        }
+        test_datatree.attrs['history_json'] = json.dumps(history_data_no_url)
+
+        result_fallback = get_request_url_attribute(sample_netcdf4_file, test_datatree)
+        assert result_fallback == sample_netcdf4_file
+
+        # history_json is present, parameters is a dict WITH request_url
+        history_data_with_url = {
+            'parameters': {'request_url': 'http://example.com/api/data'}
+        }
+        test_datatree.attrs['history_json'] = json.dumps(history_data_with_url)
+
+        result_success = get_request_url_attribute(sample_netcdf4_file, test_datatree)
+        assert result_success == 'http://example.com/api/data'

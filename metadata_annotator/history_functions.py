@@ -1,8 +1,9 @@
 """Module with history functions."""
 
+import json
 import os
 import re
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from urllib.parse import parse_qs, unquote
 
 import xarray as xr
@@ -10,18 +11,69 @@ from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.exceptions import MissingDimensionVariable
 
+# Values needed for history_json attribute
+HISTORY_JSON_SCHEMA = (
+    'https://harmony.earthdata.nasa.gov/schemas/history/0.1.0/history-v0.1.0.json'
+)
 PROGRAM = 'Harmony Metadata Annotator'
+PROGRAM_REF = 'https://github.com/nasa/harmony-metadata-annotator'
 
 
-def update_history_metadata(datatree: xr.DataTree) -> None:
-    """Update the history global attribute of the DataTree.
+def update_history_metadata(input_file_name: str, datatree: xr.DataTree) -> None:
+    """Update the history-related metadata global attribute of the DataTree.
 
-    If either an existing History or history global attribute exists, append
-    information as a new line to the existing value. Otherwise create a new
-    attribute called "history".
+    This method updates two forms of history metadata:
+
+    • The 'history_json' attribute is updated by appending a new structured
+      record describing the current operation, including the
+      timestamp, program name, version, request URL, and processing parameters.
+
+    • The human‑readable `history` (or `History`) global attribute is updated
+      by appending a new line summarizing the execution. If no
+      history attribute exists, a new one is created.
+
+    Parameters
+    ----------
+    input_file_name : str
+        Path to the input NetCDF4 file
+    datatree : xr.DataTree
+        Allow datatree history-related metadata modification
+
+    Returns:
+    -------
+    None
+        This function modifies the file in place and does not return a value.
+
     """
     history_attribute_name, existing_history = read_history_attrs(datatree)
-    write_history_attrs(datatree, history_attribute_name, existing_history)
+
+    request_url = get_request_url_attribute(input_file_name, datatree)
+
+    # Create new history_json attribute and append existing_history
+    new_history_json_record = create_history_json_record(request_url)
+
+    output_history_json = read_history_json_attrs(datatree)
+
+    # Append `history_json_record` to the existing `history_json` array:
+    output_history_json.append(new_history_json_record)
+
+    # Update existing `history_json` array:
+    datatree.attrs['history_json'] = json.dumps(output_history_json)
+
+    # Create a new history for Metadata Annotator history
+    new_history_line = ' '.join(
+        [
+            new_history_json_record['date_time'],
+            new_history_json_record['program'],
+            new_history_json_record['version'],
+        ]
+    )
+
+    # Append new Metadata Annotator history to existing history
+    output_history = '\n'.join(filter(None, [existing_history, new_history_line]))
+
+    # Update history attribute with new Metadata Annotator entry
+    datatree.attrs[history_attribute_name] = output_history
 
 
 def read_history_attrs(datatree: xr.DataTree) -> tuple[str, str]:
@@ -38,20 +90,119 @@ def read_history_attrs(datatree: xr.DataTree) -> tuple[str, str]:
     return history_attribute_name, existing_history
 
 
-def write_history_attrs(
-    datatree: xr.DataTree, history_attribute_name: str, existing_history: str
-) -> None:
-    """Write history attribute."""
-    new_history_line = ' '.join(
-        [
-            datetime.now(UTC).isoformat(),
-            PROGRAM,
-            get_semantic_version(),
-        ]
-    )
-    datatree.attrs[history_attribute_name] = '\n'.join(
-        filter(None, [existing_history, new_history_line])
-    )
+def get_request_url_attribute(input_file_name: str, datatree: xr.DataTree) -> str:
+    """Extract the request URL from the file's `history_json` attribute.
+
+    This function reads the `history_json` global attribute—if present—and
+    attempts to extract the `request_url` value from its `parameters` field.
+    The method supports both dictionary- and list-based parameter structures.
+    If a request URL is found, any query string (text after '?') is removed.
+    If no valid request URL is available, the function returns the file's
+    own filename as a fallback.
+
+    Parameters
+    ----------
+    input_file_name : str
+        Path to the input NetCDF4 file
+    datatree : xr.DataTree
+        Allow datatree history-related metadata modification
+
+    Returns:
+    -------
+    str
+        The extracted request URL without query parameters, or the file's
+        filename if no request URL is present.
+
+    """
+    if 'history_json' not in datatree.attrs:
+        return input_file_name
+
+    history_json = json.loads(datatree.attrs['history_json'])
+
+    if isinstance(history_json, list):
+        history_json = history_json[0]
+
+    parameters = history_json.get('parameters')
+
+    if isinstance(parameters, dict):
+        return parameters.get('request_url', input_file_name)
+
+    if isinstance(parameters, list):
+        for item in parameters:
+            if isinstance(item, dict) and 'request_url' in item:
+                request_url = item['request_url'].split('?', 1)[0]
+                return request_url
+
+    return input_file_name
+
+
+def create_history_json_record(granule_url: str) -> dict:
+    """Create a serializable dictionary for the `history_json` attribute.
+
+    This function assembles a serializable dictionary capturing metadata
+    about the current operation. The record includes the execution
+    timestamp, program name, version, processing parameters, and the source
+    granule URL.
+
+    Parameters
+    ----------
+    granule_url : str
+        The URL of the input granule from which the output file was derived.
+        Stored in the `derived_from` field.
+
+    Returns:
+    -------
+    Dict
+        A fully populated dictionary representing a `history_json` record,
+        ready to be serialized and written to the output file.
+
+    """
+    history_json_record = {
+        '$schema': HISTORY_JSON_SCHEMA,
+        'date_time': datetime.now(timezone.utc).isoformat(),
+        'program': PROGRAM,
+        'version': get_semantic_version(),
+        'derived_from': granule_url,
+        'program_ref': PROGRAM_REF,
+    }
+
+    return history_json_record
+
+
+def read_history_json_attrs(datatree: xr.DataTree) -> list:
+    """Retrieve and normalize the `history_json` global attribute.
+
+    This function checks whether the file contains a `history_json`
+    attribute. If present, the JSON content is parsed and returned as a
+    list of history records. The attribute may contain either a single
+    JSON object or a list of objects; in both cases, the return value is
+    normalized to a list. If the attribute does not exist, an empty list
+    is returned.
+
+    Parameters
+    ----------
+    datatree : xr.DataTree
+        datatree object from which the
+        `history_json` attribute should be read.
+
+    Returns:
+    -------
+    List
+        A list of parsed `history_json` records. Returns an empty list
+        when the file does not contain a `history_json` attribute.
+
+    """
+    output_history_json = []
+
+    if 'history_json' in datatree.attrs:
+        old_history_json = json.loads(datatree.attrs['history_json'])
+        if isinstance(old_history_json, list):
+            output_history_json = old_history_json
+        else:
+            # Single `history_json_record` element.
+            output_history_json = [old_history_json]
+
+    return output_history_json
 
 
 def get_start_index_from_history(

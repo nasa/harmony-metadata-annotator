@@ -6,6 +6,7 @@ VARINFO_CONFIG_FILE global variable.
 """
 
 from os.path import basename
+from os.path import join as path_join
 
 import pytest
 import xarray as xr
@@ -53,6 +54,13 @@ def test_process_item(
         'metadata_annotator.annotate.get_spatial_dimension_variables'
     )
     get_spatial_dimension_variables_mock.return_value = set()
+
+    get_request_url_attribute_mock = mocker.patch(
+        'metadata_annotator.history_functions.get_request_url_attribute'
+    )
+    get_request_url_attribute_mock.return_value = path_join(
+        temp_dir, 'expected_output.nc'
+    )
 
     # Create and run the service
     harmony_config = config(validate=False)
