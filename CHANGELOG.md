@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v1.7.0] - 2026-05-14
+## [v1.8.0] - 2026-05-14
+
+### Changed
+
+- Updated `get_variables_to_delete()` to utilize the
+  `get_excluded_science_variables()` method from `earthdata-varinfo`
+  for consistency and commonality.
+
+## [v1.7.0] - 2026-04-14
 
 ### Changed
 
@@ -130,6 +138,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for a variable as specified via an `earthdata-varinfo` configuration file.
 - Initial repository setup with utility scripts and Dockerfiles.
 
+[v1.8.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.8.0
 [v1.7.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.7.0
 [v1.6.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.6.0
 [v1.5.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.5.0
