@@ -1,6 +1,6 @@
 # Requirements for the Harmony Metadata Annotator service
 cftime ~= 1.6.4
-earthdata-varinfo ~= 5.1.0
+earthdata-varinfo >= 5.1.1
 harmony-service-lib ~= 3.0.0
 netCDF4 ~= 1.7.2
 xarray == 2025.9.0
