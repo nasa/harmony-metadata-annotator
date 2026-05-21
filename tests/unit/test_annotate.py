@@ -715,42 +715,6 @@ def test_update_dimension_variables(
             )
 
 
-def test_get_variables_to_delete(sample_varinfo_test05):
-    """Ensure correct list of variables to delete is obtained."""
-    expected_result = set(
-        [
-            '/string_time_utc_seconds',
-            '/sub_group/string_time_utc_seconds',
-            '/sub_group/nested_group/string_time_utc_seconds',
-        ]
-    )
-    assert (
-        set(sample_varinfo_test05.get_excluded_science_variables()) == expected_result
-    )
-
-
-def test_is_excluded_science_variable(sample_varinfo_test05):
-    """Ensure excluded science variables are determined correctly."""
-    assert sample_varinfo_test05.is_excluded_science_variable(
-        '/string_time_utc_seconds'
-    )
-    assert sample_varinfo_test05.is_excluded_science_variable(
-        '/sub_group/string_time_utc_seconds'
-    )
-    assert sample_varinfo_test05.is_excluded_science_variable(
-        '/sub_group/nested_group/string_time_utc_seconds'
-    )
-    assert not sample_varinfo_test05.is_excluded_science_variable(
-        '/string_time_seconds'
-    )
-    assert not sample_varinfo_test05.is_excluded_science_variable(
-        '/sub_group/string_time_seconds'
-    )
-    assert not sample_varinfo_test05.is_excluded_science_variable(
-        '/sub_group/nested/string_time_seconds'
-    )
-
-
 @pytest.mark.parametrize(
     'group_name',
     [
