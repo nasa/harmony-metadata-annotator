@@ -26,10 +26,8 @@ from metadata_annotator.annotate import (
     get_spatial_dimension_type,
     get_spatial_dimension_variables,
     get_start_index_from_row_col_variable,
-    get_variables_to_delete,
     has_dimension_override,
     is_exact_path,
-    is_excluded_science_variable,
     is_temporary_attribute,
     update_dimension_names,
     update_dimension_variables,
@@ -715,40 +713,6 @@ def test_update_dimension_variables(
             assert np.allclose(
                 test_datatree['sub_group'].dataset['y'], expected_y_values
             )
-
-
-def test_get_variables_to_delete(sample_varinfo_test05):
-    """Ensure correct list of variables to delete is obtained."""
-    expected_result = set(
-        [
-            '/string_time_utc_seconds',
-            '/sub_group/string_time_utc_seconds',
-            '/sub_group/nested_group/string_time_utc_seconds',
-        ]
-    )
-    assert set(get_variables_to_delete(sample_varinfo_test05)) == expected_result
-
-
-def test_is_excluded_science_variable(sample_varinfo_test05):
-    """Ensure excluded science variables are determined correctly."""
-    assert is_excluded_science_variable(
-        sample_varinfo_test05, '/string_time_utc_seconds'
-    )
-    assert is_excluded_science_variable(
-        sample_varinfo_test05, '/sub_group/string_time_utc_seconds'
-    )
-    assert is_excluded_science_variable(
-        sample_varinfo_test05, '/sub_group/nested_group/string_time_utc_seconds'
-    )
-    assert not is_excluded_science_variable(
-        sample_varinfo_test05, '/string_time_seconds'
-    )
-    assert not is_excluded_science_variable(
-        sample_varinfo_test05, '/sub_group/string_time_seconds'
-    )
-    assert not is_excluded_science_variable(
-        sample_varinfo_test05, '/sub_group/nested/string_time_seconds'
-    )
 
 
 @pytest.mark.parametrize(

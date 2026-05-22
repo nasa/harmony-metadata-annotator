@@ -78,7 +78,7 @@ def amend_in_file_metadata(
     items_to_update, variables_to_create = get_matching_groups_and_variables(
         granule_varinfo,
     )
-    variables_to_delete = get_variables_to_delete(granule_varinfo)
+    variables_to_delete = granule_varinfo.get_excluded_science_variables()
     with xr.open_datatree(
         input_file_name,
         decode_times=False,
@@ -568,22 +568,6 @@ def get_referenced_variables(
         )
 
     return referenced_variables
-
-
-def get_variables_to_delete(
-    var_info: VarInfoFromNetCDF4,
-) -> list[str]:
-    """Returns a list of variables to delete identified by VarInfo configuration."""
-    var_list = var_info.get_all_variables()
-    return [var for var in var_list if is_excluded_science_variable(var_info, var)]
-
-
-def is_excluded_science_variable(var_info: VarInfoFromNetCDF4, var) -> bool:
-    """Returns True if variable is explicitly excluded by VarInfo configuration."""
-    exclusions_pattern = re.compile(
-        '|'.join(var_info.cf_config.excluded_science_variables)
-    )
-    return var_info.variable_is_excluded(var, exclusions_pattern)
 
 
 def delete_variable(datatree, full_variable_path: str) -> None:
