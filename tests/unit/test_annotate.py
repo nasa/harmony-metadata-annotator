@@ -46,6 +46,17 @@ from metadata_annotator.exceptions import (
 )
 
 
+def test_metadata_annotator_error_str_matches_message():
+    """The base error forwards its message to Exception.
+
+    ``str(error)`` (used by logging, e.g. ``logger.exception``) must return the
+    human-readable message rather than the raw constructor arguments.
+    """
+    error = InvalidDimensionAttribute('/x', 'standard_name', 'invalid_value')
+    assert str(error) == error.message
+    assert 'invalid_value' in str(error)
+
+
 def test_is_exact_path_is_exact():
     """Returns True when the input is a path with no regular expression syntax."""
     assert is_exact_path('/path/one')
@@ -367,7 +378,10 @@ def test_update_dimension_names() -> None:
         datatree[variable_to_update] = datatree[variable_to_update].assign_attrs(
             dimensions='am_pm y x'
         )
-        with pytest.raises(InvalidDimensionsConfiguration):
+        with pytest.raises(
+            InvalidDimensionsConfiguration,
+            match='3 dimensions configured instead of 2',
+        ):
             update_dimension_names(datatree, variable_to_update)
 
 
@@ -557,7 +571,10 @@ def test_get_spatial_dimension_type_invalid_standard_name(
     with xr.open_datatree(
         sample_netcdf4_file_test02, decode_times=False
     ) as test_datatree:
-        with pytest.raises(InvalidDimensionAttribute):
+        with pytest.raises(
+            InvalidDimensionAttribute,
+            match='has an invalid "standard_name" value:',
+        ):
             get_spatial_dimension_type(test_datatree['variable_one'])
 
 
