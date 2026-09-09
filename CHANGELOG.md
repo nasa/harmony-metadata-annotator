@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.8.0] - 2026-08-21
+
+### Changed
+
+- Keep UTC time string variables (matching `time_utc` pattern) for SMAP L3
+  collections by removing the SMAP entry from the `ExcludedScienceVariables`
+  list in the `earthdata_varinfo_config.json` configuration file. This is the companion to
+  the HOSS v1.3.0 change (DAS-2498). With these changes in place, requests for SMAP granules
+  can include the UTC time strings and the annotator retains and annotates them instead of
+  deleting them from the output.
+
 ## [v1.7.1] - 2026-05-14
 
 ### Changed
@@ -138,6 +149,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for a variable as specified via an `earthdata-varinfo` configuration file.
 - Initial repository setup with utility scripts and Dockerfiles.
 
+[v1.8.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.8.0
 [v1.7.1]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.7.1
 [v1.7.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.7.0
 [v1.6.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.6.0

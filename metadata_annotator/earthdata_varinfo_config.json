@@ -19,14 +19,6 @@
   "ExcludedScienceVariables": [
     {
       "Applicability": {
-        "Mission": "SMAP"
-      },
-      "VariablePattern": [
-	      "/.*time_utc.*"
-      ]
-    },
-    {
-      "Applicability": {
         "Mission": "SMAP",
         "ShortNamePath": "SPL3FTA"
       },
