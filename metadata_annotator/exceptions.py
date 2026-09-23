@@ -6,6 +6,7 @@ class MetadataAnnotatorError(Exception):
 
     def __init__(self, message=None):
         """All Metadata Annotator service errors have a message field."""
+        super().__init__(message)
         self.message = message
 
 
@@ -34,7 +35,7 @@ class InvalidDimensionAttribute(MetadataAnnotatorError):
     def __init__(self, variable_name, attribute_name, attribute_value):
         """Initialize the exception with variable name, attribute name, and value."""
         super().__init__(
-            f'Dimension variable "{variable_name}" has an invalid "{attribute_name} '
+            f'Dimension variable "{variable_name}" has an invalid "{attribute_name}" '
             f'value: "{attribute_value}".'
         )
 
@@ -94,9 +95,9 @@ class InvalidDimensionsConfiguration(MetadataAnnotatorError):
     ):
         """Initialize with variable name, configured and expected dimensions."""
         super().__init__(
-            f'Incorrect number of configured dimensions for {variable_name}'
-            f'Dimension variable "{variable_name}" has "{num_configured_dimensions} '
-            f'dimensions instead of "{num_expected_dimensions}".'
+            f'Incorrect number of configured dimensions for "{variable_name}": '
+            f'{num_configured_dimensions} dimensions configured instead of '
+            f'{num_expected_dimensions}.'
         )
 
 
