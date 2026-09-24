@@ -120,6 +120,8 @@ def get_request_url_attribute(input_file_name: str, datatree: xr.DataTree) -> st
     history_json = json.loads(datatree.attrs['history_json'])
 
     if isinstance(history_json, list):
+        if not history_json:
+            return input_file_name
         history_json = history_json[0]
 
     parameters = history_json.get('parameters')
