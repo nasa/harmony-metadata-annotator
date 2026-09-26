@@ -115,10 +115,11 @@ def amend_in_file_metadata(
             )
             for variable_path in referenced_variables_to_create:
                 create_new_variable(datatree, variable_path, granule_varinfo)
-            if is_dimension_renaming_required(granule_varinfo, items_to_update):
-                update_dimension_variables(
-                    datatree, items_to_update, variables_to_create, granule_varinfo
-                )
+        # Renaming existing dimensions does not require creating new variables.
+        if is_dimension_renaming_required(granule_varinfo, items_to_update):
+            update_dimension_variables(
+                datatree, items_to_update, variables_to_create, granule_varinfo
+            )
 
         update_history_metadata(input_file_name, datatree)
 
