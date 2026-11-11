@@ -323,6 +323,79 @@ def test_annotate_granule_with_dimension_variable_updates(temp_output_file_path)
         )
 
 
+def test_annotate_granule_with_existing_coordinate_variables(
+    temp_output_file_path,
+):
+    """Confirm dimension renaming works when coordinate variables already exist.
+
+    This test uses a subset of a VIIRS D1F granule (VJ110D1F).
+    The HDF-EOS5 data fields have no dimension scales, so their dimensions are
+    anonymous, while the latitude and longitude variables are present as
+    one-dimensional variables in the same group. The existing lat/lon variables
+    become coordinates when the anonymous dimensions are swapped for them.
+
+    """
+    input_file_path = 'tests/data/VJ110D1F.A2026244.002.2026245085124_subsetted.h5'
+    data_fields = '/HDFEOS/GRIDS/VIIRS_Daily_SnowCover_CMG/Data Fields'
+
+    annotate_granule(
+        input_file_path,
+        temp_output_file_path,
+        'metadata_annotator/earthdata_varinfo_config.json',
+        'VJ110D1F',
+    )
+
+    with (
+        xr.open_datatree(
+            input_file_path,
+            engine='h5netcdf',
+            decode_coords=False,
+            mask_and_scale=False,
+        ) as input_datatree,
+        xr.open_datatree(
+            temp_output_file_path,
+            engine='h5netcdf',
+            decode_coords=False,
+            mask_and_scale=False,
+        ) as output_datatree,
+    ):
+        input_group = input_datatree[data_fields]
+        output_group = output_datatree[data_fields]
+
+        # The input has anonymous dimensions and no coordinates:
+        assert set(input_group.dims) == set(['phony_dim_0', 'phony_dim_1'])
+        assert set(input_group.coords) == set()
+
+        # The output has the existing lat and lon variables as coordinates:
+        assert set(output_group.dims) == set(['lat', 'lon'])
+        assert set(output_group.coords) == set(['lat', 'lon'])
+
+        for variable_name in ['CGF_NDSI_Snow_Cover', 'Cloud_Persistence']:
+            assert output_group[variable_name].dims == ('lat', 'lon')
+            assert output_group[variable_name].attrs['coordinates'] == 'lat lon'
+            assert output_group[variable_name].attrs['dimensions'] == 'lat lon'
+            np.testing.assert_array_equal(
+                output_group[variable_name].values,
+                input_group[variable_name].values,
+            )
+
+        assert output_group['lat'].dims == ('lat',)
+        assert output_group['lat'].attrs['standard_name'] == 'latitude'
+        assert output_group['lat'].attrs['axis'] == 'Y'
+        assert output_group['lat'].attrs['units'] == 'degrees_north'
+        np.testing.assert_array_equal(
+            output_group['lat'].values, input_group['lat'].values
+        )
+
+        assert output_group['lon'].dims == ('lon',)
+        assert output_group['lon'].attrs['standard_name'] == 'longitude'
+        assert output_group['lon'].attrs['axis'] == 'X'
+        assert output_group['lon'].attrs['units'] == 'degrees_east'
+        np.testing.assert_array_equal(
+            output_group['lon'].values, input_group['lon'].values
+        )
+
+
 def test_update_group_and_variable_attributes() -> None:
     """Confirm the attributes are updated for existing variables.
 
@@ -369,6 +442,42 @@ def test_update_dimension_names() -> None:
         )
         with pytest.raises(InvalidDimensionsConfiguration):
             update_dimension_names(datatree, variable_to_update)
+
+
+def test_update_dimension_names_existing_coordinate_variables() -> None:
+    """Verify a dimension is swapped for an existing variable of the new name.
+
+    When a new dimension name matches a 1-D variable along the renamed
+    dimension in the same group, that variable becomes a coordinate
+    for every variable in the group sharing the dimension. A new name that
+    does not match a variable is applied only to the variable being updated.
+
+    """
+    datatree = xr.DataTree(xr.Dataset())
+    datatree['/group'] = xr.Dataset(
+        data_vars={
+            'science_variable': xr.DataArray(
+                np.ones((2, 3)),
+                dims=['phony_dim_0', 'phony_dim_1'],
+                attrs={'dimensions': 'lat x'},
+            ),
+            'other_variable': xr.DataArray(
+                np.zeros((2, 3)),
+                dims=['phony_dim_0', 'phony_dim_1'],
+            ),
+            'lat': xr.DataArray(np.array([1.0, 2.0]), dims=['phony_dim_0']),
+        },
+    )
+
+    update_dimension_names(datatree, '/group/science_variable')
+
+    # The existing lat variable is now a coordinate of both variables, while
+    # the x dimension is renamed only on the updated variable:
+    assert datatree['/group/science_variable'].dims == ('lat', 'x')
+    assert datatree['/group/other_variable'].dims == ('lat', 'phony_dim_1')
+    assert set(datatree['/group'].coords) == set(['lat'])
+    assert datatree['/group/lat'].dims == ('lat',)
+    np.testing.assert_array_equal(datatree['/group/lat'].values, [1.0, 2.0])
 
 
 def test_create_new_variable() -> None:
