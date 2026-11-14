@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.10.0] - 2026-11-13
+
+### Added
+
+- Changes `XDim` and `YDim` coordinate variables from upper-left corners to cell centers. This is only for a selected HDF-EOS5 collections that their `XDim` and `YDim` are tagged with `_*hdfeos5_cell_centers` in the config file.
+- Adds new metadata overrides for MOD10A1, MOD29P1D, MYD10A1F and MYD29P1N and VJ110A1F.
+
 ## [v1.9.0] - 2026-11-11
 
 ### Added
@@ -170,6 +177,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for a variable as specified via an `earthdata-varinfo` configuration file.
 - Initial repository setup with utility scripts and Dockerfiles.
 
+[v1.10.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.10.0
 [v1.9.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.9.0
 [v1.8.1]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.8.1
 [v1.8.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.8.0

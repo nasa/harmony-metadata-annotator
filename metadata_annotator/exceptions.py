@@ -119,3 +119,24 @@ class AmbiguousDimensionVariables(MetadataAnnotatorError):
             'swapped for it. Square grids without dimension scales are not '
             'supported.'
         )
+
+
+class InvalidHDFEOS5GridDefinition(MetadataAnnotatorError):
+    """Raised when an HDF-EOS5 grid is missing, unsupported or misconfigured."""
+
+    def __init__(self, item_name, reason):
+        """Initialize the exception with the grid or variable name and reason."""
+        super().__init__(
+            f'Invalid HDF-EOS5 grid configuration for "{item_name}": {reason}.'
+        )
+
+
+class UnexpectedCoordinateValues(MetadataAnnotatorError):
+    """Raised when coordinates match neither pixel corners nor pixel centers."""
+
+    def __init__(self, variable_name):
+        """Initialize the exception with the coordinate variable name."""
+        super().__init__(
+            f'Coordinate variable "{variable_name}" matches neither the pixel '
+            'corners nor the pixel centers of its HDF-EOS5 grid definition.'
+        )

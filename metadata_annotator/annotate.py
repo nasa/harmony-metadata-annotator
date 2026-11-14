@@ -20,6 +20,7 @@ from metadata_annotator.exceptions import (
     MissingSubsetIndexReference,
 )
 from metadata_annotator.geotransform import compute_dimension_scale
+from metadata_annotator.hdfeos5 import update_hdfeos5_cell_centers
 from metadata_annotator.history_functions import (
     get_dimension_index_map,
     get_start_index_from_history,
@@ -68,7 +69,8 @@ def amend_in_file_metadata(
     that need to be created. Then, delete any variables that are configured to be
     excluded. Next create any missing, attribute only, variables. Update the metadata
     attributes of all variables listed in overrides, or removing any attributes with an
-    overriding value of None. Lastly, update the `history` global attribute.
+    overriding value of None. Rewrite configured HDF-EOS5 grid coordinates that hold
+    pixel corners as cell centers. Lastly, update the `history` global attribute.
 
     When opening the file as a DataTree, attempts to decode times, coordinates
     and other CF-Convention metadata are disabled, to allow updates to be made
@@ -101,6 +103,10 @@ def amend_in_file_metadata(
         # Update all pre-existing variables or groups with metadata overrides including
         # dimension renaming where applicable.
         update_group_and_variable_attributes(datatree, items_to_update, granule_varinfo)
+
+        # Rewrite configured HDF-EOS5 grid coordinates that hold pixel corners
+        # as cell centers.
+        update_hdfeos5_cell_centers(datatree, items_to_update, granule_varinfo)
 
         if variables_to_create:
             # Find candidate variables that might be in our configuration for creation,
