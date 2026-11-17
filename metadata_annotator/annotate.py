@@ -275,12 +275,9 @@ def update_dimension_names(datatree: xr.DataTree, variable_to_update: str) -> No
                 variable_to_update, len(rename_dim_list), len(data_array.dims)
             )
 
-        # Rename from source data dimension names to VarInfo dimension names
-        # and limit to the number of dimensions given in rename list.
-        source_dims = data_array.dims[: len(rename_dim_list)]
         rename_dict = {
             source_dim: new_dim
-            for source_dim, new_dim in zip(source_dims, rename_dim_list)
+            for source_dim, new_dim in zip(data_array.dims, rename_dim_list)
             if source_dim != new_dim
         }
 
