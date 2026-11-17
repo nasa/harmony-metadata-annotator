@@ -14,7 +14,8 @@
     "ShortName"
   ],
   "Mission": {
-    "SPL[1234].+": "SMAP"
+    "SPL[1234].+": "SMAP",
+    "V(NP|J1|J2)\\d{2}.*": "VIIRS"
   },
   "ExcludedScienceVariables": [
     {
@@ -1712,6 +1713,68 @@
         }
       ],
       "_Description": "SMAP L3 timestamp variables have an incomplete units value. The UTC string variables are excluded."
-    }
+    },
+    {
+      "Applicability": {
+        "Mission": "VIIRS",
+        "ShortNamePath": "V(NP|J1|J2)10D1F$",
+        "VariablePattern": "/HDFEOS/GRIDS/VIIRS_Daily_SnowCover_CMG/Data Fields/(CGF_NDSI_Snow_Cover|Cloud_Persistence)$"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "lat lon"
+        },
+        {
+          "Name": "coordinates",
+          "Value": "lat lon"
+        }
+      ],
+      "_Description": "VIIRS D1F (VNP10D1F, VJ110D1F, VJ210D1F) granules are HDF-EOS5 grids without HDF5 dimension scales, so the data fields have anonymous dimensions. The dimensions are named after the one-dimensional lat and lon variables in the same group, and the coordinates attribute is corrected: it refers to latitude and longitude, which do not exist in the file."
+    },
+    {
+      "Applicability": {
+        "Mission": "VIIRS",
+        "ShortNamePath": "V(NP|J1|J2)10D1F$",
+        "VariablePattern": "/HDFEOS/GRIDS/VIIRS_Daily_SnowCover_CMG/Data Fields/lat$"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "lat"
+        },
+        {
+          "Name": "standard_name",
+          "Value": "latitude"
+        },
+        {
+          "Name": "axis",
+          "Value": "Y"
+        }
+      ],
+      "_Description": "Name the dimension of the VIIRS D1F lat variable after the variable, so that it becomes the latitude coordinate of the data fields, and add the CF standard_name and axis attributes."
+    },
+    {
+      "Applicability": {
+        "Mission": "VIIRS",
+        "ShortNamePath": "V(NP|J1|J2)10D1F$",
+        "VariablePattern": "/HDFEOS/GRIDS/VIIRS_Daily_SnowCover_CMG/Data Fields/lon$"
+      },
+      "Attributes": [
+        {
+          "Name": "dimensions",
+          "Value": "lon"
+        },
+        {
+          "Name": "standard_name",
+          "Value": "longitude"
+        },
+        {
+          "Name": "axis",
+          "Value": "X"
+        }
+      ],
+      "_Description": "Name the dimension of the VIIRS D1F lon variable after the variable, so that it becomes the longitude coordinate of the data fields, and add the CF standard_name and axis attributes."
+     }
   ]
 }

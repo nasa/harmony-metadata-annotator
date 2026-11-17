@@ -9,6 +9,7 @@ import xarray as xr
 from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.exceptions import (
+    AmbiguousDimensionVariables,
     InvalidDimensionAttribute,
     InvalidDimensionsConfiguration,
     InvalidGridMappingReference,
@@ -81,6 +82,7 @@ def amend_in_file_metadata(
     variables_to_delete = granule_varinfo.get_excluded_science_variables()
     with xr.open_datatree(
         input_file_name,
+        chunks={},
         decode_times=False,
         decode_timedelta=False,
         decode_coords=False,
@@ -115,17 +117,16 @@ def amend_in_file_metadata(
             )
             for variable_path in referenced_variables_to_create:
                 create_new_variable(datatree, variable_path, granule_varinfo)
-            if is_dimension_renaming_required(granule_varinfo, items_to_update):
-                update_dimension_variables(
-                    datatree, items_to_update, variables_to_create, granule_varinfo
-                )
 
+        # Dimension renaming applies whether or not new variables are created.
+        if is_dimension_renaming_required(granule_varinfo, items_to_update):
+            update_dimension_variables(
+                datatree, items_to_update, variables_to_create, granule_varinfo
+            )
         update_history_metadata(input_file_name, datatree)
 
-        # Future improvement: It is memory intensive to try and write out the
-        # whole `xarray.DataTree` in one operation. Making this write variables
-        # and group separately reduces the memory usage, but makes the
-        # operation slower. (See Harmony SMAP L2 Gridder implementation)
+        # Variables are dask-backed (see `chunks={}` above), and the write
+        # streams each variable chunk by chunk.
         datatree.to_netcdf(output_file_name, engine='h5netcdf')
 
 
@@ -254,7 +255,16 @@ def update_group_and_variable_attributes(
 
 
 def update_dimension_names(datatree: xr.DataTree, variable_to_update: str) -> None:
-    """Update the dimension names."""
+    """Update the dimension names.
+
+    The `dimensions` attribute lists one new name per dimension. For each
+    dimension, one of the following will happen:
+
+    - If the new dimension name is an existing 1-D variable in the same group,
+    the dimension is swapped for that variable and the variable becomes a coordinate
+    of all variables in the group that share the dimension.
+    - Otherwise, the dimension is renamed only on `variable_to_update`.
+    """
     data_array = datatree[variable_to_update]
     rename_dim_list = data_array.attrs.get('dimensions', '').split()
 
@@ -265,11 +275,57 @@ def update_dimension_names(datatree: xr.DataTree, variable_to_update: str) -> No
                 variable_to_update, len(rename_dim_list), len(data_array.dims)
             )
 
-        # Rename from source data dimension names to VarInfo dimension names
-        # and limit to the number of dimensions given in rename list.
-        source_dims = data_array.dims[: len(rename_dim_list)]
-        rename_dict = dict(zip(source_dims, rename_dim_list))
-        datatree[variable_to_update] = data_array.rename(rename_dict)
+        rename_dict = {
+            source_dim: new_dim
+            for source_dim, new_dim in zip(data_array.dims, rename_dim_list)
+            if source_dim != new_dim
+        }
+
+        group_path, _ = os.path.split(variable_to_update)
+        group_dataset = datatree[group_path].dataset
+        check_dimension_variables_distinct(group_dataset, group_path)
+        swap_dict = {
+            source_dim: new_dim
+            for source_dim, new_dim in rename_dict.items()
+            if new_dim in group_dataset.variables
+            and group_dataset[new_dim].dims == (source_dim,)
+        }
+
+        if swap_dict:
+            datatree[group_path].dataset = group_dataset.swap_dims(swap_dict)
+
+        remaining_rename_dict = {
+            source_dim: new_dim
+            for source_dim, new_dim in rename_dict.items()
+            if source_dim not in swap_dict
+        }
+
+        if remaining_rename_dict:
+            data_array = datatree[variable_to_update]
+            datatree[variable_to_update] = data_array.rename(remaining_rename_dict)
+
+
+def check_dimension_variables_distinct(
+    group_dataset: xr.Dataset, group_path: str
+) -> None:
+    """Raise when two requested dimension variables lie on the same dimension.
+
+    A granule without dimension scales has one anonymous dimension per distinct
+    length in a group. On a square grid the existing one-dimensional
+    coordinate variables share a dimension and cannot be told apart when dimensions
+    are swapped for them.
+
+    """
+    for variable in group_dataset.variables.values():
+        variables_by_dimension = {}
+        for new_dim in variable.attrs.get('dimensions', '').split():
+            if new_dim in group_dataset.variables and group_dataset[new_dim].ndim == 1:
+                dimension = group_dataset[new_dim].dims[0]
+                first = variables_by_dimension.setdefault(dimension, new_dim)
+                if first != new_dim:
+                    raise AmbiguousDimensionVariables(
+                        group_path, first, new_dim, dimension
+                    )
 
 
 def create_new_variable(

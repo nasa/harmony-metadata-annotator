@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v1.9.0] - 2026-11-11
+
+### Added
+
+- Adds overrides for the VIIRS D1F collections (VNP10D1F, VJ110D1F, VJ210D1F) that lack dimension scales.
+  The existing `lat` and `lon` variables become dimensions and coordinates variables.
+
+### Changed
+
+- Dimension renaming runs whenever a `dimensions` override applies and a new dim name that matches an existing
+  1-D variable in the same group swaps the dimension for that variable.
+- The input granule is opened with chunked variables using dask, so the granule is written back chunk by chunk.
+- `dask` added to `requirements.txt`.
+
 ## [v1.8.1] - 2026-09-23
 
 ### Changed
@@ -156,6 +170,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   for a variable as specified via an `earthdata-varinfo` configuration file.
 - Initial repository setup with utility scripts and Dockerfiles.
 
+[v1.9.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.9.0
 [v1.8.1]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.8.1
 [v1.8.0]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.8.0
 [v1.7.1]: https://github.com/nasa/harmony-metadata-annotator/releases/tag/1.7.1
