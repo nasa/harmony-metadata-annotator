@@ -106,3 +106,16 @@ class MissingDimensionVariable(MetadataAnnotatorError):
     def __init__(self, variable_name):
         """Initialize the exception with the variable name."""
         super().__init__(f'Dimension variable {variable_name} is not in the datatree.')
+
+
+class AmbiguousDimensionVariables(MetadataAnnotatorError):
+    """Raised when two requested dimension variables share a source dimension."""
+
+    def __init__(self, group_path, first_variable, second_variable, dimension):
+        """Initialize the exception with the group, the variables and the dimension."""
+        super().__init__(
+            f'Variables "{first_variable}" and "{second_variable}" in group '
+            f'"{group_path}" both span dimension "{dimension}", so neither can be '
+            'swapped for it. Square grids without dimension scales are not '
+            'supported.'
+        )

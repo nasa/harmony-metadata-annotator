@@ -9,6 +9,7 @@ import xarray as xr
 from varinfo import VarInfoFromNetCDF4
 
 from metadata_annotator.exceptions import (
+    AmbiguousDimensionVariables,
     InvalidDimensionAttribute,
     InvalidDimensionsConfiguration,
     InvalidGridMappingReference,
@@ -285,6 +286,7 @@ def update_dimension_names(datatree: xr.DataTree, variable_to_update: str) -> No
 
         group_path, _ = os.path.split(variable_to_update)
         group_dataset = datatree[group_path].dataset
+        check_dimension_variables_distinct(group_dataset, group_path)
         swap_dict = {
             source_dim: new_dim
             for source_dim, new_dim in rename_dict.items()
@@ -304,6 +306,29 @@ def update_dimension_names(datatree: xr.DataTree, variable_to_update: str) -> No
         if remaining_rename_dict:
             data_array = datatree[variable_to_update]
             datatree[variable_to_update] = data_array.rename(remaining_rename_dict)
+
+
+def check_dimension_variables_distinct(
+    group_dataset: xr.Dataset, group_path: str
+) -> None:
+    """Raise when two requested dimension variables lie on the same dimension.
+
+    A granule without dimension scales has one anonymous dimension per distinct
+    length in a group. On a square grid the existing one-dimensional
+    coordinate variables share a dimension and cannot be told apart when dimensions
+    are swapped for them.
+
+    """
+    for variable in group_dataset.variables.values():
+        variables_by_dimension = {}
+        for new_dim in variable.attrs.get('dimensions', '').split():
+            if new_dim in group_dataset.variables and group_dataset[new_dim].ndim == 1:
+                dimension = group_dataset[new_dim].dims[0]
+                first = variables_by_dimension.setdefault(dimension, new_dim)
+                if first != new_dim:
+                    raise AmbiguousDimensionVariables(
+                        group_path, first, new_dim, dimension
+                    )
 
 
 def create_new_variable(

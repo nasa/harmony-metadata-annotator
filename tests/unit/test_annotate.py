@@ -36,6 +36,7 @@ from metadata_annotator.annotate import (
     update_spatial_dimension_values,
 )
 from metadata_annotator.exceptions import (
+    AmbiguousDimensionVariables,
     InvalidDimensionAttribute,
     InvalidDimensionsConfiguration,
     InvalidGridMappingReference,
@@ -478,6 +479,32 @@ def test_update_dimension_names_existing_coordinate_variables() -> None:
     assert set(datatree['/group'].coords) == set(['lat'])
     assert datatree['/group/lat'].dims == ('lat',)
     np.testing.assert_array_equal(datatree['/group/lat'].values, [1.0, 2.0])
+
+
+def test_update_dimension_names_square_grid_raises() -> None:
+    """Verify a square grid with existing coordinate variables is rejected.
+
+    Without dimension scales, one-dimensional variables of the same length land
+    on the same anonymous dimension, so lat and lon cannot be told apart.
+
+    """
+    datatree = xr.DataTree(xr.Dataset())
+    datatree['/group'] = xr.Dataset(
+        data_vars={
+            'science_variable': xr.DataArray(
+                np.ones((2, 2)),
+                dims=['phony_dim_0', 'phony_dim_1'],
+                attrs={'dimensions': 'lat lon'},
+            ),
+            'lat': xr.DataArray(np.array([1.0, 2.0]), dims=['phony_dim_0']),
+            'lon': xr.DataArray(np.array([3.0, 4.0]), dims=['phony_dim_0']),
+        },
+    )
+
+    with pytest.raises(AmbiguousDimensionVariables) as exception_info:
+        update_dimension_names(datatree, '/group/science_variable')
+
+    assert '"lat" and "lon"' in exception_info.value.message
 
 
 def test_create_new_variable() -> None:
