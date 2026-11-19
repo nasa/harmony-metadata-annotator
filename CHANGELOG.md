@@ -5,12 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v1.10.0] - 2026-11-13
+## [v1.10.0] - 2026-11-19
 
 ### Added
 
-- Changes `XDim` and `YDim` coordinate variables from upper-left corners to cell centers. This is only for a selected HDF-EOS5 collections that their `XDim` and `YDim` are tagged with `_*hdfeos5_cell_centers` in the config file.
-- Adds new metadata overrides for MOD10A1, MOD29P1D, MYD10A1F and MYD29P1N and VJ110A1F.
+- Changes `XDim` and `YDim` coordinate variables from upper-left corners to cell centers by shifting them half a pixel, and adds CF bounds variables (`XDim_bnds` and `YDim_bnds`) that hold the pixel edges. This applies only to selected HDF-EOS5 collections whose `XDim` and `YDim` are tagged with `_*shift_to_cell_centers` in the config file.
+- Adds support for HDF group exclusion.
+- Adds new exclusions that delete the legacy `HDFEOS INFORMATION` group.
+- The overrides only target MOD10A1, MOD29P1D, MYD10A1F, MYD29P1N and VJ110A1F collections.
 
 ## [v1.9.0] - 2026-11-11
 

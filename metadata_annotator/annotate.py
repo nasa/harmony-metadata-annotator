@@ -20,7 +20,6 @@ from metadata_annotator.exceptions import (
     MissingSubsetIndexReference,
 )
 from metadata_annotator.geotransform import compute_dimension_scale
-from metadata_annotator.hdfeos5 import update_hdfeos5_cell_centers
 from metadata_annotator.history_functions import (
     get_dimension_index_map,
     get_start_index_from_history,
@@ -66,11 +65,11 @@ def amend_in_file_metadata(
     """Update metadata attributes according to known rules.
 
     First, identify the variables or groups needing to be updated, or variables
-    that need to be created. Then, delete any variables that are configured to be
+    that need to be created. Then, delete any variables or groups configured to be
     excluded. Next create any missing, attribute only, variables. Update the metadata
     attributes of all variables listed in overrides, or removing any attributes with an
-    overriding value of None. Rewrite configured HDF-EOS5 grid coordinates that hold
-    pixel corners as cell centers. Lastly, update the `history` global attribute.
+    overriding value of None. Shift configured coordinates from pixel corners to cell
+    centers. Lastly, update the `history` global attribute.
 
     When opening the file as a DataTree, attempts to decode times, coordinates
     and other CF-Convention metadata are disabled, to allow updates to be made
@@ -100,13 +99,21 @@ def amend_in_file_metadata(
                 items_to_update.remove(variable)
             delete_variable(datatree, variable)
 
+        # Delete excluded groups, with everything in them.
+        for group in get_excluded_groups(datatree, granule_varinfo):
+            items_to_update -= {
+                item
+                for item in items_to_update
+                if item == group or item.startswith(f'{group}/')
+            }
+            delete_variable(datatree, group)
+
         # Update all pre-existing variables or groups with metadata overrides including
         # dimension renaming where applicable.
         update_group_and_variable_attributes(datatree, items_to_update, granule_varinfo)
 
-        # Rewrite configured HDF-EOS5 grid coordinates that hold pixel corners
-        # as cell centers.
-        update_hdfeos5_cell_centers(datatree, items_to_update, granule_varinfo)
+        # Shift configured coordinates from pixel corners to cell centers.
+        shift_to_cell_centers(datatree, items_to_update, granule_varinfo)
 
         if variables_to_create:
             # Find candidate variables that might be in our configuration for creation,
@@ -258,6 +265,43 @@ def update_group_and_variable_attributes(
             item_to_update,
             granule_varinfo,
         )
+
+
+def shift_to_cell_centers(
+    datatree: xr.DataTree,
+    items_to_update: set[str],
+    granule_varinfo: VarInfoFromNetCDF4,
+) -> None:
+    """Shift configured coordinates from pixel corners to cell centers.
+
+    Applies to variables configured with `_*shift_to_cell_centers`. The pixel size
+    is inferred from the coordinate spacing, and each value moves by half a pixel.
+    Also, a CF bounds variable is added which holds the edges of each cell.
+    Coordinates that are not evenly spaced are left unchanged.
+
+    """
+    for variable_path in items_to_update:
+        overrides = granule_varinfo.cf_config.get_metadata_overrides(variable_path)
+        if str(overrides.get('_*shift_to_cell_centers', '')).lower() != 'true':
+            continue
+
+        coordinate = datatree[variable_path]
+        values = coordinate.values
+        steps = np.diff(values)
+        if steps.size == 0 or not np.allclose(steps, steps[0]):
+            continue
+
+        pixel_size = (values[-1] - values[0]) / (values.size - 1)
+        datatree[variable_path] = coordinate.copy(
+            data=(values + pixel_size / 2).astype(values.dtype)
+        ).assign_attrs(bounds=f'{coordinate.name}_bnds')
+
+        # The stored corners are the cell edges, so adjacent cells share them exactly.
+        edges = np.append(values, values[-1] + pixel_size).astype(values.dtype)
+        bounds = xr.DataArray(
+            np.stack([edges[:-1], edges[1:]], axis=1), dims=(coordinate.dims[0], 'nv')
+        )
+        datatree[f'{variable_path}_bnds'] = bounds
 
 
 def update_dimension_names(datatree: xr.DataTree, variable_to_update: str) -> None:
@@ -633,7 +677,27 @@ def get_referenced_variables(
 
 
 def delete_variable(datatree, full_variable_path: str) -> None:
-    """Delete a variable from the DataTree."""
+    """Delete a variable or group from the DataTree."""
     parent_group, variable_name = full_variable_path.rsplit('/', 1)
     node = datatree[parent_group] if parent_group else datatree
     del node[variable_name]
+
+
+def get_excluded_groups(
+    datatree: xr.DataTree, granule_varinfo: VarInfoFromNetCDF4
+) -> list[str]:
+    """Return the paths of groups matching the exclusion patterns.
+
+    Longer paths come first, so a group is deleted before its parent.
+
+    """
+    return sorted(
+        (
+            node.path
+            for node in datatree.subtree
+            if not node.is_root
+            and granule_varinfo.is_excluded_science_variable(node.path)
+        ),
+        key=len,
+        reverse=True,
+    )
