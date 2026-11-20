@@ -14,6 +14,7 @@ from metadata_annotator.exceptions import (
     InvalidDimensionsConfiguration,
     InvalidGridMappingReference,
     InvalidSubsetIndexShape,
+    IrregularCoordinateSpacing,
     MissingDimensionAttribute,
     MissingDimensionVariable,
     MissingStartIndexConfiguration,
@@ -65,10 +66,11 @@ def amend_in_file_metadata(
     """Update metadata attributes according to known rules.
 
     First, identify the variables or groups needing to be updated, or variables
-    that need to be created. Then, delete any variables that are configured to be
+    that need to be created. Then, delete any variables or groups configured to be
     excluded. Next create any missing, attribute only, variables. Update the metadata
     attributes of all variables listed in overrides, or removing any attributes with an
-    overriding value of None. Lastly, update the `history` global attribute.
+    overriding value of None. Shift configured coordinates from pixel corners to cell
+    centers. Lastly, update the `history` global attribute.
 
     When opening the file as a DataTree, attempts to decode times, coordinates
     and other CF-Convention metadata are disabled, to allow updates to be made
@@ -79,7 +81,7 @@ def amend_in_file_metadata(
     items_to_update, variables_to_create = get_matching_groups_and_variables(
         granule_varinfo,
     )
-    variables_to_delete = granule_varinfo.get_excluded_science_variables()
+    items_to_delete = get_excluded_items(granule_varinfo)
     with xr.open_datatree(
         input_file_name,
         chunks={},
@@ -91,16 +93,22 @@ def amend_in_file_metadata(
         mask_and_scale=False,
         engine='h5netcdf',
     ) as datatree:
-        # Delete the excluded variables from the datatree and remove them from
-        # the set of items to update
-        for variable in variables_to_delete:
-            if variable in items_to_update:
-                items_to_update.remove(variable)
-            delete_variable(datatree, variable)
+        # Delete the excluded variables and groups from the datatree, and remove
+        # them, with anything inside an excluded group, from the items to update.
+        for item_path in items_to_delete:
+            items_to_update -= {
+                item
+                for item in items_to_update
+                if item == item_path or item.startswith(f'{item_path}/')
+            }
+            delete_item(datatree, item_path)
 
         # Update all pre-existing variables or groups with metadata overrides including
         # dimension renaming where applicable.
         update_group_and_variable_attributes(datatree, items_to_update, granule_varinfo)
+
+        # Shift configured coordinates from pixel corners to cell centers.
+        shift_to_cell_centers(datatree, items_to_update, granule_varinfo)
 
         if variables_to_create:
             # Find candidate variables that might be in our configuration for creation,
@@ -252,6 +260,47 @@ def update_group_and_variable_attributes(
             item_to_update,
             granule_varinfo,
         )
+
+
+def shift_to_cell_centers(
+    datatree: xr.DataTree,
+    items_to_update: set[str],
+    granule_varinfo: VarInfoFromNetCDF4,
+) -> None:
+    """Shift configured coordinates from the upper-left pixel corner to the center.
+
+    Applies to variables configured with `_*shift_to_cell_centers`. The values are
+    assumed to represent the upper-left corner of the cell. The pixel size
+    is inferred from the coordinate spacing, and each value moves by half a pixel.
+    Also, a CF bounds variable is added which holds the edges of each cell. A coordinate
+    with fewer than two values, or with a step that differs from the first by more than
+    1% of a pixel, raises IrregularCoordinateSpacing.
+
+    """
+    for variable_path in items_to_update:
+        overrides = granule_varinfo.cf_config.get_metadata_overrides(variable_path)
+        if str(overrides.get('_*shift_to_cell_centers', '')).lower() != 'true':
+            continue
+
+        coordinate = datatree[variable_path]
+        values = coordinate.values
+        steps = np.diff(values)
+        if steps.size == 0 or not np.allclose(
+            steps, steps[0], rtol=0.0, atol=0.01 * abs(steps[0])
+        ):
+            raise IrregularCoordinateSpacing(variable_path)
+
+        pixel_size = (values[-1] - values[0]) / (values.size - 1)
+        datatree[variable_path] = coordinate.copy(
+            data=(values + pixel_size / 2).astype(values.dtype)
+        ).assign_attrs(bounds=f'{coordinate.name}_bnds')
+
+        # The stored corners are the cell edges, so adjacent cells share them exactly.
+        edges = np.append(values, values[-1] + pixel_size).astype(values.dtype)
+        bounds = xr.DataArray(
+            np.stack([edges[:-1], edges[1:]], axis=1), dims=(coordinate.dims[0], 'nv')
+        )
+        datatree[f'{variable_path}_bnds'] = bounds
 
 
 def update_dimension_names(datatree: xr.DataTree, variable_to_update: str) -> None:
@@ -626,8 +675,28 @@ def get_referenced_variables(
     return referenced_variables
 
 
-def delete_variable(datatree, full_variable_path: str) -> None:
-    """Delete a variable from the DataTree."""
-    parent_group, variable_name = full_variable_path.rsplit('/', 1)
+def delete_item(datatree: xr.DataTree, item_path: str) -> None:
+    """Delete a variable, or a group with everything in it, from the DataTree."""
+    parent_group, item_name = item_path.rsplit('/', 1)
     node = datatree[parent_group] if parent_group else datatree
-    del node[variable_name]
+    del node[item_name]
+
+
+def get_excluded_items(granule_varinfo: VarInfoFromNetCDF4) -> list[str]:
+    """Return the paths of variables and groups matching the exclusion patterns.
+
+    Longer paths come first, so anything inside a group is deleted before the
+    group itself. The root group is not returned.
+
+    """
+    excluded_groups = {
+        group
+        for group in granule_varinfo.groups
+        # is_excluded_science_variable() matches any path, including group paths
+        if group != '/' and granule_varinfo.is_excluded_science_variable(group)
+    }
+    return sorted(
+        granule_varinfo.get_excluded_science_variables() | excluded_groups,
+        key=len,
+        reverse=True,
+    )

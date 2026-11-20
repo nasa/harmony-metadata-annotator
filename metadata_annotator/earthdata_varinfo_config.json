@@ -15,7 +15,8 @@
   ],
   "Mission": {
     "SPL[1234].+": "SMAP",
-    "V(NP|J1|J2)\\d{2}.*": "VIIRS"
+    "V(NP|J1|J2)\\d{2}.*": "VIIRS",
+    "M[OY]D(10A1F?|29P1[DN])$": "MODIS"
   },
   "ExcludedScienceVariables": [
     {
@@ -27,6 +28,26 @@
 	      "/Freeze_Thaw_Retrieval_Data/freeze_reference_date",
 	      "/Freeze_Thaw_Retrieval_Data/thaw_reference_date"
       ]
+    },
+    {
+      "Applicability": {
+        "Mission": "MODIS",
+        "ShortNamePath": "(MOD10A1|MOD29P1D|MYD10A1F|MYD29P1N)$"
+      },
+      "VariablePattern": [
+        "/HDFEOS INFORMATION$"
+      ],
+      "_Description": "Removes the legacy HDF-EOS5 metadata group, which holds StructMetadata.0."
+    },
+    {
+      "Applicability": {
+        "Mission": "VIIRS",
+        "ShortNamePath": "VJ110A1F$"
+      },
+      "VariablePattern": [
+        "/HDFEOS INFORMATION$"
+      ],
+      "_Description": "Removes the legacy HDF-EOS5 metadata group, which holds StructMetadata.0."
     }
   ],
   "MetadataOverrides": [
@@ -1775,6 +1796,34 @@
         }
       ],
       "_Description": "Name the dimension of the VIIRS D1F lon variable after the variable, so that it becomes the longitude coordinate of the data fields, and add the CF standard_name and axis attributes."
-     }
+     },
+    {
+      "Applicability": {
+        "Mission": "MODIS",
+        "ShortNamePath": "(MOD10A1|MOD29P1D|MYD10A1F|MYD29P1N)$",
+        "VariablePattern": "/HDFEOS/GRIDS/[^/]+/(XDim|YDim)$"
+      },
+      "Attributes": [
+        {
+          "Name": "_*shift_to_cell_centers",
+          "Value": "true"
+        }
+      ],
+      "_Description": "XDim and YDim hold the upper-left corner of each pixel; they are shifted by half a pixel to cell centers, and CF bounds variables hold the pixel edges."
+    },
+    {
+      "Applicability": {
+        "Mission": "VIIRS",
+        "ShortNamePath": "VJ110A1F$",
+        "VariablePattern": "/HDFEOS/GRIDS/[^/]+/(XDim|YDim)$"
+      },
+      "Attributes": [
+        {
+          "Name": "_*shift_to_cell_centers",
+          "Value": "true"
+        }
+      ],
+      "_Description": "XDim and YDim hold the upper-left corner of each pixel; they are shifted by half a pixel to cell centers, and CF bounds variables hold the pixel edges."
+    }
   ]
 }
