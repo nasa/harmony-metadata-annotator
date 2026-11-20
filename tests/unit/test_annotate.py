@@ -15,10 +15,10 @@ from metadata_annotator.annotate import (
     construct_dim_path,
     copy_shared_dimensions_to_parent,
     create_new_variable,
-    delete_variable,
+    delete_item,
     ensure_dimension_node_exists,
     get_dimension_variables,
-    get_excluded_groups,
+    get_excluded_items,
     get_geotransform_config,
     get_grid_start_index,
     get_matching_groups_and_variables,
@@ -43,6 +43,7 @@ from metadata_annotator.exceptions import (
     InvalidDimensionsConfiguration,
     InvalidGridMappingReference,
     InvalidSubsetIndexShape,
+    IrregularCoordinateSpacing,
     MissingDimensionAttribute,
     MissingStartIndexConfiguration,
     MissingSubsetIndexReference,
@@ -863,7 +864,7 @@ def test_update_dimension_variables(
         '/sub_group/nested_group',
     ],
 )
-def test_delete_variable(sample_netcdf4_file_test05, group_name):
+def test_delete_item(sample_netcdf4_file_test05, group_name):
     """Ensure correct variables are deleted from the datatree."""
     with xr.open_datatree(
         sample_netcdf4_file_test05, decode_times=False
@@ -878,25 +879,30 @@ def test_delete_variable(sample_netcdf4_file_test05, group_name):
         assert variable_name in test_datatree[group_name].ds.data_vars
         initial_var_count = len(test_datatree[group_name].ds.data_vars)
 
-        delete_variable(test_datatree, full_path)
+        delete_item(test_datatree, full_path)
         assert variable_name not in test_datatree[group_name].ds.data_vars
         assert len(test_datatree[group_name].ds.data_vars) == initial_var_count - 1
 
 
-def test_get_excluded_groups(mocker):
-    """Matching groups are returned children first, and never the root group."""
-    datatree = xr.DataTree.from_dict(
-        {
-            '/HDFEOS INFORMATION': xr.Dataset(),
-            '/HDFEOS/GRIDS/MOD_Grid_Seaice_1km': xr.Dataset(),
-        }
-    )
+def test_get_excluded_items(mocker):
+    """Matching items are returned longest path first; the root group is ignored."""
     granule_varinfo = mocker.Mock()
+    granule_varinfo.groups = {
+        '/': None,
+        '/HDFEOS': None,
+        '/HDFEOS INFORMATION': None,
+        '/HDFEOS/GRIDS': None,
+        '/HDFEOS/GRIDS/MOD_Grid_Seaice_1km': None,
+    }
     granule_varinfo.is_excluded_science_variable.side_effect = (
         lambda path: path == '/' or path.startswith('/HDFEOS/')
     )
+    granule_varinfo.get_excluded_science_variables.return_value = {
+        '/HDFEOS/GRIDS/MOD_Grid_Seaice_1km/XDim'
+    }
 
-    assert get_excluded_groups(datatree, granule_varinfo) == [
+    assert get_excluded_items(granule_varinfo) == [
+        '/HDFEOS/GRIDS/MOD_Grid_Seaice_1km/XDim',
         '/HDFEOS/GRIDS/MOD_Grid_Seaice_1km',
         '/HDFEOS/GRIDS',
     ]
@@ -1056,20 +1062,26 @@ def test_copy_shared_dimensions_to_parent(temp_dir):
 
 
 def build_mod29p1d_datatree() -> xr.DataTree:
-    """Return a MOD29P1D style DataTree with corner-valued XDim and YDim."""
-    pixel_offsets = 1002.701 * np.arange(951)
+    """Return a MOD29P1D-style DataTree with 10 x 10 cells of 1000 m.
+
+    As in MOD29P1D, XDim and YDim hold the upper-left corner of each cell. XDim
+    runs east from 0 m (0, 1000, ..., 9000) and YDim runs south from 10000 m
+    (10000, 9000, ..., 1000).
+
+    """
+    corners = 1000.0 * np.arange(10)
     return xr.DataTree.from_dict(
         {
             MOD29P1D_GRID_PATH: xr.Dataset(
                 coords={
                     'XDim': (
                         'XDim',
-                        -5244627.5805 + pixel_offsets,
+                        corners,
                         {'standard_name': 'projection_x_coordinate', 'units': 'm'},
                     ),
                     'YDim': (
                         'YDim',
-                        1430352.9765 - pixel_offsets,
+                        10000.0 - corners,
                         {'standard_name': 'projection_y_coordinate', 'units': 'm'},
                     ),
                 }
@@ -1078,7 +1090,7 @@ def build_mod29p1d_datatree() -> xr.DataTree:
                 {
                     'Ice_Surface_Temperature': (
                         ('YDim', 'XDim'),
-                        np.zeros((951, 951), dtype=np.uint16),
+                        np.zeros((10, 10), dtype=np.uint16),
                     )
                 }
             ),
@@ -1089,8 +1101,10 @@ def build_mod29p1d_datatree() -> xr.DataTree:
 @pytest.mark.parametrize(
     'variable_name, expected_first, expected_last',
     [
-        ('XDim', -5244126.2300, -4291560.2800),
-        ('YDim', 1429851.6260, 477285.6760),
+        # XDim corners 0 ... 9000 m move half a cell (500 m) east.
+        ('XDim', 500.0, 9500.0),
+        # YDim corners 10000 ... 1000 m move half a cell (500 m) south.
+        ('YDim', 9500.0, 500.0),
     ],
 )
 def test_shift_to_cell_centers(mocker, variable_name, expected_first, expected_last):
@@ -1106,8 +1120,8 @@ def test_shift_to_cell_centers(mocker, variable_name, expected_first, expected_l
     shift_to_cell_centers(datatree, {variable_path}, granule_varinfo)
 
     values = datatree[variable_path].values
-    assert values[0] == pytest.approx(expected_first, abs=1e-4)
-    assert values[-1] == pytest.approx(expected_last, abs=1e-4)
+    assert values[0] == expected_first
+    assert values[-1] == expected_last
     assert values.dtype == np.float64
     assert datatree[variable_path].attrs == attributes | {
         'bounds': f'{variable_name}_bnds'
@@ -1128,6 +1142,32 @@ def test_shift_to_cell_centers_not_configured(mocker):
     assert 'XDim_bnds' not in datatree[MOD29P1D_GRID_PATH]
 
 
+@pytest.mark.parametrize(
+    'x_values',
+    [
+        # The third corner is 100 m (10% of a cell) east of a regular grid.
+        np.array([0.0, 1000.0, 2100.0]),
+        np.array([0.0]),
+    ],
+    ids=['uneven', 'single_value'],
+)
+def test_shift_to_cell_centers_irregular_spacing(mocker, x_values):
+    """A configured coordinate that is not a regular grid raises an exception."""
+    variable_path = f'{MOD29P1D_GRID_PATH}/XDim'
+    datatree = xr.DataTree.from_dict(
+        {MOD29P1D_GRID_PATH: xr.Dataset(coords={'XDim': x_values})}
+    )
+    granule_varinfo = mocker.Mock()
+    granule_varinfo.cf_config.get_metadata_overrides.return_value = {
+        '_*shift_to_cell_centers': 'true'
+    }
+
+    with pytest.raises(IrregularCoordinateSpacing) as exception_info:
+        shift_to_cell_centers(datatree, {variable_path}, granule_varinfo)
+
+    assert variable_path in exception_info.value.message
+
+
 def test_annotate_granule_shift_to_cell_centers(temp_dir, temp_output_file_path):
     """The annotated MOD29P1D output holds cell centers and bounds."""
     input_file_path = path_join(temp_dir, 'MOD29P1D_sample.h5')
@@ -1143,12 +1183,12 @@ def test_annotate_granule_shift_to_cell_centers(temp_dir, temp_output_file_path)
     with xr.open_datatree(
         temp_output_file_path, decode_coords=False, engine='h5netcdf'
     ) as output:
+        # The first cell has its upper-left corner at (0, 10000) m: its center is
+        # at (500, 9500) m, and its XDim edges are 0 and 1000 m.
         x_values = output[f'{MOD29P1D_GRID_PATH}/XDim']
-        assert float(x_values[0]) == pytest.approx(-5244126.2300, abs=1e-4)
-        assert float(output[f'{MOD29P1D_GRID_PATH}/YDim'][0]) == pytest.approx(
-            1429851.6260, abs=1e-4
-        )
+        assert float(x_values[0]) == 500.0
+        assert float(output[f'{MOD29P1D_GRID_PATH}/YDim'][0]) == 9500.0
         assert '_*shift_to_cell_centers' not in x_values.attrs
         assert x_values.attrs['bounds'] == 'XDim_bnds'
         x_bounds = output[f'{MOD29P1D_GRID_PATH}/XDim_bnds']
-        assert x_bounds.values[0] == pytest.approx([-5244627.5805, -5243624.8795])
+        assert x_bounds.values[0].tolist() == [0.0, 1000.0]
