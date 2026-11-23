@@ -119,3 +119,14 @@ class AmbiguousDimensionVariables(MetadataAnnotatorError):
             'swapped for it. Square grids without dimension scales are not '
             'supported.'
         )
+
+
+class IrregularCoordinateSpacing(MetadataAnnotatorError):
+    """Raised when a coordinate configured for a cell-center shift is not regular."""
+
+    def __init__(self, variable_path):
+        """Initialize the exception with the coordinate variable path."""
+        super().__init__(
+            f'Cannot shift "{variable_path}" to cell centers: it needs at least two '
+            'values, evenly spaced to within 1% of a pixel.'
+        )
